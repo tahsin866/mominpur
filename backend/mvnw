@@ -1,0 +1,25 @@
+#!/bin/sh
+# Maven Wrapper startup script for UN*X systems
+
+set -e
+
+MAVEN_PROJECTDIR="$(cd "$(dirname "$0")" && pwd)"
+WRAPPER_JAR="$MAVEN_PROJECTDIR/.mvn/wrapper/maven-wrapper.jar"
+WRAPPER_PROPERTIES="$MAVEN_PROJECTDIR/.mvn/wrapper/maven-wrapper.properties"
+MAVEN_HOME="$HOME/.m2/wrapper/dists/apache-maven-3.9.6"
+
+if [ -r "$WRAPPER_JAR" ]; then
+    exec java -jar "$WRAPPER_JAR" "$@"
+fi
+
+if [ ! -d "$MAVEN_HOME" ]; then
+    echo "Downloading Maven 3.9.6..."
+    mkdir -p "$MAVEN_HOME"
+    DOWNLOAD_URL=$(grep 'distributionUrl' "$WRAPPER_PROPERTIES" | cut -d'=' -f2-)
+    curl -fsSL "$DOWNLOAD_URL" -o /tmp/maven.zip
+    unzip -q /tmp/maven.zip -d /tmp/maven-extract
+    mv /tmp/maven-extract/apache-maven-3.9.6/* "$MAVEN_HOME/"
+    rm -rf /tmp/maven.zip /tmp/maven-extract
+fi
+
+exec "$MAVEN_HOME/bin/mvn" "$@"
