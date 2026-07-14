@@ -65,9 +65,6 @@ public class Registration {
     private String occupationDetails;
 
     @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
     private String status = "PENDING";
 
     @Column(name = "submitted_at")
