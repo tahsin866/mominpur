@@ -1,6 +1,7 @@
 package com.example.project.auth.controller;
 
 import com.example.project.auth.dto.AuthResponse;
+import com.example.project.auth.dto.ChangePasswordRequest;
 import com.example.project.auth.dto.LoginRequest;
 import com.example.project.auth.dto.RegisterRequest;
 import com.example.project.auth.service.UserService;
@@ -31,6 +32,16 @@ public class AuthController {
         try {
             AuthResponse response = userService.loginUser(loginRequest);
             return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+        try {
+            String message = userService.changePassword(request);
+            return ResponseEntity.ok(message);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

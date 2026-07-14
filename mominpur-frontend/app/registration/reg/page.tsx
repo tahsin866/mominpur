@@ -64,7 +64,7 @@ export default function RegistrationPage() {
   );
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/location/divisions`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/location/divisions`)
       .then((res) => res.json())
       .then((data) => setDivisions(data))
       .catch((err) => console.error("Failed to load divisions", err));
@@ -129,7 +129,7 @@ export default function RegistrationPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/registrations/submit`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/registrations/submit`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

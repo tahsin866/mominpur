@@ -31,7 +31,7 @@ export default function RegList() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/registrations/all`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/registrations/all`)
       .then((res) => {
         if (!res.ok) throw new Error("ডাটা লোড করা যায়নি");
         return res.json();
@@ -44,7 +44,7 @@ export default function RegList() {
   const handleStatus = async (id: number, status: string) => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/registrations/${id}/status?status=${status}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/registrations/${id}/status?status=${status}`,
         { method: "PATCH" }
       );
       if (!res.ok) throw new Error("স্ট্যাটাস আপডেট হয়নি");
@@ -60,7 +60,7 @@ export default function RegList() {
     if (!confirm("আপনি কি নিশ্চিত এটি মুছে ফেলতে চান?")) return;
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/registrations/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/registrations/${id}`,
         { method: "DELETE" }
       );
       if (!res.ok) throw new Error("মুছে ফেলা যায়নি");

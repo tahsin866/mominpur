@@ -22,7 +22,7 @@ export default function Login() {
 
     try {
       // আপনার ব্যাকএন্ড এপিআই ইউআরএল (প্রয়োজন অনুযায়ী পোর্ট পরিবর্তন করে নেবেন)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -7,11 +7,9 @@ import { useRouter } from "next/navigation";
 export default function Login() {
   const router = useRouter();
   
-  // ফর্ম স্টেট
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   
-  // মেসেজ ও লোডিং স্টেট
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,8 +19,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // আপনার ব্যাকএন্ড এপিআই ইউআরএল (প্রয়োজন অনুযায়ী পোর্ট পরিবর্তন করে নেবেন)
-      const response = await fetch("http://localhost:8080/api/auth/login", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,17 +33,15 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        // ব্যাকএন্ড থেকে badRequest().body(e.getMessage()) আসলে তা হ্যান্ডেল করবে
-        throw new Error(data.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়");
+        throw new Error(data.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়");
       }
 
-      // সফলভাবে লগইন হলে (AuthResponse) টোকেন বা ইউজার ডাটা লোকালস্টোরেজে সেভ করতে পারেন
+      localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data));
       
-      alert("লগইন সফল হয়েছে!");
+      alert("লগইন সফল হয়েছে!");
       
-      // ড্যাশবোর্ড বা হোম পেজে রিডায়রেক্ট
-      router.push("/dashboard");
+      router.push("/auth");
       
     } catch (err: any) {
       setError(err.message || "সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না");
@@ -58,10 +53,10 @@ export default function Login() {
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50 items-center justify-center p-4 antialiased dark:bg-zinc-950">
       
-      {/* ব্র্যান্ডিং এরিয়া */}
+      {/* ব্র্যান্ডিং এরিয়া */}
       <div className="text-center mb-6 space-y-2">
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-          ইত্তেহাদে আবনায়ে মুমিনপুর
+          ইত্তেহাদে আবনায়ে মুমিনপুর
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           আপনার একাউন্টে লগইন করুন
@@ -80,7 +75,7 @@ export default function Login() {
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           
-          {/* ইমেইল ইনপুট (ব্যাকএন্ড LoginRequest অনুযায়ী) */}
+          {/* ইমেইল ইনপুট */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1 dark:text-zinc-400">
               ইমেইল ঠিকানা
@@ -95,17 +90,17 @@ export default function Login() {
             />
           </div>
 
-          {/* পাসওয়ার্ড ইনপুট */}
+          {/* পাসওয়ার্ড ইনপুট */}
           <div>
             <div className="flex justify-between items-center mb-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
-                পাসওয়ার্ড
+                পাসওয়ার্ড
               </label>
               <a 
                 href="#" 
                 className="text-xs font-medium text-emerald-600 hover:underline dark:text-emerald-400"
               >
-                পাসওয়ার্ড ভুলে গেছেন?
+                পাসওয়ার্ড ভুলে গেছেন?
               </a>
             </div>
             <input 
@@ -159,7 +154,7 @@ export default function Login() {
           href="/" 
           className="text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
         >
-          ← মূল পাতায় ফিরে যান
+          ← মূল পাতায় ফিরে যান
         </Link>
       </div>
 

@@ -1,6 +1,7 @@
 package com.example.project.auth.service;
 
 import com.example.project.auth.dto.AuthResponse;
+import com.example.project.auth.dto.ChangePasswordRequest;
 import com.example.project.auth.dto.LoginRequest;
 import com.example.project.auth.dto.RegisterRequest;
 import com.example.project.auth.model.User;
@@ -18,6 +19,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtService jwtService;
+
     public AuthResponse registerUser(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered");
@@ -31,7 +35,8 @@ public class UserService {
 
         userRepository.save(user);
 
-        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), "Registration successful");
+        String token = jwtService.generateToken(user.getEmail());
+        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token, "Registration successful");
     }
 
     public AuthResponse loginUser(LoginRequest request) {
@@ -42,6 +47,21 @@ public class UserService {
             throw new RuntimeException("Invalid username or password");
         }
 
-        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), "Login successful");
+        String token = jwtService.generateToken(user.getEmail());
+        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token, "Login successful");
+    }
+
+    public String changePassword(ChangePasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return "Password changed successfully";
     }
 }
