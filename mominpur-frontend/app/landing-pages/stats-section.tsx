@@ -7,18 +7,18 @@ const stats = [
 
 export default function StatsSection() {
   return (
-    <section className="border-b" style={{ backgroundColor: "#EDE1C4", borderColor: "rgba(184,146,74,0.3)" }}>
+    <section className="border-b" style={{ backgroundColor: "#FFFFFF", borderColor: "rgba(10,61,42,0.15)" }}>
       <div className="max-w-4xl mx-auto px-4 py-8 flex flex-wrap justify-center">
         {stats.map((s, i) => (
           <div
             key={s.label}
             className={`px-8 py-2 text-center ${i !== 0 ? "border-l" : ""}`}
-            style={{ borderColor: "rgba(184,146,74,0.35)" }}
+            style={{ borderColor: "rgba(10,61,42,0.2)" }}
           >
-            <p className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#7C2D2D" }}>
+            <p className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#0A3D2A" }}>
               {s.value}
             </p>
-            <p className="text-xs mt-1 tracking-wide" style={{ color: "#5C5544" }}>
+            <p className="text-xs mt-1 tracking-wide" style={{ color: "#6B7280" }}>
               {s.label}
             </p>
           </div>

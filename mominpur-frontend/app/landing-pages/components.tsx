@@ -16,17 +16,17 @@ export function CornerFlourish({ className = "" }: { className?: string }) {
 export function OrnateFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative">
-      <CornerFlourish className="absolute -top-2 -left-2 w-9 h-9 text-[#B8924A]" />
-      <CornerFlourish className="absolute -top-2 -right-2 w-9 h-9 text-[#B8924A] rotate-90" />
-      <CornerFlourish className="absolute -bottom-2 -left-2 w-9 h-9 text-[#B8924A] -rotate-90" />
-      <CornerFlourish className="absolute -bottom-2 -right-2 w-9 h-9 text-[#B8924A] rotate-180" />
+      <CornerFlourish className="absolute -top-2 -left-2 w-9 h-9 text-[#0A3D2A]" />
+      <CornerFlourish className="absolute -top-2 -right-2 w-9 h-9 text-[#0A3D2A] rotate-90" />
+      <CornerFlourish className="absolute -bottom-2 -left-2 w-9 h-9 text-[#0A3D2A] -rotate-90" />
+      <CornerFlourish className="absolute -bottom-2 -right-2 w-9 h-9 text-[#0A3D2A] rotate-180" />
       {children}
     </div>
   );
 }
 
-export function RiverDivider({ tone = "gold" }: { tone?: "gold" | "ink" }) {
-  const stroke = tone === "gold" ? "#B8924A" : "#16232C";
+export function RiverDivider({ tone = "green" }: { tone?: "gold" | "ink" | "green" }) {
+  const stroke = tone === "gold" ? "#B8924A" : tone === "green" ? "#0A3D2A" : "#16232C";
   return (
     <svg viewBox="0 0 1200 48" preserveAspectRatio="none" className="w-full h-8" aria-hidden="true">
       <path

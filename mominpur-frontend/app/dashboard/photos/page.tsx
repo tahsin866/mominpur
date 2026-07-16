@@ -20,7 +20,7 @@ const sections = [
   { value: "event", label: "অনুষ্ঠান" },
 ];
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+const API = "";
 
 export default function PhotosPage() {
   const router = useRouter();

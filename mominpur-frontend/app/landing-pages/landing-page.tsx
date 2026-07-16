@@ -1,13 +1,14 @@
 "use client";
 
 import { Noto_Serif_Bengali, Hind_Siliguri } from "next/font/google";
-import Navbar from "./navbar";
 import HeroSection from "./hero-section";
 import StatsSection from "./stats-section";
 import AboutSection from "./about-section";
 import HighlightsSection from "./highlights-section";
-import CtaSection from "./cta-section";
+// import CtaSection from "./cta-section";
+import ContactSection from "./contact-section";
 import Footer from "./footer";
+import Navbar from "./navbar";
 import DawatnamaModal from "./dawatnama-modal";
 import { RiverDivider } from "./components";
 
@@ -27,23 +28,24 @@ export default function LandingPage() {
   return (
     <div
       className={`${display.variable} ${body.variable} min-h-screen antialiased`}
-      style={{ fontFamily: "var(--font-body)", backgroundColor: "#F4ECD8", color: "#2A2620" }}
+      style={{ fontFamily: "var(--font-body)", backgroundColor: "#FFFFFF", color: "#064E3B" }}
     >
-      <DawatnamaModal />
       <Navbar />
+      <DawatnamaModal />
       <HeroSection />
 
-      <div style={{ backgroundColor: "#0B1418" }}>
-        <RiverDivider tone="gold" />
+      <div style={{ backgroundColor: "#FFFFFF", borderTop: "1px solid rgba(10,61,42,0.15)" }}>
+        <RiverDivider tone="green" />
       </div>
 
-      <StatsSection />
+      {/* <StatsSection /> */}
       <AboutSection />
 
-      <RiverDivider tone="gold" />
+      <RiverDivider tone="green" />
 
       <HighlightsSection />
-      <CtaSection />
+      {/* <CtaSection /> */}
+      <ContactSection />
       <Footer />
     </div>
   );
