@@ -17,6 +17,12 @@ public class RegistrationService {
 
     @Transactional
     public Registration createRegistration(Registration registration) {
+        if (registration.getPhone() == null || !registration.getPhone().matches("^\\d{11}$")) {
+            throw new RuntimeException("মোবাইল নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
+        }
+        if (registration.getWhatsapp() == null || !registration.getWhatsapp().matches("^\\d{11}$")) {
+            throw new RuntimeException("হোয়াটসঅ্যাপ নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
+        }
         if (registration.getStatus() == null) {
             registration.setStatus("PENDING");
         }
@@ -31,6 +37,10 @@ public class RegistrationService {
         return registrationRepository.findById(id);
     }
 
+    public Optional<Registration> getRegistrationByPhone(String phone) {
+        return registrationRepository.findByPhone(phone);
+    }
+
     @Transactional
     public Registration updateStatus(Long id, String newStatus) {
         Registration registration = registrationRepository.findById(id)
@@ -41,6 +51,12 @@ public class RegistrationService {
 
     @Transactional
     public Registration updateRegistration(Long id, Registration updated) {
+        if (updated.getPhone() == null || !updated.getPhone().matches("^\\d{11}$")) {
+            throw new RuntimeException("মোবাইল নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
+        }
+        if (updated.getWhatsapp() == null || !updated.getWhatsapp().matches("^\\d{11}$")) {
+            throw new RuntimeException("হোয়াটসঅ্যাপ নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
+        }
         Registration existing = registrationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Registration not found with id: " + id));
         existing.setName(updated.getName());

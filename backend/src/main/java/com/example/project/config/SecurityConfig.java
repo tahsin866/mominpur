@@ -1,5 +1,4 @@
 package com.example.project.config;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +30,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:3005"));
+        // আপনার সার্ভারের পাবলিক আইপি "http://76.13.183.6" এখানে যুক্ত করা হয়েছে
+        config.setAllowedOriginPatterns(List.of(
+            "http://76.13.183.6",
+            "http://76.13.183.6:*",
+            "http://localhost:*",
+            "http://abnayemuminpur26.org",
+            "https://abnayemuminpur26.org"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -52,6 +58,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/photos/file/**").permitAll()
                 .requestMatchers("/api/photos").permitAll()
                 .requestMatchers("/api/photos/section/**").permitAll()
+                .requestMatchers("/api/messages/submit").permitAll()
+                .requestMatchers("/api/transactions/submit").permitAll()
+                .requestMatchers("/api/registrations/check-status").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

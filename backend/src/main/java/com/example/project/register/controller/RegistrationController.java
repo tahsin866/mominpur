@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/registrations")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://abnayemuminpur26.org", "https://abnayemuminpur26.org"})
 public class RegistrationController {
 
     @Autowired
@@ -17,7 +19,9 @@ public class RegistrationController {
     public ResponseEntity<?> submitRegistration(@RequestBody Registration registration) {
         try {
             Registration saved = registrationService.createRegistration(registration);
-            return ResponseEntity.ok("আলহামদুলিল্লাহ! আপনার ফরমটি সফলভাবে ডাটাবেজে সংরক্ষিত হয়েছে।");
+            return ResponseEntity.ok(saved);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("দুঃখিত, সার্ভারে কোনো সমস্যা হয়েছে: " + e.getMessage());
         }
@@ -32,6 +36,18 @@ public class RegistrationController {
     public ResponseEntity<?> getById(@PathVariable Long id) {
         return registrationService.getRegistrationById(id)
                 .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/check-status")
+    public ResponseEntity<?> checkStatus(@RequestParam String phone) {
+        return registrationService.getRegistrationByPhone(phone)
+                .map(r -> ResponseEntity.ok((Object) Map.of(
+                    "name", r.getName(),
+                    "phone", r.getPhone(),
+                    "status", r.getStatus(),
+                    "submittedAt", r.getSubmittedAt() != null ? r.getSubmittedAt().toString() : ""
+                )))
                 .orElse(ResponseEntity.notFound().build());
     }
 
