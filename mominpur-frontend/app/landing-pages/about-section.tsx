@@ -59,7 +59,7 @@ const organizers = [
   { 
     name: "শোয়াইব আহম্মেদ (সিলেট)", 
     role: "সহকারী  উদ্যোক্তা", 
-    phone: "+৪৪৭ 1979-79647913" 
+    phone: "+44 7979 647913" 
   },
   { 
     name: "ওমায়ের (নোয়াখালি)", 
@@ -72,15 +72,15 @@ const organizers = [
 //   { name: "মাওলানা ফয়জুল হক", role: "সহ-সচিব" },
 //   { name: "হাফেজ আব্দুল হাকিম", role: "কর্মসম্পাদক" },
 //   { name: "মাওলানা সলেম উদ্দিন", role: "সদস্য" },
-  { name: " মাওলানা মুফতি সাঈদ সাহেব", role: "জামিয়াতুল আবরার (রহমানিয়া)" },
-  { name: "মাওলানা আহমদুল্লাহ সাহেব ", role: "জামিয়াতুল আবরার (রহমানিয়া)" },
+  { name: " মাওলানা মুফতি সাঈদ সাহেব", role: "জামিয়াতুল আবরার (রাহমানিয়া)" },
+  { name: "মাওলানা আহমাদুল্লাহ সাহেব ", role: "জামিয়াতুল আবরার (রাহমানিয়া)" },
   { name: " মাওলানা মুফতি শামসুল আরেফিন খান সাদী সাহেব", role: "কল‍্যানপুর" },
   { name: " মাওলানা মুফতি শামসুল ইসলাম জীলানি সাহেব", role: "কুমিল্লা" },
   { name: "হাফেজ মাওলানা জাহেদ বিন মুহসিন সাহেব", role: "মুমিনপুর" },
   { name: "হাফেজ মাওলানা আব্দুলাহ আল কারীম সাহেব", role: "উত্তরা" },
   { name: "হাফেজ মাওলানা শরীফ আহমাদ সাহেব (নাতী পিরজী হুজুর রহ.)", role: "পুরান ঢাকা" },
   { name: "হাফেজ মাওলানা নোমান বিন মুহিব‍্বুল্লাহ সাহেব", role: "তালতলা" },
-  { name: "হাফেজ শোয়াইব", role: "মোহাম্মদপুর" },
+  { name: "হাফেজ শোয়াইব (ওসাকা)", role: "মোহাম্মদপুর" },
   { name: "মোহাম্মদ আসাদুল্লাহ ( মোহাম্মাদিয়া লাইব্রেরি )", role: "পুরান ঢাকা" },
   { name: "হাফেজ হুজাইফা", role: "মিরপুর" },
   { name: "হাফেজ আব্দুলাহ", role: "টংগি" },
@@ -199,7 +199,7 @@ export default function AboutSection() {
             <h3 className="text-sm font-bold px-4 py-1.5 rounded-sm text-white tracking-wider" style={{ backgroundColor: "#0A3D2A" }}>
               উদ্যোক্তাগণ
             </h3>
-            <span className="h-[1px] flex-1" style={{ backgroundColor: "rgba(10,61,42,0.12)" }}></span>
+            {/* <span className="h-[1px] flex-1" style={{ backgroundColor: "rgba(10,61,42,0.12)" }}></span> */}
           </div>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center">
@@ -219,11 +219,6 @@ export default function AboutSection() {
                       <span className="text-xl font-bold text-white">
                         {org.name.charAt(0)}
                       </span>
-                      {org.role === "প্রধান উদ্যোক্তা" && (
-                        <span className="absolute -top-1 -right-1 text-xs text-white px-1.5 py-0.5 rounded-full font-bold shadow-sm" style={{ backgroundColor: "#D97706" }}>
-                          ★
-                        </span>
-                      )}
                     </div>
                     <h4 className="font-bold mb-1 text-base" style={{ color: "#064E3B" }}>
                       {org.name}
