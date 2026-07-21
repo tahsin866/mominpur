@@ -2,6 +2,7 @@ package com.example.project.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -60,6 +61,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/photos/section/**").permitAll()
                 .requestMatchers("/api/messages/submit").permitAll()
                 .requestMatchers("/api/transactions/submit").permitAll()
+                .requestMatchers("/api/transactions/all").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/transactions/**").permitAll()
                 .requestMatchers("/api/registrations/check-status").permitAll()
                 .anyRequest().authenticated()
             )

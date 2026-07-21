@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/transactions")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://abnayemuminpur26.org", "https://abnayemuminpur26.org"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://76.13.183.6", "http://abnayemuminpur26.org", "https://abnayemuminpur26.org"})
 public class TransactionController {
 
     @Autowired
@@ -23,7 +23,7 @@ public class TransactionController {
                 return ResponseEntity.badRequest().body("ট্রানজেকশন আইডি আবশ্যক।");
             }
             if (transaction.getPayingNumber() == null || transaction.getPayingNumber().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("পেয়িং নম্বর আবশ্যক।");
+                return ResponseEntity.badRequest().body("পেয়িং নম্বরের শেষ ৪ ডিজিট আবশ্যক।");
             }
             Transaction saved = transactionService.createTransaction(transaction);
             return ResponseEntity.ok(saved);
