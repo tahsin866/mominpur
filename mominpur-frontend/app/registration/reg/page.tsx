@@ -40,6 +40,7 @@ export default function RegistrationPage() {
   const [selectedOccupations, setSelectedOccupations] = useState<string[]>([]);
 
   const [transactionId, setTransactionId] = useState("");
+  const [lastFourDigits, setLastFourDigits] = useState("");
 
   const [deptOpen, setDeptOpen] = useState(false);
   const [occOpen, setOccOpen] = useState(false);
@@ -142,6 +143,11 @@ export default function RegistrationPage() {
       setLoading(false);
       return;
     }
+    if (!lastFourDigits.trim() || lastFourDigits.length !== 4) {
+      setMessage("Error: পেয়িং নম্বরের শেষ ৪ ডিজিট আবশ্যক।");
+      setLoading(false);
+      return;
+    }
 
     const payload = {
       ...form,
@@ -180,13 +186,14 @@ export default function RegistrationPage() {
           body: JSON.stringify({
             registrationId: data.id,
             transactionId: transactionId.trim(),
-            payingNumber: "0170000000000",
+            payingNumber: lastFourDigits.trim(),
           }),
         });
         setMessage("আলহামদুলিল্লাহ! আপনার ফরমটি সফলভাবে ডাটাবেজে সংরক্ষিত হয়েছে।");
         setSelectedDepartments([]);
         setSelectedOccupations([]);
         setTransactionId("");
+        setLastFourDigits("");
         setForm({
           name: "",
           fatherName: "",
@@ -444,7 +451,7 @@ export default function RegistrationPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    বিভাগ
+                    বিভাগ *
                   </label>
                   <select
                     value={permDivId}
@@ -454,6 +461,7 @@ export default function RegistrationPage() {
                       setPermThanaId("");
                     }}
                     className={inputClass}
+                    required
                   >
                     <option value="">বিভাগ নির্বাচন করুন</option>
                     {permDivisions.map((d) => (
@@ -465,7 +473,7 @@ export default function RegistrationPage() {
                 </div>
                 <div>
                   <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    জেলা
+                    জেলা *
                   </label>
                   <select
                     value={permDistId}
@@ -475,6 +483,7 @@ export default function RegistrationPage() {
                     }}
                     className={inputClass}
                     disabled={!permDivId}
+                    required
                   >
                     <option value="">জেলা নির্বাচন করুন</option>
                     {permDistricts.map((d) => (
@@ -486,13 +495,14 @@ export default function RegistrationPage() {
                 </div>
                 <div>
                   <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    থানা
+                    থানা *
                   </label>
                   <select
                     value={permThanaId}
                     onChange={(e) => setPermThanaId(e.target.value)}
                     className={inputClass}
                     disabled={!permDistId}
+                    required
                   >
                     <option value="">থানা নির্বাচন করুন</option>
                     {permThanas.map((t) => (
@@ -505,7 +515,7 @@ export default function RegistrationPage() {
               </div>
               <div>
                 <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                  গ্রাম/ঠিকানার বিস্তারিত
+                  গ্রাম/ঠিকানার বিস্তারিত *
                 </label>
                 <textarea
                   name="permanentAddressDetails"
@@ -514,6 +524,7 @@ export default function RegistrationPage() {
                   rows={2}
                   placeholder="গ্রাম, ডাকঘর ইত্যাদি..."
                   className={inputClass}
+                  required
                 ></textarea>
               </div>
             </div>
@@ -526,7 +537,7 @@ export default function RegistrationPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    বিভাগ
+                    বিভাগ *
                   </label>
                   <select
                     value={curDivId}
@@ -536,6 +547,7 @@ export default function RegistrationPage() {
                       setCurThanaId("");
                     }}
                     className={inputClass}
+                    required
                   >
                     <option value="">বিভাগ নির্বাচন করুন</option>
                     {curDivisions.map((d) => (
@@ -547,7 +559,7 @@ export default function RegistrationPage() {
                 </div>
                 <div>
                   <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    জেলা
+                    জেলা *
                   </label>
                   <select
                     value={curDistId}
@@ -557,6 +569,7 @@ export default function RegistrationPage() {
                     }}
                     className={inputClass}
                     disabled={!curDivId}
+                    required
                   >
                     <option value="">জেলা নির্বাচন করুন</option>
                     {curDistricts.map((d) => (
@@ -568,13 +581,14 @@ export default function RegistrationPage() {
                 </div>
                 <div>
                   <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    থানা
+                    থানা *
                   </label>
                   <select
                     value={curThanaId}
                     onChange={(e) => setCurThanaId(e.target.value)}
                     className={inputClass}
                     disabled={!curDistId}
+                    required
                   >
                     <option value="">থানা নির্বাচন করুন</option>
                     {curThanas.map((t) => (
@@ -587,7 +601,7 @@ export default function RegistrationPage() {
               </div>
                 <div>
                   <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    বর্তমান ঠিকানার বিস্তারিত
+                    বর্তমান ঠিকানার বিস্তারিত *
                   </label>
                 <textarea
                   name="currentAddressDetails"
@@ -596,6 +610,7 @@ export default function RegistrationPage() {
                   rows={2}
                   placeholder="বাসা নম্বর, রোড, এলাকা ইত্যাদি..."
                   className={inputClass}
+                  required
                 ></textarea>
               </div>
             </div>
@@ -700,30 +715,63 @@ export default function RegistrationPage() {
                 পেমেন্ট
               </h3>
               <div className="p-4 rounded-sm" style={{ backgroundColor: "#F0FDF4", border: "1px solid rgba(10,61,42,0.15)" }}>
-                <p className="text-lg font-semibold mb-2" style={{ color: "#064E3B" }}>
-                  নগদ/বিকাশ/রকেট পেমেন্ট করুন
+                <div className="flex items-center justify-between mb-4 p-3 rounded-sm" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
+                  <span className="text-lg font-semibold" style={{ color: "#064E3B" }}>রেজিস্ট্রেশন ফি:</span>
+                  <span className="text-2xl font-bold" style={{ color: "#0A3D2A" }}>১,০২০ টাকা</span>
+                </div>
+                
+                <p className="text-lg font-semibold mb-3" style={{ color: "#064E3B" }}>
+                  বিকাশ পেমেন্ট করুন
                 </p>
-                <p className="text-lg mb-1" style={{ color: "#6B7280" }}>
-                  পেয়িং নম্বর:
-                </p>
-                <p className="text-2xl font-bold mb-4" style={{ color: "#0A3D2A", fontFamily: "var(--font-display)" }}>
-                  0170000000000
-                </p>
+                
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg" style={{ color: "#6B7280" }}>পেয়িং নম্বর ১:</span>
+                    <span className="text-xl font-bold" style={{ color: "#0A3D2A" }}>01775900779</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg" style={{ color: "#6B7280" }}>পেয়িং নম্বর ২:</span>
+                    <span className="text-xl font-bold" style={{ color: "#0A3D2A" }}>01727728792</span>
+                  </div>
+                </div>
+
                 <p className="text-sm mb-4" style={{ color: "#6B7280" }}>
-                  পেমেন্ট করার পর নিচে ট্রানজেকশন আইডি দিন।
+                  পেমেন্ট করার পর নিচে ট্রানজেকশন আইডি এবং পেয়িং নম্বরের শেষ ৪ ডিজিট দিন।
                 </p>
-                <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    ট্রানজেকশন আইডি *
-                  </label>
-                  <input
-                    type="text"
-                    value={transactionId}
-                    onChange={(e) => setTransactionId(e.target.value)}
-                    placeholder="ট্রানজেকশন আইডি লিখুন"
-                    className={inputClass}
-                    required
-                  />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                      ট্রানজেকশন আইডি *
+                    </label>
+                    <input
+                      type="text"
+                      value={transactionId}
+                      onChange={(e) => setTransactionId(e.target.value)}
+                      placeholder="ট্রানজেকশন আইডি লিখুন"
+                      className={inputClass}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                      পেয়িং নম্বরের শেষ ৪ ডিজিট *
+                    </label>
+                    <input
+                      type="text"
+                      value={lastFourDigits}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "" || /^\d{0,4}$/.test(val)) {
+                          setLastFourDigits(val);
+                        }
+                      }}
+                      placeholder="৪ ডিজিট"
+                      className={inputClass}
+                      maxLength={4}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -740,7 +788,7 @@ export default function RegistrationPage() {
               </Link>
               <button
                 type="submit"
-                disabled={loading || selectedDepartments.length === 0 || selectedOccupations.length === 0 || !transactionId.trim()}
+                disabled={loading || selectedDepartments.length === 0 || selectedOccupations.length === 0 || !transactionId.trim() || lastFourDigits.length !== 4}
                 className="text-white text-lg font-semibold py-2 px-6 rounded-sm hover:opacity-90 transition disabled:opacity-50"
                 style={{ backgroundColor: "#0A3D2A" }}
               >

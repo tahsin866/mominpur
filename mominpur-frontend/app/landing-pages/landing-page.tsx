@@ -1,6 +1,5 @@
 "use client";
 
-import { Noto_Serif_Bengali, Hind_Siliguri } from "next/font/google";
 import HeroSection from "./hero-section";
 import StatsSection from "./stats-section";
 import AboutSection from "./about-section";
@@ -12,23 +11,11 @@ import Navbar from "./navbar";
 import DawatnamaModal from "./dawatnama-modal";
 import { RiverDivider } from "./components";
 
-const display = Noto_Serif_Bengali({
-  subsets: ["bengali"],
-  weight: ["600", "700", "800"],
-  variable: "--font-display",
-});
-
-const body = Hind_Siliguri({
-  subsets: ["bengali"],
-  weight: ["400", "500", "600"],
-  variable: "--font-body",
-});
-
 export default function LandingPage() {
   return (
     <div
-      className={`${display.variable} ${body.variable} min-h-screen antialiased`}
-      style={{ fontFamily: "var(--font-body)", backgroundColor: "#FFFFFF", color: "#064E3B" }}
+      className="min-h-screen antialiased"
+      style={{ fontFamily: "'Hind Siliguri', 'SolaimanLipi', 'Aneuro', sans-serif", backgroundColor: "#FFFFFF", color: "#064E3B" }}
     >
       <Navbar />
       <DawatnamaModal />

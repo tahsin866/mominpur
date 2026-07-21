@@ -18,6 +18,14 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://fonts.cdnfonts.com/css/solaimanlipi"
         />
+        <link
+          rel="stylesheet"
+          href="https://fonts.cdnfonts.com/css/hind-siliguri"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.cdnfonts.com/css/noto-serif-bengali"
+        />
       </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { CornerFlourish } from "./components";
 
 const info = [
   { k: "নাম", v: "আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর" },
   { k: "অবস্থান", v: "মুমিনপুর, ডাকাতিয়া নদীর তীরে" },
-  { k: "প্রতিষ্ঠাকাল", v: "১৯৬৩" },
-  { k: "প্রতিষ্ঠাতা মুহতামিম", v: "হাফেজ মাওলানা মুহসিন সাহেব রহ. (বড় হুজুর) " },
+  { k: "প্রতিষ্ঠাকাল", v: "১৯৬৪" },
+  { k: "প্রতিষ্ঠাতা মুহতামিম", v: "হাফেজ মাওলানা ক্বারী মুহসিন সাহেব রহ. (বড় হুজুর) " },
   { k: "সাবেক মুহতামিম", v: "হাফেজ মাওলানা খালিদ বিন মুহসিন সাহেব রহ." },
-  { k: "বর্তমান মুহতামিম", v: "হাফেজ মাওলানা রাশেদ বিন মুহসিন দা.বা." },
+  { k: "বর্তমান মুহতামিম", v: " রাশেদ বিন মুহসিন দা.বা." },
 ];
 
 const eventCounts = [
@@ -24,46 +24,50 @@ const organizers = [
   // প্রধান উদ্যোক্তা
   { 
     name: "খোরশেদ আলম", 
-    role: "প্রধান উদ্যোক্তা", 
+    role: "প্রধান সমন্বয়ক", 
     phone: "+880 1727-728792" 
   },
   
   // সহকারী প্রধান উদ্যোক্তা
   { 
     name: "মোঃ মিফতাহ উদ্দিন", 
-    role: "সহকারী প্রধান উদ্যোক্তা", 
+    role: "সহকারী প্রধান সমন্বয়ক", 
     phone: "+880 1775-900779" 
   },
   { 
     name: "মোঃ শাহেদ আহম্মেদ (সিলেট)", 
-    role: "সহকারী প্রধান উদ্যোক্তা", 
+    role: "সহকারী প্রধান সমন্বয়ক", 
     phone: "+880 1717-870310" 
   },
   { 
     name: "মোঃ হুমায়ন খান (সিলেট)", 
-    role: "সহকারী উদ্যোক্তা", 
+    role: "সহকারী সমন্বয়ক", 
     phone: "+880 1713-811740" 
   },
+
+    { 
+    name: "মোঃ আবির (সিলেট)", 
+    role: "সহকারী সমন্বয়ক", 
+    phone: "+880 1710-904042" 
+  },
+
+
   { 
     name: "মোঃ ইয়ামিন তালুকদার (মুমিনপুর)", 
-    role: "সহকারী উদ্যোক্তা", 
+    role: "সহকারী সমন্বয়ক", 
     phone: "+880 1737-876660" 
   },
 
 
-  { 
-    name: "মোঃ তালহা (গৌরিপুর)", 
-    role: "সহকারী  উদ্যোক্তা", 
-    phone: "+880 1670-185211" 
-  },
+
   { 
     name: "শোয়াইব আহম্মেদ (সিলেট)", 
-    role: "সহকারী  উদ্যোক্তা", 
+    role: "সহকারী  সমন্বয়ক", 
     phone: "+44 7979 647913" 
   },
   { 
     name: "ওমায়ের (নোয়াখালি)", 
-    role: "সহকারী উদ্যোক্তা", 
+    role: "সহকারী সমন্বয়ক", 
     phone: "+880 1848-001670" 
   },
 
@@ -72,21 +76,21 @@ const organizers = [
 //   { name: "মাওলানা ফয়জুল হক", role: "সহ-সচিব" },
 //   { name: "হাফেজ আব্দুল হাকিম", role: "কর্মসম্পাদক" },
 //   { name: "মাওলানা সলেম উদ্দিন", role: "সদস্য" },
-  { name: " মাওলানা মুফতি সাঈদ সাহেব", role: "জামিয়াতুল আবরার (রাহমানিয়া)" },
-  { name: "মাওলানা আহমাদুল্লাহ সাহেব ", role: "জামিয়াতুল আবরার (রাহমানিয়া)" },
-  { name: " মাওলানা মুফতি শামসুল আরেফিন খান সাদী সাহেব", role: "কল‍্যানপুর" },
-  { name: " মাওলানা মুফতি শামসুল ইসলাম জীলানি সাহেব", role: "কুমিল্লা" },
+  { name: "মুফতি সাঈদ আহমাদ সাহেব", role: "জামিয়াতুল আবরার (রাহমানিয়া)" },
+  { name: "হাফেজ মাওলানা আহমাদুল্লাহ সাহেব ", role: "জামিয়াতুল আবরার (রাহমানিয়া)" },
+  { name: "মুফতি শামসুল আরেফিন খান সাদী সাহেব", role: "কল‍্যানপুর" },
+  { name: "মুফতি শামসুল ইসলাম জীলানি সাহেব", role: "কুমিল্লা" },
   { name: "হাফেজ মাওলানা জাহেদ বিন মুহসিন সাহেব", role: "মুমিনপুর" },
   { name: "হাফেজ মাওলানা আব্দুলাহ আল কারীম সাহেব", role: "উত্তরা" },
   { name: "হাফেজ মাওলানা শরীফ আহমাদ সাহেব (নাতী পিরজী হুজুর রহ.)", role: "পুরান ঢাকা" },
   { name: "হাফেজ মাওলানা নোমান বিন মুহিব‍্বুল্লাহ সাহেব", role: "তালতলা" },
-  { name: "হাফেজ শোয়াইব (ওসাকা)", role: "মোহাম্মদপুর" },
-  { name: "মোহাম্মদ আসাদুল্লাহ ( মোহাম্মাদিয়া লাইব্রেরি )", role: "পুরান ঢাকা" },
+  { name: "হাফেজ শোয়াইব সাহেব(ওসাকা)", role: "মোহাম্মদপুর" },
+  { name: "মোহাম্মদ আসাদুল্লাহ (মোহাম্মাদিয়া লাইব্রেরি )", role: "পুরান ঢাকা" },
   { name: "হাফেজ হুজাইফা", role: "মিরপুর" },
   { name: "হাফেজ আব্দুলাহ", role: "টংগি" },
-  { name: "মাওলানা ওমায়ের", role: "নোয়াখালী" },
-  { name: "হাফেজ মাওলানা মিফতাহ উদ্দিন", role: "মিরপুর" },
-  { name: "খোরশেদ আলম", role: "উত্তরা" }
+  // { name: "মাওলানা ওমায়ের", role: "নোয়াখালী" },
+  // { name: "হাফেজ মাওলানা মিফতাহ উদ্দিন", role: "মিরপুর" },
+  // { name: "খোরশেদ আলম", role: "উত্তরা" }
 ];
 
 interface GalleryPhoto {
@@ -102,20 +106,33 @@ const NUMBER_FONT = "Inter, system-ui, -apple-system, sans-serif";
 export default function AboutSection() {
   const [gallery, setGallery] = useState<GalleryPhoto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lightbox, setLightbox] = useState<GalleryPhoto | null>(null);
+
+  const closeLightbox = useCallback(() => setLightbox(null), []);
 
   useEffect(() => {
-    fetch("/api/photos/section/gallery")
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+    };
+    if (lightbox) {
+      document.addEventListener("keydown", handleKey);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.body.style.overflow = "";
+    };
+  }, [lightbox, closeLightbox]);
+
+  useEffect(() => {
+    fetch("/photos/manifest.json")
       .then((r) => {
         if (!r.ok) throw new Error("Failed to load gallery");
-        const contentType = r.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Invalid response format");
-        }
         return r.json();
       })
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setGallery(data);
+      .then((filenames: string[]) => {
+        if (Array.isArray(filenames)) {
+          setGallery(filenames.map((f, i) => ({ id: i + 1, filename: f, originalFilename: f })));
         }
         setLoading(false);
       })
@@ -142,11 +159,13 @@ export default function AboutSection() {
         {/* টেক্সট এরিয়া */}
         <div className="lg:col-span-3 flex flex-col justify-center space-y-6 text-base md:text-lg leading-relaxed text-justify" style={{ color: "#064E3B" }}>
           <p className="bg-emerald-50/30 p-6 rounded-sm border-l-4 border-[#0A3D2A]">
-            তিনদিক থেকে ডাকাতিয়া নদী বেষ্টিত দ্বীপসদৃশ মুমিনপুর গ্রামে অবস্থিত মুমিনপুর মাদরাসা একটি ঐতিহ্যবাহী কওমী শিক্ষা প্রতিষ্ঠান।
-            হিফজুল কুরআনের কিংবদন্তি হাফেজ মাওলানা মুহসিন সাহেব রহ. (বড় হুজুর) ও তাঁর যোগ্য উত্তরসূরীদের দরদমাখা ও কঠোর তদারকিতে এই মাদরাসা পরিচালিত হয়ে আসছে।
+            হাফেজ মাওলানা ক্বারী মুহসিন (রহ.) ১৯০৪ খ্রিস্টাব্দে শাহ হাবিবুল্লাহ (রহ.)-এর ঘরে জন্মগ্রহণ করেন। শৈশবেই কুরআনের হিফজ সম্পন্ন করে উচ্চশিক্ষার জন্য তিনি দারুল উলুম দেওবন্দে গমন করেন।
           </p>
           <p className="px-6">
-            শৈশবের শিক্ষা জীবনের স্মৃতিগুলো মুমিনপুর মাদরাসার শিক্ষার্থীদের মন থেকে কখনো মুছে যায় না বলে আমাদের বিশ্বাস।
+            পরবর্তীকালে হযরত আল্লামা শাব্বীর আহমদ উসমানী (রহ.) ও হযরত হুসাইন আহমদ মাদানী (রহ.) তাঁর কুরআনের খেদমতে অসামান্য অবদান রাখার বিষয়ে সুসংবাদ ও দোয়া প্রদান করেন। এই প্রেরণা নিয়ে তিনি মোস্তফাগঞ্জে দীর্ঘ ১৬ বছর কুরআন শিক্ষা ও কিরাআতের খেদমত করেন। পরবর্তীতে ১৯৬৪ সালে তিনি মুমিনপুর মাদ্রাসা প্রতিষ্ঠা করেন। অতঃপর এই মহীয়সী ব্যক্তিত্ব (বড় হুজুর) আমৃত্যু কুরআন শিক্ষা, হিফজ পরিচালনা ও যোগ্য হাফেজ-কারি গড়ে তোলার মহান কাজে নিজেকে আত্মনিয়োগ করেন।
+          </p>
+          <p className="px-6">
+            তাঁর ইন্তেকালের পর জ্যেষ্ঠ পুত্র হাফেজ মাওলানা খালেদ মুহসিন (রহ.) প্রতিষ্ঠানের দায়িত্ব গ্রহণ করেন এবং তাঁর অক্লান্ত মেহনতের বদৌলতে মাদ্রাসার ব্যাপক উন্নতি সাধিত হয়। পরবর্তীতে বার্ধক্যজনিত কারণে ইন্তেকালের কয়েক বছর পূর্বেই তিনি দায়িত্ব থেকে অবসর গ্রহণ করলে, তাঁর ছোট ভাই  রাশেদ বিন মুহসিন (দা.বা.) প্রতিষ্ঠানের দায়িত্বভার গ্রহণ করেন। বর্তমানে তাঁরই সুযোগ্য নেতৃত্বে মাদ্রাসার শিক্ষা কার্যক্রম ও দ্বীনি খেদমতের ধারাবাহিকতা সফলভাবে অব্যাহত রয়েছে।
           </p>
         </div>
 
@@ -181,7 +200,39 @@ export default function AboutSection() {
         </div>
       </div>
 
-      {/* আয়োজক ও কার্যকরী কমিটি সেকশন */}
+      {/* বিশেষ ঘোষণা স্মরণিকা */}
+      <div className="mb-16">
+        <div className="relative p-8 md:p-10 rounded-sm overflow-hidden" style={{ backgroundColor: "#0A3D2A", border: "2px solid #064E3B" }}>
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }}></div>
+          <div className="relative z-10 text-center">
+            <span className="inline-block px-4 py-1 mb-4 text-xs font-bold tracking-widest uppercase rounded-sm bg-white/20 text-white">
+              বিশেষ ঘোষণা
+            </span>
+            <h3 className="text-xl md:text-2xl font-bold mb-4 text-white">
+              ১৬ ডিসেম্বরের পুনর্মিলনী উপলক্ষে ঐতিহাসিক স্মরণিকা প্রকাশ
+            </h3>
+            <div className="max-w-3xl mx-auto space-y-4 text-base md:text-lg text-emerald-100 leading-relaxed text-justify">
+              <p>
+                ১৬ ডিসেম্বরের পুনর্মিলনী উপলক্ষে মুমিনপুর মাদ্রাসার একটি ঐতিহাসিক স্মরণিকা প্রকাশের উদ্যোগ নেওয়া হয়েছে।
+              </p>
+              <p>
+                তাই বড় হুজুর (রহ.) ও মাদরাসা সংক্রান্ত নির্ভরযোগ্য যেকোন তথ্য পাঠিয়ে আপনিও এই উদ্যোগের অংশীদার হোন।
+              </p>
+              <p className="pt-4 border-t border-white/20">
+                <span className="font-bold text-white">তথ্য পাঠানোর জন্য যোগাযোগ করুন:</span><br />
+                <a href="https://wa.me/8801848001670" className="inline-flex items-center gap-2 mt-2 px-5 py-2.5 bg-white text-[#0A3D2A] font-bold rounded-sm hover:bg-emerald-50 transition-colors">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  01848001670 (Whatsapp মোঃ ওমায়ের)
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* আয়োজক ও কার্যকরী কমিটি সেকশন */}
       <div className="mb-24">
         
         {/* সেকশন সাব-টাইটেল */}
@@ -197,47 +248,30 @@ export default function AboutSection() {
         <div className="mb-16">
           <div className="flex items-center gap-3 mb-8">
             <h3 className="text-sm font-bold px-4 py-1.5 rounded-sm text-white tracking-wider" style={{ backgroundColor: "#0A3D2A" }}>
-              উদ্যোক্তাগণ
+            সমন্বয়ক
             </h3>
-            {/* <span className="h-[1px] flex-1" style={{ backgroundColor: "rgba(10,61,42,0.12)" }}></span> */}
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center">
-            {organizers
-              .filter(org => org.role.includes("উদ্যোক্তা") || org.role.toLowerCase().includes("organizer") || org.role.toLowerCase().includes("founder"))
-              .map((org) => (
-                <div
-                  key={org.name}
-                  className="text-center p-6 rounded-sm transition-all duration-300 flex flex-col justify-between border group hover:shadow-md hover:border-emerald-800/30"
-                  style={{ 
-                    backgroundColor: "#FFFFFF", 
-                    borderColor: "rgba(10,61,42,0.12)",
-                  }}
-                >
-                  <div>
-                    <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center relative transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: "#0A3D2A" }}>
-                      <span className="text-xl font-bold text-white">
-                        {org.name.charAt(0)}
+          <div className="relative h-full flex">
+            <CornerFlourish className="absolute -top-3 -left-3 w-8 h-8 text-[#0A3D2A]" />
+            <CornerFlourish className="absolute -bottom-3 -right-3 w-8 h-8 rotate-180 text-[#0A3D2A]" />
+            <div className="p-8 w-full rounded-sm flex flex-col justify-between" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)", boxShadow: "0 4px 20px rgba(10,61,42,0.03)" }}>
+              <ul className="space-y-4 text-sm md:text-base flex-1 flex flex-col justify-center">
+                {organizers
+                   .filter(org => org.role.includes("সমন্বয়ক") || org.role.includes("সমন্বয়ক") || org.role.toLowerCase().includes("organizer") || org.role.toLowerCase().includes("founder") || org.role.toLowerCase().includes("coordinator"))
+                  .map((org, i, arr) => (
+                    <li key={`${org.name}-${org.role}`} className={`flex justify-between items-start gap-4 pb-3 ${i !== arr.length - 1 ? "border-b border-gray-100" : ""}`}>
+                      <span className="font-bold flex flex-col items-start" style={{ color: "#064E3B" }}>
+                        <span>{org.name}</span>
+                        {org.phone && (
+                          <span className="text-xs mt-0.5 font-semibold text-gray-500" style={{ fontFamily: NUMBER_FONT }}>{org.phone}</span>
+                        )}
                       </span>
-                    </div>
-                    <h4 className="font-bold mb-1 text-base" style={{ color: "#064E3B" }}>
-                      {org.name}
-                    </h4>
-                    <p className="text-xs font-semibold mb-4 text-[#0A3D2A]/80">
-                      {org.role}
-                    </p>
-                  </div>
-                  
-                  {org.phone && (
-                    <div className="mt-2 pt-3 border-t border-gray-100 flex items-center justify-center gap-2 text-sm font-semibold text-gray-600">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-emerald-800 shrink-0">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25V16.5a2.25 2.25 0 0 0-2.25-2.25h-1.35c-.48 0-.963-.206-1.3-.53l-2.2-2.2c-.34-.34-.84-.53-1.3-.53H9.75V6.75A2.25 2.25 0 0 0 7.5 4.5H4.5a2.25 2.25 0 0 0-2.25 2.25Z" />
-                      </svg>
-                      <span style={{ fontFamily: NUMBER_FONT }}>{org.phone}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
+                      <span className="font-medium shrink-0" style={{ color: "#6B7280" }}>{org.role}</span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -250,28 +284,23 @@ export default function AboutSection() {
             <span className="h-[1px] flex-1" style={{ backgroundColor: "rgba(10,61,42,0.12)" }}></span>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {organizers
-              .filter(org => !(org.role.includes("উদ্যোক্তা") || org.role.toLowerCase().includes("organizer") || org.role.toLowerCase().includes("founder")))
-              .map((org) => (
-                <div
-                  key={org.name}
-                  className="text-center p-6 rounded-sm border transition-all duration-300 hover:shadow-sm"
-                  style={{ backgroundColor: "#FFFFFF", borderColor: "rgba(10,61,42,0.12)" }}
-                >
-                  <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: "rgba(10,61,42,0.06)" }}>
-                    <span className="text-lg font-bold" style={{ color: "#0A3D2A" }}>
-                      {org.name.charAt(0)}
-                    </span>
-                  </div>
-                  <h4 className="font-bold mb-1 text-base" style={{ color: "#064E3B" }}>
-                    {org.name}
-                  </h4>
-                  <p className="text-xs text-gray-500 font-medium">
-                    {org.role}
-                  </p>
-                </div>
-              ))}
+          <div className="relative h-full flex">
+            <CornerFlourish className="absolute -top-3 -left-3 w-8 h-8 text-[#0A3D2A]" />
+            <CornerFlourish className="absolute -bottom-3 -right-3 w-8 h-8 rotate-180 text-[#0A3D2A]" />
+            <div className="p-8 w-full rounded-sm flex flex-col justify-between" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)", boxShadow: "0 4px 20px rgba(10,61,42,0.03)" }}>
+              <ul className="space-y-4 text-sm md:text-base flex-1 flex flex-col justify-center">
+                {organizers
+                   .filter(org => !(org.role.includes("সমন্বয়ক") || org.role.includes("সমন্বয়ক") || org.role.toLowerCase().includes("organizer") || org.role.toLowerCase().includes("founder") || org.role.toLowerCase().includes("coordinator")))
+                  .map((org, i, arr) => (
+                    <li key={`${org.name}-${org.role}`} className={`flex justify-between items-start gap-4 pb-3 ${i !== arr.length - 1 ? "border-b border-gray-100" : ""}`}>
+                      <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>{org.name.trim()}</span>
+                      <span className="font-medium text-right" style={{ color: "#9CA3AF" }}>
+                        {org.role}
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -286,54 +315,48 @@ export default function AboutSection() {
           <span className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-emerald-800/20"></span>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          {/* তাহসিন আব্দুল্লাহ */}
-          <div
-            className="text-center p-6 rounded-sm border transition-all duration-300 hover:shadow-md hover:border-emerald-800/30"
-            style={{ backgroundColor: "#FFFFFF", borderColor: "rgba(10,61,42,0.12)" }}
-          >
-            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: "#0A3D2A" }}>
-              <span className="text-xl font-bold text-white">ত</span>
-            </div>
-            <h4 className="font-bold mb-1 text-base" style={{ color: "#064E3B" }}>
-              তাহসিন আব্দুল্লাহ
-            </h4>
-            <p className="text-xs font-semibold mb-2" style={{ color: "#0A3D2A" }}>
-              সফটওয়্যার ডেভেলপার
-            </p>
-            <p className="text-xs text-gray-500 mb-4">
-              বেফাকুল মাদারিসিল আরাবিয়া বাংলাদেশ
-            </p>
-            <div className="pt-3 border-t border-gray-100 flex items-center justify-center gap-2 text-sm font-semibold text-gray-600">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-emerald-800 shrink-0">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25V16.5a2.25 2.25 0 0 0-2.25-2.25h-1.35c-.48 0-.963-.206-1.3-.53l-2.2-2.2c-.34-.34-.84-.53-1.3-.53H9.75V6.75A2.25 2.25 0 0 0 7.5 4.5H4.5a2.25 2.25 0 0 0-2.25 2.25Z" />
-              </svg>
-              <span style={{ fontFamily: NUMBER_FONT }}>০১৫৩৩৩৮৬৮৬৬</span>
-            </div>
-          </div>
+        <div className="relative h-full flex">
+          <CornerFlourish className="absolute -top-3 -left-3 w-8 h-8 text-[#0A3D2A]" />
+          <CornerFlourish className="absolute -bottom-3 -right-3 w-8 h-8 rotate-180 text-[#0A3D2A]" />
+          <div className="p-8 w-full rounded-sm flex flex-col justify-between" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)", boxShadow: "0 4px 20px rgba(10,61,42,0.03)" }}>
+            <div className="text-sm md:text-base flex-1 flex flex-col justify-center">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                <div className="py-2 border-b border-gray-100">
+                  <div className="text-xs" style={{ color: "#9CA3AF" }}>নাম</div>
+                  <div className="font-medium" style={{ color: "#064E3B" }}>তাহসিন আব্দুল্লাহ</div>
+                </div>
+                <div className="py-2 border-b border-gray-100">
+                  <div className="text-xs" style={{ color: "#9CA3AF" }}>নাম</div>
+                  <div className="font-medium" style={{ color: "#064E3B" }}>আব্দুর রহমান আলজামি</div>
+                </div>
 
-          {/* আব্দুর রহমান আলজামি */}
-          <div
-            className="text-center p-6 rounded-sm border transition-all duration-300 hover:shadow-md hover:border-emerald-800/30"
-            style={{ backgroundColor: "#FFFFFF", borderColor: "rgba(10,61,42,0.12)" }}
-          >
-            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: "#0A3D2A" }}>
-              <span className="text-xl font-bold text-white">আ</span>
-            </div>
-            <h4 className="font-bold mb-1 text-base" style={{ color: "#064E3B" }}>
-              আব্দুর রহমান আলজামি
-            </h4>
-            <p className="text-xs font-semibold mb-2" style={{ color: "#0A3D2A" }}>
-              সফটওয়্যার ডেভেলপার
-            </p>
-            <p className="text-xs text-gray-500 mb-4">
-              আল-হাইআতুল উলয়া লিল-জামি&lsquo;আতিল কওমিয়া বাংলাদেশ
-            </p>
-            <div className="pt-3 border-t border-gray-100 flex items-center justify-center gap-2 text-sm font-semibold text-gray-600">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-emerald-800 shrink-0">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25V16.5a2.25 2.25 0 0 0-2.25-2.25h-1.35c-.48 0-.963-.206-1.3-.53l-2.2-2.2c-.34-.34-.84-.53-1.3-.53H9.75V6.75A2.25 2.25 0 0 0 7.5 4.5H4.5a2.25 2.25 0 0 0-2.25 2.25Z" />
-              </svg>
-              <span style={{ fontFamily: NUMBER_FONT }}>০১৯৯১৭৪৫২১৯</span>
+                <div className="py-2 border-b border-gray-100">
+                  <div className="text-xs" style={{ color: "#9CA3AF" }}>পদ</div>
+                  <div className="font-medium" style={{ color: "#064E3B" }}>সফটওয়্যার ডেভেলপার</div>
+                </div>
+                <div className="py-2 border-b border-gray-100">
+                  <div className="text-xs" style={{ color: "#9CA3AF" }}>পদ</div>
+                  <div className="font-medium" style={{ color: "#064E3B" }}>সফটওয়্যার ডেভেলপার</div>
+                </div>
+
+                <div className="py-2 border-b border-gray-100">
+                  <div className="text-xs" style={{ color: "#9CA3AF" }}>প্রতিষ্ঠান</div>
+                  <div className="font-medium" style={{ color: "#064E3B" }}>বেফাকুল মাদারিসিল আরাবিয়া বাংলাদেশ</div>
+                </div>
+                <div className="py-2 border-b border-gray-100">
+                  <div className="text-xs" style={{ color: "#9CA3AF" }}>প্রতিষ্ঠান</div>
+                  <div className="font-medium" style={{ color: "#064E3B" }}>আল-হাইআতুল উলয়া লিল-জামি'আতিল কওমিয়া বাংলাদেশ</div>
+                </div>
+
+                <div className="py-2">
+                  <div className="text-xs" style={{ color: "#9CA3AF" }}>মোবাইল</div>
+                  <div className="font-medium" style={{ color: "#064E3B", fontFamily: NUMBER_FONT }}>০১৫৩৩৩৮৬৮৬৬</div>
+                </div>
+                <div className="py-2">
+                  <div className="text-xs" style={{ color: "#9CA3AF" }}>মোবাইল</div>
+                  <div className="font-medium" style={{ color: "#064E3B", fontFamily: NUMBER_FONT }}>০১৯৯১৭৪৫২১৯</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -357,13 +380,15 @@ export default function AboutSection() {
             {gallery.map((photo, i) => (
               <div
                 key={photo.id || i}
-                className="aspect-square relative overflow-hidden rounded-sm group border transition-all duration-300 hover:shadow-md"
+                className="aspect-square relative overflow-hidden rounded-sm group border transition-all duration-300 hover:shadow-md cursor-pointer"
                 style={{ backgroundColor: "#F3F4F6", borderColor: "rgba(10,61,42,0.12)" }}
+                onClick={() => setLightbox(photo)}
               >
                 <Image
-                  src={`/api/photos/file/${photo.filename}`}
+                  src={`/photos/${photo.filename}`}
                   alt={photo.originalFilename}
                   fill
+                  sizes="(max-width: 768px) 50vw, 33vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
@@ -377,6 +402,34 @@ export default function AboutSection() {
           </div>
         )}
       </div>
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          onClick={closeLightbox}
+        >
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 text-white/80 hover:text-white transition z-10"
+          >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <div
+            className="relative max-w-4xl w-full max-h-[85vh] aspect-[4/3]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={`/photos/${lightbox.filename}`}
+              alt={lightbox.originalFilename}
+              fill
+              sizes="(max-width: 768px) 100vw, 75vw"
+              className="object-contain rounded-sm"
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 }

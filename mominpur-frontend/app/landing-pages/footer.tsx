@@ -23,7 +23,7 @@ export default function Footer() {
               ইত্তেহাদে আবনায়ে মুমিনপুর
             </h3>
             <p className="text-lg leading-relaxed text-gray-400">
-              স্মৃতির টানে, চেনা প্রাঙ্গণে... <span style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>১৯৬৩</span> সাল থেকে <span style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>২০২৬</span> সকল প্রাক্তনের স্মৃতিচারণ ও পুনর্মিলনী।
+              স্মৃতির টানে, চেনা প্রাঙ্গণে... <span style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>১৯৬৪</span> সাল থেকে <span style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>২০২৬</span> সকল প্রাক্তনের স্মৃতিচারণ ও পুনর্মিলনী।
             </p>
           </div>
           

@@ -10,7 +10,7 @@ const contacts = [
   { name: "মোঃ শাহেদ আহম্মেদ (সিলেট)", phone: "+880 1717-870310" },
   { name: "মোঃ হুমায়ন খান (সিলেট)", phone: "+880 1713-811740" },
   { name: "মোঃ হুজাইফা (মিরপুর)", phone: "+880 1817-574268" },
-  { name: "মোঃ আসাদুল্লাহ (মোহাম্মাদিয়া লাইব্রেরী),", phone: "+880 1817-575158" },
+  { name: "মোঃ আসাদুল্লাহ (মোহাম্মাদিয়া লাইব্রেরী)", phone: "+880 1817-575158" },
 ];
 
 // গ্লোবাল ফন্ট কনফিগারেশন
@@ -57,9 +57,7 @@ export default function ContactSection() {
     >
       {/* হেড সেকশন */}
       <div className="text-center mb-20 relative">
-        <p className="text-xs md:text-sm tracking-[0.3em] uppercase mb-3 font-semibold" style={{ color: "#0A3D2A" }}>
-          যোগাযোগ
-        </p>
+       
         <h2 className="text-3xl md:text-5xl font-black tracking-tight" style={{ color: "#0B4230" }}>
           যেকোনো প্রয়োজনে যোগাযোগ করুন
         </h2>

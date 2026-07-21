@@ -239,13 +239,14 @@ export default function RegList() {
                 <th className="px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">পেশা</th>
                 <th className="px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">স্ট্যাটাস</th>
                 <th className="px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400 min-w-[200px]">ট্রানজেকশন ID</th>
+                <th className="px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">পেয়িং নম্বর (শেষ ৪)</th>
                 <th className="px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">কার্যক্রম</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
+                  <td colSpan={8} className="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
                     কোনো রেজিস্ট্রেশন পাওয়া যায়নি
                   </td>
                 </tr>
@@ -288,6 +289,15 @@ export default function RegList() {
                               </div>
                             )}
                           </div>
+                        ) : (
+                          <span className="text-xs text-zinc-400 dark:text-zinc-500">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {tx ? (
+                          <span className="text-xs font-mono font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded inline-block">
+                            {tx.payingNumber || "-"}
+                          </span>
                         ) : (
                           <span className="text-xs text-zinc-400 dark:text-zinc-500">-</span>
                         )}

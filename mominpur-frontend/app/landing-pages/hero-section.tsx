@@ -146,7 +146,7 @@ export default function HeroSection() {
           className="max-w-2xl mx-auto text-base md:text-xl mb-10 font-medium leading-relaxed" 
           style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}
         >
-          স্মৃতির টানে, চেনা প্রাঙ্গণে... <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>১৯৬৩</span> সাল থেকে <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>২০২৬</span> সকল প্রাক্তনের স্মৃতিচারণ ও পুনর্মিলনী।
+          স্মৃতির টানে, চেনা প্রাঙ্গণে... <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>১৯৬৪</span> সাল থেকে <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>২০২৬</span> সকল প্রাক্তনের স্মৃতিচারণ ও পুনর্মিলনী।
         </p>
 
         {/* রেজিস্ট্রেশন কল-টু-অ্যাকশন বাটন */}
