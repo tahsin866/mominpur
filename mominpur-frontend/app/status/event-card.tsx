@@ -217,7 +217,7 @@ export default function EventCard({ name, phone }: EventCardProps) {
             {/* Greeting */}
             <div style={styles.guestSection}>
               <div style={styles.guestLabel}>সম্মানিত সুধী,</div>
-              <div style={styles.guestName}>জনাব মোঃ {name}</div>
+              <div style={styles.guestName}> {name}</div>
               <div style={styles.guestPhone}>মোবাইল: {phone}</div>
             </div>
 

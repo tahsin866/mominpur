@@ -23,7 +23,7 @@ services:
     ports:
       - "3005:3000" # বাইরে ৩০০৫ (কনফ্লিক্ট এড়াতে), ভেতরে ৩০০০
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8082 # এপিআই কল যাবে ৮০৮২ পোর্টে
+      - NEXT_PUBLIC_API_URL=http://76.13.183.6:8082 # এপিআই কল যাবে ৮০৮২ পোর্টে
     restart: always
     depends_on:
       - backend

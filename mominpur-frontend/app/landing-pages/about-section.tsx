@@ -22,54 +22,7 @@ const eventCounts = [
 
 const organizers = [
   // প্রধান উদ্যোক্তা
-  { 
-    name: "খোরশেদ আলম", 
-    role: "প্রধান সমন্বয়ক", 
-    phone: "+880 1727-728792" 
-  },
-  
-  // সহকারী প্রধান উদ্যোক্তা
-  { 
-    name: "মোঃ মিফতাহ উদ্দিন", 
-    role: "সহকারী প্রধান সমন্বয়ক", 
-    phone: "+880 1775-900779" 
-  },
-  { 
-    name: "মোঃ শাহেদ আহম্মেদ (সিলেট)", 
-    role: "সহকারী প্রধান সমন্বয়ক", 
-    phone: "+880 1717-870310" 
-  },
-  { 
-    name: "মোঃ হুমায়ন খান (সিলেট)", 
-    role: "সহকারী সমন্বয়ক", 
-    phone: "+880 1713-811740" 
-  },
 
-    { 
-    name: "মোঃ আবির (সিলেট)", 
-    role: "সহকারী সমন্বয়ক", 
-    phone: "+880 1710-904042" 
-  },
-
-
-  { 
-    name: "মোঃ ইয়ামিন তালুকদার (মুমিনপুর)", 
-    role: "সহকারী সমন্বয়ক", 
-    phone: "+880 1737-876660" 
-  },
-
-
-
-  { 
-    name: "শোয়াইব আহম্মেদ (সিলেট)", 
-    role: "সহকারী  সমন্বয়ক", 
-    phone: "+44 7979 647913" 
-  },
-  { 
-    name: "ওমায়ের (নোয়াখালি)", 
-    role: "সহকারী সমন্বয়ক", 
-    phone: "+880 1848-001670" 
-  },
 
   // কার্যকরী কমিটির অন্যান্য সদস্য
 // { name: "হাফেজ মাওলানা মুহাম্মাদ রাশেদ বিন মুহসিন", role: "মুহতামিম" },
@@ -88,6 +41,69 @@ const organizers = [
   { name: "মোহাম্মদ আসাদুল্লাহ (মোহাম্মাদিয়া লাইব্রেরি )", role: "পুরান ঢাকা" },
   { name: "হাফেজ হুজাইফা", role: "মিরপুর" },
   { name: "হাফেজ আব্দুলাহ", role: "টংগি" },
+
+  { 
+    name: "খোরশেদ আলম", 
+    role: "উত্তরা", 
+    phone: "+880 1727-728792" 
+  },
+  
+  // সহকারী প্রধান উদ্যোক্তা
+  { 
+    name: "মোঃ মিফতাহ উদ্দিন", 
+    role: "মিরপুর", 
+    phone: "+880 1775-900779" 
+  },
+  { 
+    name: "মোঃ শাহেদ আহম্মেদ ", 
+    role: "সিলেট", 
+    phone: "+880 1717-870310" 
+  },
+  { 
+    name: "মোঃ হুমায়ন খান ", 
+    role: "সিলেট", 
+    phone: "+880 1713-811740" 
+  },
+
+
+
+
+{
+name: "মোঃ তালহা  ",
+role: "গৌরিপুর",
+phone: "+880 1670-185211"
+}, 
+    { 
+    name: "মোঃ আবির ", 
+    role: "সিলেট", 
+    phone: "+880 1710-904042" 
+  },
+
+
+  { 
+    name: "মোঃ ইয়ামিন তালুকদার", 
+    role: " মুমিনপুর", 
+    phone: "+880 1737-876660" 
+  },
+
+
+
+  { 
+    name: "শোয়াইব আহম্মেদ ", 
+    role: "সিলেট", 
+    phone: "+44 7979 647913" 
+  },
+
+   { 
+    name: "মোঃ আব্দুলাহ  ", 
+    role: "গৌরিপুর", 
+    phone: "+880 1930-185211" 
+  },
+  { 
+    name: "ওমায়ের ", 
+    role: "নোয়াখালি", 
+    phone: "+880 1848-001670" 
+  },
   // { name: "মাওলানা ওমায়ের", role: "নোয়াখালী" },
   // { name: "হাফেজ মাওলানা মিফতাহ উদ্দিন", role: "মিরপুর" },
   // { name: "খোরশেদ আলম", role: "উত্তরা" }
@@ -125,14 +141,14 @@ export default function AboutSection() {
   }, [lightbox, closeLightbox]);
 
   useEffect(() => {
-    fetch("/photos/manifest.json")
+    fetch("/api/photos/section/gallery")
       .then((r) => {
         if (!r.ok) throw new Error("Failed to load gallery");
         return r.json();
       })
-      .then((filenames: string[]) => {
-        if (Array.isArray(filenames)) {
-          setGallery(filenames.map((f, i) => ({ id: i + 1, filename: f, originalFilename: f })));
+      .then((data: GalleryPhoto[]) => {
+        if (Array.isArray(data)) {
+          setGallery(data);
         }
         setLoading(false);
       })
@@ -162,7 +178,7 @@ export default function AboutSection() {
             হাফেজ মাওলানা ক্বারী মুহসিন (রহ.) ১৯০৪ খ্রিস্টাব্দে শাহ হাবিবুল্লাহ (রহ.)-এর ঘরে জন্মগ্রহণ করেন। শৈশবেই কুরআনের হিফজ সম্পন্ন করে উচ্চশিক্ষার জন্য তিনি দারুল উলুম দেওবন্দে গমন করেন।
           </p>
           <p className="px-6">
-            পরবর্তীকালে হযরত আল্লামা শাব্বীর আহমদ উসমানী (রহ.) ও হযরত হুসাইন আহমদ মাদানী (রহ.) তাঁর কুরআনের খেদমতে অসামান্য অবদান রাখার বিষয়ে সুসংবাদ ও দোয়া প্রদান করেন। এই প্রেরণা নিয়ে তিনি মোস্তফাগঞ্জে দীর্ঘ ১৬ বছর কুরআন শিক্ষা ও কিরাআতের খেদমত করেন। পরবর্তীতে ১৯৬৪ সালে তিনি মুমিনপুর মাদ্রাসা প্রতিষ্ঠা করেন। অতঃপর এই মহীয়সী ব্যক্তিত্ব (বড় হুজুর) আমৃত্যু কুরআন শিক্ষা, হিফজ পরিচালনা ও যোগ্য হাফেজ-কারি গড়ে তোলার মহান কাজে নিজেকে আত্মনিয়োগ করেন।
+            পরবর্তীকালে হযরত আল্লামা শাব্বীর আহমদ উসমানী (রহ.) ও হযরত হুসাইন আহমদ মাদানী (রহ.) তাঁর কুরআনের খেদমতে অসামান্য অবদান রাখার বিষয়ে সুসংবাদ ও দোয়া প্রদান করেন। এই প্রেরণা নিয়ে তিনি মোস্তফাগঞ্জে দীর্ঘ ১৭ বছর কুরআন শিক্ষা ও কিরাআতের খেদমত করেন। পরবর্তীতে ১৯৬৪ সালে তিনি মুমিনপুর মাদ্রাসা প্রতিষ্ঠা করেন। অতঃপর এই মহীয়সী ব্যক্তিত্ব (বড় হুজুর) আমৃত্যু কুরআন শিক্ষা, হিফজ পরিচালনা ও যোগ্য হাফেজ-কারি গড়ে তোলার মহান কাজে নিজেকে আত্মনিয়োগ করেন।
           </p>
           <p className="px-6">
             তাঁর ইন্তেকালের পর জ্যেষ্ঠ পুত্র হাফেজ মাওলানা খালেদ মুহসিন (রহ.) প্রতিষ্ঠানের দায়িত্ব গ্রহণ করেন এবং তাঁর অক্লান্ত মেহনতের বদৌলতে মাদ্রাসার ব্যাপক উন্নতি সাধিত হয়। পরবর্তীতে বার্ধক্যজনিত কারণে ইন্তেকালের কয়েক বছর পূর্বেই তিনি দায়িত্ব থেকে অবসর গ্রহণ করলে, তাঁর ছোট ভাই  রাশেদ বিন মুহসিন (দা.বা.) প্রতিষ্ঠানের দায়িত্বভার গ্রহণ করেন। বর্তমানে তাঁরই সুযোগ্য নেতৃত্বে মাদ্রাসার শিক্ষা কার্যক্রম ও দ্বীনি খেদমতের ধারাবাহিকতা সফলভাবে অব্যাহত রয়েছে।
@@ -244,65 +260,27 @@ export default function AboutSection() {
           <span className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-emerald-800/20"></span>
         </div>
 
-        {/* ================= ১. মূল উদ্যোক্তা সেকশন ================= */}
-        <div className="mb-16">
-          <div className="flex items-center gap-3 mb-8">
-            <h3 className="text-sm font-bold px-4 py-1.5 rounded-sm text-white tracking-wider" style={{ backgroundColor: "#0A3D2A" }}>
-            সমন্বয়ক
-            </h3>
-          </div>
-
-          <div className="relative h-full flex">
+        {/* সকল আয়োজক ও কমিটি */}
+        <div className="relative h-full flex">
             <CornerFlourish className="absolute -top-3 -left-3 w-8 h-8 text-[#0A3D2A]" />
             <CornerFlourish className="absolute -bottom-3 -right-3 w-8 h-8 rotate-180 text-[#0A3D2A]" />
             <div className="p-8 w-full rounded-sm flex flex-col justify-between" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)", boxShadow: "0 4px 20px rgba(10,61,42,0.03)" }}>
               <ul className="space-y-4 text-sm md:text-base flex-1 flex flex-col justify-center">
                 {organizers
-                   .filter(org => org.role.includes("সমন্বয়ক") || org.role.includes("সমন্বয়ক") || org.role.toLowerCase().includes("organizer") || org.role.toLowerCase().includes("founder") || org.role.toLowerCase().includes("coordinator"))
                   .map((org, i, arr) => (
                     <li key={`${org.name}-${org.role}`} className={`flex justify-between items-start gap-4 pb-3 ${i !== arr.length - 1 ? "border-b border-gray-100" : ""}`}>
-                      <span className="font-bold flex flex-col items-start" style={{ color: "#064E3B" }}>
-                        <span>{org.name}</span>
+                      <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>{org.name}</span>
+                      <span className="font-medium shrink-0 text-right flex flex-col items-end" style={{ color: "#6B7280" }}>
+                        <span>{org.role}</span>
                         {org.phone && (
                           <span className="text-xs mt-0.5 font-semibold text-gray-500" style={{ fontFamily: NUMBER_FONT }}>{org.phone}</span>
                         )}
                       </span>
-                      <span className="font-medium shrink-0" style={{ color: "#6B7280" }}>{org.role}</span>
                     </li>
                   ))}
               </ul>
             </div>
           </div>
-        </div>
-
-        {/* ================= ২. কার্যকরী কমিটি সেকশন ================= */}
-        <div>
-          <div className="flex items-center gap-3 mb-8">
-            <h3 className="text-sm font-bold px-4 py-1.5 rounded-sm text-emerald-900 tracking-wider" style={{ backgroundColor: "rgba(10,61,42,0.08)" }}>
-              কার্যকারী কমিটি
-            </h3>
-            <span className="h-[1px] flex-1" style={{ backgroundColor: "rgba(10,61,42,0.12)" }}></span>
-          </div>
-
-          <div className="relative h-full flex">
-            <CornerFlourish className="absolute -top-3 -left-3 w-8 h-8 text-[#0A3D2A]" />
-            <CornerFlourish className="absolute -bottom-3 -right-3 w-8 h-8 rotate-180 text-[#0A3D2A]" />
-            <div className="p-8 w-full rounded-sm flex flex-col justify-between" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)", boxShadow: "0 4px 20px rgba(10,61,42,0.03)" }}>
-              <ul className="space-y-4 text-sm md:text-base flex-1 flex flex-col justify-center">
-                {organizers
-                   .filter(org => !(org.role.includes("সমন্বয়ক") || org.role.includes("সমন্বয়ক") || org.role.toLowerCase().includes("organizer") || org.role.toLowerCase().includes("founder") || org.role.toLowerCase().includes("coordinator")))
-                  .map((org, i, arr) => (
-                    <li key={`${org.name}-${org.role}`} className={`flex justify-between items-start gap-4 pb-3 ${i !== arr.length - 1 ? "border-b border-gray-100" : ""}`}>
-                      <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>{org.name.trim()}</span>
-                      <span className="font-medium text-right" style={{ color: "#9CA3AF" }}>
-                        {org.role}
-                      </span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* ডিজাইন ও ডেভেলপমেন্ট সেকশন */}
@@ -320,43 +298,28 @@ export default function AboutSection() {
           <CornerFlourish className="absolute -bottom-3 -right-3 w-8 h-8 rotate-180 text-[#0A3D2A]" />
           <div className="p-8 w-full rounded-sm flex flex-col justify-between" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)", boxShadow: "0 4px 20px rgba(10,61,42,0.03)" }}>
             <div className="text-sm md:text-base flex-1 flex flex-col justify-center">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                <div className="py-2 border-b border-gray-100">
-                  <div className="text-xs" style={{ color: "#9CA3AF" }}>নাম</div>
-                  <div className="font-medium" style={{ color: "#064E3B" }}>তাহসিন আব্দুল্লাহ</div>
-                </div>
-                <div className="py-2 border-b border-gray-100">
-                  <div className="text-xs" style={{ color: "#9CA3AF" }}>নাম</div>
-                  <div className="font-medium" style={{ color: "#064E3B" }}>আব্দুর রহমান আলজামি</div>
-                </div>
-
-                <div className="py-2 border-b border-gray-100">
-                  <div className="text-xs" style={{ color: "#9CA3AF" }}>পদ</div>
-                  <div className="font-medium" style={{ color: "#064E3B" }}>সফটওয়্যার ডেভেলপার</div>
-                </div>
-                <div className="py-2 border-b border-gray-100">
-                  <div className="text-xs" style={{ color: "#9CA3AF" }}>পদ</div>
-                  <div className="font-medium" style={{ color: "#064E3B" }}>সফটওয়্যার ডেভেলপার</div>
-                </div>
-
-                <div className="py-2 border-b border-gray-100">
-                  <div className="text-xs" style={{ color: "#9CA3AF" }}>প্রতিষ্ঠান</div>
-                  <div className="font-medium" style={{ color: "#064E3B" }}>বেফাকুল মাদারিসিল আরাবিয়া বাংলাদেশ</div>
-                </div>
-                <div className="py-2 border-b border-gray-100">
-                  <div className="text-xs" style={{ color: "#9CA3AF" }}>প্রতিষ্ঠান</div>
-                  <div className="font-medium" style={{ color: "#064E3B" }}>আল-হাইআতুল উলয়া লিল-জামি'আতিল কওমিয়া বাংলাদেশ</div>
-                </div>
-
-                <div className="py-2">
-                  <div className="text-xs" style={{ color: "#9CA3AF" }}>মোবাইল</div>
-                  <div className="font-medium" style={{ color: "#064E3B", fontFamily: NUMBER_FONT }}>০১৫৩৩৩৮৬৮৬৬</div>
-                </div>
-                <div className="py-2">
-                  <div className="text-xs" style={{ color: "#9CA3AF" }}>মোবাইল</div>
-                  <div className="font-medium" style={{ color: "#064E3B", fontFamily: NUMBER_FONT }}>০১৯৯১৭৪৫২১৯</div>
-                </div>
-              </div>
+              <ul className="space-y-4">
+                <li className="flex justify-between items-start gap-4 pb-3 border-b border-gray-100">
+                  <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>তাহসিন আব্দুল্লাহ</span>
+                  <span className="text-center" style={{ color: "#6B7280" }}>সফটওয়্যার ডেভেলপার, বেফাকুল মাদারিসিল আরাবিয়া বাংলাদেশ</span>
+                  <span className="font-medium shrink-0" style={{ color: "#064E3B", fontFamily: NUMBER_FONT }}>০১৫৩৩৩৮৬৮৬৬</span>
+                </li>
+                <li className="flex justify-between items-start gap-4 pb-3 border-b border-gray-100">
+                  <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>আব্দুর রহমান আলজামি</span>
+                  <span className="text-center" style={{ color: "#6B7280" }}>সফটওয়্যার ডেভেলপার, আল-হাইআতুল উলয়া লিল-জামি'আতিল কওমিয়া বাংলাদেশ</span>
+                  <span className="font-medium shrink-0" style={{ color: "#064E3B", fontFamily: NUMBER_FONT }}>০১৯৯১৭৪৫২১৯</span>
+                </li>
+                <li className="flex justify-between items-start gap-4 pb-3 border-b border-gray-100">
+                  <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>আরাফাত ইসলাম</span>
+                  <span className="text-center" style={{ color: "#6B7280" }}>সহকারী শিক্ষক (নূরানী), তানজিমুল উম্মাহ প্রি-হিফজ মাদ্রাসা, মিরপুর শাখা</span>
+                  <span className="font-medium shrink-0" style={{ color: "#064E3B", fontFamily: NUMBER_FONT }}>০১৩২৭-৩৬৩৯৬১</span>
+                </li>
+                <li className="flex justify-between items-start gap-4">
+                  <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>শুয়াইব</span>
+                  <span className="text-center" style={{ color: "#6B7280" }}>আল-হাইআতুল উলয়া লিল-জামি'আতিল কওমিয়া বাংলাদেশ</span>
+                  <span className="font-medium shrink-0" style={{ color: "#064E3B", fontFamily: NUMBER_FONT }}>০১৮৩৫৩৯৮৬৫৬</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -385,7 +348,7 @@ export default function AboutSection() {
                 onClick={() => setLightbox(photo)}
               >
                 <Image
-                  src={`/photos/${photo.filename}`}
+                  src={`/api/photos/file/${photo.filename}`}
                   alt={photo.originalFilename}
                   fill
                   sizes="(max-width: 768px) 50vw, 33vw"

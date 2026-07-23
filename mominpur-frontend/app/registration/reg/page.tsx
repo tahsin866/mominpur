@@ -712,7 +712,7 @@ export default function RegistrationPage() {
             {/* 6. Payment */}
             <div className="space-y-3">
               <h3 className="text-lg font-bold border-b pb-1" style={{ color: "#0A3D2A", borderColor: "rgba(10,61,42,0.15)" }}>
-                পেমেন্ট
+                সেন্ডমানি করুন
               </h3>
               <div className="p-4 rounded-sm" style={{ backgroundColor: "#F0FDF4", border: "1px solid rgba(10,61,42,0.15)" }}>
                 <div className="flex items-center justify-between mb-4 p-3 rounded-sm" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
@@ -721,28 +721,28 @@ export default function RegistrationPage() {
                 </div>
                 
                 <p className="text-lg font-semibold mb-3" style={{ color: "#064E3B" }}>
-                  বিকাশ পেমেন্ট করুন
+                  বিকাশ সেন্ডমানি করুন
                 </p>
                 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg" style={{ color: "#6B7280" }}>পেয়িং নম্বর ১:</span>
+                    <span className="text-lg" style={{ color: "#6B7280" }}>সেন্ডমানি করুন এই নম্বারে ১:</span>
                     <span className="text-xl font-bold" style={{ color: "#0A3D2A" }}>01775900779</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg" style={{ color: "#6B7280" }}>পেয়িং নম্বর ২:</span>
+                    <span className="text-lg" style={{ color: "#6B7280" }}>সেন্ডমানি করুন এই নম্বারে ২:</span>
                     <span className="text-xl font-bold" style={{ color: "#0A3D2A" }}>01727728792</span>
                   </div>
                 </div>
 
                 <p className="text-sm mb-4" style={{ color: "#6B7280" }}>
-                  পেমেন্ট করার পর নিচে ট্রানজেকশন আইডি এবং পেয়িং নম্বরের শেষ ৪ ডিজিট দিন।
+                  সেন্ডমানি করার পর নিচে ট্রানজেকশন আইডি এবং পেয়িং নম্বরের শেষ ৪ ডিজিট দিন।
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      ট্রানজেকশন আইডি *
+                  যে নাম্বার থেকে সেন্ডমানি করেছেন তার ট্রানজেকশন আইডি *
                     </label>
                     <input
                       type="text"
@@ -755,7 +755,7 @@ export default function RegistrationPage() {
                   </div>
                   <div>
                     <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      পেয়িং নম্বরের শেষ ৪ ডিজিট *
+                      যে  নম্বরের থেকে সেন্ডমানি করেছেন তার শেষ ৪ ডিজিট *
                     </label>
                     <input
                       type="text"
