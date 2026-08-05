@@ -64,6 +64,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/transactions/all").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/transactions/**").permitAll()
                 .requestMatchers("/api/registrations/check-status").permitAll()
+                .requestMatchers("/api/audit-logs/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
