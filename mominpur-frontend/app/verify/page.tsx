@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
+import { useSearchParams } from "next/navigation";
 
 interface VerifyResult {
   name: string;
@@ -11,41 +12,74 @@ interface VerifyResult {
   submittedAt: string;
 }
 
-export default function VerifyPage() {
-  const [phone, setPhone] = useState("");
+function VerifyContent() {
+  const searchParams = useSearchParams();
+  const phoneParam = searchParams.get("phone");
+  const autoPhone =
+    typeof phoneParam === "string" && /^\d{11}$/.test(phoneParam)
+      ? phoneParam
+      : "";
+  const [phone, setPhone] = useState(autoPhone);
   const [result, setResult] = useState<VerifyResult | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(Boolean(autoPhone));
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const runCheck = useCallback(async (number: string) => {
+    if (!/^\d{11}$/.test(number)) {
+      return { error: "অনুগ্রহ করে ১১ ডিজিটের মোবাইল নম্বর দিন।" };
+    }
+    try {
+      const res = await fetch(`/api/registrations/check-status?phone=${number}`);
+      if (res.status === 404) {
+        return { error: "এই নম্বরে কোনো রেজিস্ট্রেশন পাওয়া যায়নি।" };
+      }
+      if (res.ok) {
+        return { result: (await res.json()) as VerifyResult };
+      }
+      return { error: "সার্ভারে সমস্যা হয়েছে।" };
+    } catch {
+      return { error: "সংযোগ করা যায়নি।" };
+    }
+  }, []);
+
+  const verifyPhone = useCallback(
+    async (number: string) => {
+      setLoading(true);
+      setError("");
+      setResult(null);
+      const outcome = await runCheck(number);
+      if (outcome.error) {
+        setError(outcome.error);
+      } else if (outcome.result) {
+        setResult(outcome.result);
+      }
+      setLoading(false);
+    },
+    [runCheck]
+  );
+
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-    setResult(null);
-
-    if (!/^\d{11}$/.test(phone)) {
-      setError("অনুগ্রহ করে ১১ ডিজিটের মোবাইল নম্বর দিন।");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/registrations/check-status?phone=${phone}`);
-      if (res.status === 404) {
-        setError("এই নম্বরে কোনো রেজিস্ট্রেশন পাওয়া যায়নি।");
-      } else if (res.ok) {
-        const data = await res.json();
-        setResult(data);
-      } else {
-        setError("সার্ভারে সমস্যা হয়েছে।");
-      }
-    } catch {
-      setError("সংযোগ করা যায়নি।");
-    } finally {
-      setLoading(false);
-    }
+    await verifyPhone(phone);
   };
+
+  useEffect(() => {
+    if (!autoPhone) return;
+    let cancelled = false;
+    runCheck(autoPhone).then((outcome) => {
+      if (cancelled) return;
+      if (outcome.error) {
+        setError(outcome.error);
+      } else if (outcome.result) {
+        setResult(outcome.result);
+      }
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [autoPhone, runCheck]);
 
   const handleNewSearch = () => {
     setPhone("");
@@ -236,7 +270,11 @@ export default function VerifyPage() {
                 <div className="flex items-center gap-4 p-4 rounded-xl" style={{ backgroundColor: "#F9FAFB", border: "1px solid #E5E7EB" }}>
                   <div className="p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
                     <QRCodeSVG
-                      value={result.phone}
+                      value={
+                        typeof window !== "undefined"
+                          ? `${window.location.origin}/verify?phone=${result.phone}`
+                          : result.phone
+                      }
                       size={64}
                       bgColor="#FFFFFF"
                       fgColor="#0A3D2A"
@@ -289,5 +327,19 @@ export default function VerifyPage() {
         <p>© ২০২৬ ইত্তেহাদে আবনায়ে মুমিনপুর।</p>
       </footer>
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F8FAF9" }}>
+          <p className="text-sm text-zinc-500">লোড হচ্ছে...</p>
+        </div>
+      }
+    >
+      <VerifyContent />
+    </Suspense>
   );
 }

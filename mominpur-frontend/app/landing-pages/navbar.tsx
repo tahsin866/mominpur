@@ -4,7 +4,6 @@ import { useState } from "react";
 const navLinks = [
   { label: "মুমিনপুর সম্পর্কে", href: "#about" },
   { label: "আবেদন স্ট্যাটাস চেক", href: "/status" },
-  { label: "ভেরিফাই", href: "/verify" },
   { label: "যোগাযোগ", href: "#contact" },
 ];
 

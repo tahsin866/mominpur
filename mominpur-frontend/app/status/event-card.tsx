@@ -35,8 +35,11 @@ export default function EventCard({ name, phone }: EventCardProps) {
     }
   };
 
-  // বর্তমানে যে পেজে আছে তার URL QR কোডের জন্য
-  const qrUrl = typeof window !== "undefined" ? window.location.href : "";
+  // QR কোড স্ক্যান করলে সরাসরি ভেরিফিকেশন পেজে নিয়ে যাবে ফোন নম্বরসহ
+  const qrUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/verify?phone=${phone}`
+      : "";
 
   // ইনলাইন স্টাইল অবজেক্টস (পরিচ্ছন্নতার জন্য)
   const styles = {
@@ -254,9 +257,9 @@ export default function EventCard({ name, phone }: EventCardProps) {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={styles.qrInfoTitle}>ডিজিটাল এন্ট্রি পাস</div>
-                <div style={styles.qrInfoText}>
-                  অনুগ্রহ করে প্রবেশের সময় এই QR কোডটি প্রদর্শন করুন। বিস্তারিত জানতে বা ভেরিফাই করতে স্ক্যান করুন।
-                </div>
+                  <div style={styles.qrInfoText}>
+                    অনুগ্রহ করে প্রবেশের সময় এই QR কোডটি স্ক্যান করুন। স্ক্যান করলে সরাসরি ভেরিফিকেশন হয়ে যাবে।
+                  </div>
               </div>
             </div>
           </div>
