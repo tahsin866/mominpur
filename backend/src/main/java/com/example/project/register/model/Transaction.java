@@ -19,11 +19,22 @@ public class Transaction {
     @Column(nullable = false, name = "transaction_id")
     private String transactionId;
 
-    @Column(nullable = false, name = "paying_number")
+    @Column(nullable = false, name = "paying_number_last4")
     private String payingNumber;
 
-    /** রেজিস্ট্রেশন ফি + অতিথি ফি। সার্ভারে হিসাব হয়, ক্লায়েন্ট থেকে নেওয়া হয় না। */
-    @Column(name = "total_amount", nullable = false, columnDefinition = "INTEGER DEFAULT 1020")
+    /** ইউজার যে নম্বরে সেন্ডমানি করেছে। */
+    @Column(name = "receiver_number")
+    private String receiverNumber;
+
+    /** ইউজার কত টাকা পাঠিয়েছে বলে জানিয়েছে। */
+    @Column(name = "paid_amount")
+    private Integer paidAmount;
+
+    /**
+     * রেজিস্ট্রেশন ফি + অতিথি ফি। সার্ভারে হিসাব হয়, ক্লায়েন্ট থেকে নেওয়া হয়
+     * না।
+     */
+    @Column(name = "registration_amount", nullable = false, columnDefinition = "INTEGER DEFAULT 1020")
     private Integer totalAmount = 1020;
 
     @Column(nullable = false)

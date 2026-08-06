@@ -25,6 +25,7 @@ interface DivisionData {
 
 export default function RegistrationPage() {
   const [divisions, setDivisions] = useState<DivisionData[]>([]);
+  const [divisionsLoading, setDivisionsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -41,6 +42,8 @@ export default function RegistrationPage() {
 
   const [transactionId, setTransactionId] = useState("");
   const [lastFourDigits, setLastFourDigits] = useState("");
+  const [receiverNumber, setReceiverNumber] = useState("");
+  const [paidAmount, setPaidAmount] = useState("");
 
   // অতিথি — ০, ১ বা ২ জন। টাকার চূড়ান্ত হিসাব সার্ভারেই হয়, এখানে শুধু দেখানো।
   const [guestCount, setGuestCount] = useState(0);
@@ -92,7 +95,8 @@ export default function RegistrationPage() {
         return r.json();
       })
       .then((data) => setDivisions(data))
-      .catch((err) => console.error("Failed to load divisions", err));
+      .catch((err) => console.error("Failed to load divisions", err))
+      .finally(() => setDivisionsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -139,6 +143,7 @@ export default function RegistrationPage() {
     curDistricts.find((d) => String(d.desId) === curDistId)?.thanas || [];
 
   const [errorField, setErrorField] = useState("");
+  const [sameAddress, setSameAddress] = useState(false);
 
   const showError = (msg: string, fieldId: string) => {
     setMessage("Error: " + msg);
@@ -168,6 +173,14 @@ export default function RegistrationPage() {
       showError("সঠিক হোয়াটসঅ্যাপ নম্বর দিন (013, 014, 015, 016, 017, 018, 019 দিয়ে শুরু হতে হবে এবং ১১ ডিজিটের হতে হবে)।", "field-whatsapp");
       return;
     }
+    if (!receiverNumber) {
+      showError("যে নম্বরে সেন্ডমানি করেছেন তা নির্বাচন করুন।", "field-receiverNumber");
+      return;
+    }
+    if (!paidAmount || Number(paidAmount) <= 0) {
+      showError("কত টাকা পাঠিয়েছেন তা লিখুন।", "field-paidAmount");
+      return;
+    }
     if (!transactionId.trim()) {
       showError("ট্রানজেকশন আইডি আবশ্যক।", "field-transactionId");
       return;
@@ -179,6 +192,7 @@ export default function RegistrationPage() {
 
     const payload = {
       ...form,
+      ...(sameAddress ? { currentAddressDetails: form.permanentAddressDetails } : {}),
       guestCount,
       departments: selectedDepartments.join(", "),
       occupation: selectedOccupations.join(", "),
@@ -189,12 +203,15 @@ export default function RegistrationPage() {
         "",
       permanentThana:
         permThanas.find((t) => String(t.id) === permThanaId)?.thana || "",
-      currentDivision:
-        curDivisions.find((d) => String(d.id) === curDivId)?.division || "",
-      currentDistrict:
-        curDistricts.find((d) => String(d.desId) === curDistId)?.district || "",
-      currentThana:
-        curThanas.find((t) => String(t.id) === curThanaId)?.thana || "",
+      currentDivision: sameAddress
+        ? permDivisions.find((d) => String(d.id) === permDivId)?.division || ""
+        : curDivisions.find((d) => String(d.id) === curDivId)?.division || "",
+      currentDistrict: sameAddress
+        ? permDistricts.find((d) => String(d.desId) === permDistId)?.district || ""
+        : curDistricts.find((d) => String(d.desId) === curDistId)?.district || "",
+      currentThana: sameAddress
+        ? permThanas.find((t) => String(t.id) === permThanaId)?.thana || ""
+        : curThanas.find((t) => String(t.id) === curThanaId)?.thana || "",
     };
 
     try {
@@ -240,6 +257,8 @@ export default function RegistrationPage() {
             registrationId: data.id,
             transactionId: transactionId.trim(),
             payingNumber: lastFourDigits.trim(),
+            receiverNumber: receiverNumber,
+            paidAmount: Number(paidAmount),
           }),
         });
         setMessage("আলহামদুলিল্লাহ! আপনার ফরমটি সফলভাবে ডাটাবেজে সংরক্ষিত হয়েছে।");
@@ -250,7 +269,10 @@ export default function RegistrationPage() {
         setSelectedOccupations([]);
         setTransactionId("");
         setLastFourDigits("");
+        setReceiverNumber("");
+        setPaidAmount("");
         setGuestCount(0);
+        setSameAddress(false);
         setForm({
           name: "",
           fatherName: "",
@@ -306,11 +328,10 @@ export default function RegistrationPage() {
           {message && (
             <div
               id="form-message"
-              className={`mb-6 p-3 rounded-sm text-lg font-medium ${
-                message.startsWith("Error")
+              className={`mb-6 p-3 rounded-sm text-lg font-medium ${message.startsWith("Error")
                   ? "bg-red-50 text-red-700 border border-red-200"
                   : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-              }`}
+                }`}
             >
               {message}
             </div>
@@ -443,11 +464,10 @@ export default function RegistrationPage() {
                     <button
                       type="button"
                       onClick={() => setDeptOpen((o) => !o)}
-                      className={`w-full text-lg px-3 py-2 border rounded-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-emerald-500 ${
-                        deptOpen
+                      className={`w-full text-lg px-3 py-2 border rounded-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-emerald-500 ${deptOpen
                           ? "border-emerald-500 ring-1 ring-emerald-500"
                           : ""
-                      }`}
+                        }`}
                     >
                       <span className="truncate">
                         {selectedDepartments.length > 0
@@ -455,11 +475,10 @@ export default function RegistrationPage() {
                           : "নির্বাচন করুন"}
                       </span>
                       <svg
-                         className={`w-4 h-4 ml-2 shrink-0 transition-transform ${
-                           deptOpen ? "rotate-180" : ""
-                         }`}
-                         style={{ color: "#6B7280" }}
-                         fill="none"
+                        className={`w-4 h-4 ml-2 shrink-0 transition-transform ${deptOpen ? "rotate-180" : ""
+                          }`}
+                        style={{ color: "#6B7280" }}
+                        fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
@@ -471,13 +490,13 @@ export default function RegistrationPage() {
                         />
                       </svg>
                     </button>
-                      {deptOpen && (
-                       <div className="absolute z-50 mt-1 w-full bg-white border rounded-sm shadow-lg" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
+                    {deptOpen && (
+                      <div className="absolute z-50 mt-1 w-full bg-white border rounded-sm shadow-lg" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
                         {["নাজেরা", "হিফজ", "কিতাব"].map((dept) => (
-                           <label
-                             key={dept}
-                             className="flex items-center gap-2 px-3 py-2 text-lg cursor-pointer transition"
-                           >
+                          <label
+                            key={dept}
+                            className="flex items-center gap-2 px-3 py-2 text-lg cursor-pointer transition"
+                          >
                             <input
                               type="checkbox"
                               className="accent-emerald-600"
@@ -520,7 +539,7 @@ export default function RegistrationPage() {
                     className={inputClass()}
                     required
                   >
-                    <option value="">বিভাগ নির্বাচন করুন</option>
+                    <option value="">{divisionsLoading ? "লোড হচ্ছে..." : "বিভাগ নির্বাচন করুন"}</option>
                     {permDivisions.map((d) => (
                       <option key={d.id} value={d.id}>
                         {d.division}
@@ -588,25 +607,59 @@ export default function RegistrationPage() {
 
             {/* 4. Current Address */}
             <div className="space-y-3">
-              <h3 className="text-lg font-bold border-b pb-1" style={{ color: "#0A3D2A", borderColor: "rgba(10,61,42,0.15)" }}>
-                বর্তমান ঠিকানা
-              </h3>
+              <div className="flex items-center justify-between border-b pb-1" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
+                <h3 className="text-lg font-bold" style={{ color: "#0A3D2A" }}>
+                  বর্তমান ঠিকানা
+                </h3>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={sameAddress}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setSameAddress(checked);
+                      if (checked) {
+                        setCurDivId(permDivId);
+                        setCurDistId(permDistId);
+                        setCurThanaId(permThanaId);
+                        setForm((prev) => ({
+                          ...prev,
+                          currentAddressDetails: prev.permanentAddressDetails,
+                        }));
+                      } else {
+                        setCurDivId("");
+                        setCurDistId("");
+                        setCurThanaId("");
+                        setForm((prev) => ({
+                          ...prev,
+                          currentAddressDetails: "",
+                        }));
+                      }
+                    }}
+                    className="w-4 h-4 accent-emerald-700 rounded"
+                  />
+                  <span className="text-sm font-medium" style={{ color: "#064E3B" }}>
+                    স্থায়ী ঠিকানার সাথে একই
+                  </span>
+                </label>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     বিভাগ *
                   </label>
                   <select
-                    value={curDivId}
+                    value={sameAddress ? permDivId : curDivId}
                     onChange={(e) => {
                       setCurDivId(e.target.value);
                       setCurDistId("");
                       setCurThanaId("");
                     }}
                     className={inputClass()}
+                    disabled={sameAddress}
                     required
                   >
-                    <option value="">বিভাগ নির্বাচন করুন</option>
+                    <option value="">{divisionsLoading ? "লোড হচ্ছে..." : "বিভাগ নির্বাচন করুন"}</option>
                     {curDivisions.map((d) => (
                       <option key={d.id} value={d.id}>
                         {d.division}
@@ -619,17 +672,17 @@ export default function RegistrationPage() {
                     জেলা *
                   </label>
                   <select
-                    value={curDistId}
+                    value={sameAddress ? permDistId : curDistId}
                     onChange={(e) => {
                       setCurDistId(e.target.value);
                       setCurThanaId("");
                     }}
                     className={inputClass()}
-                    disabled={!curDivId}
+                    disabled={sameAddress || !(sameAddress ? permDivId : curDivId)}
                     required
                   >
                     <option value="">জেলা নির্বাচন করুন</option>
-                    {curDistricts.map((d) => (
+                    {(sameAddress ? permDistricts : curDistricts).map((d) => (
                       <option key={d.desId} value={d.desId}>
                         {d.district}
                       </option>
@@ -641,14 +694,14 @@ export default function RegistrationPage() {
                     থানা *
                   </label>
                   <select
-                    value={curThanaId}
+                    value={sameAddress ? permThanaId : curThanaId}
                     onChange={(e) => setCurThanaId(e.target.value)}
                     className={inputClass()}
-                    disabled={!curDistId}
+                    disabled={sameAddress || !(sameAddress ? permDistId : curDistId)}
                     required
                   >
                     <option value="">থানা নির্বাচন করুন</option>
-                    {curThanas.map((t) => (
+                    {(sameAddress ? permThanas : curThanas).map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.thana}
                       </option>
@@ -656,17 +709,18 @@ export default function RegistrationPage() {
                   </select>
                 </div>
               </div>
-                <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    বর্তমান ঠিকানার বিস্তারিত *
-                  </label>
+              <div>
+                <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  বর্তমান ঠিকানার বিস্তারিত *
+                </label>
                 <textarea
                   name="currentAddressDetails"
-                  value={form.currentAddressDetails}
+                  value={sameAddress ? form.permanentAddressDetails : form.currentAddressDetails}
                   onChange={handleChange}
                   rows={2}
                   placeholder="বাসা নম্বর, রোড, এলাকা ইত্যাদি..."
                   className={inputClass()}
+                  disabled={sameAddress}
                   required
                 ></textarea>
               </div>
@@ -686,11 +740,10 @@ export default function RegistrationPage() {
                     <button
                       type="button"
                       onClick={() => setOccOpen((o) => !o)}
-                      className={`w-full text-lg px-3 py-2 border rounded-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-emerald-500 ${
-                        occOpen
+                      className={`w-full text-lg px-3 py-2 border rounded-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-emerald-500 ${occOpen
                           ? "border-emerald-500 ring-1 ring-emerald-500"
                           : ""
-                      }`}
+                        }`}
                     >
                       <span className="truncate">
                         {selectedOccupations.length > 0
@@ -698,11 +751,10 @@ export default function RegistrationPage() {
                           : "নির্বাচন করুন"}
                       </span>
                       <svg
-                         className={`w-4 h-4 ml-2 shrink-0 transition-transform ${
-                           occOpen ? "rotate-180" : ""
-                         }`}
-                         style={{ color: "#6B7280" }}
-                         fill="none"
+                        className={`w-4 h-4 ml-2 shrink-0 transition-transform ${occOpen ? "rotate-180" : ""
+                          }`}
+                        style={{ color: "#6B7280" }}
+                        fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
@@ -715,7 +767,7 @@ export default function RegistrationPage() {
                       </svg>
                     </button>
                     {occOpen && (
-                       <div className="absolute z-50 mt-1 w-full bg-white border rounded-sm shadow-lg max-h-60 overflow-y-auto" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
+                      <div className="absolute z-50 mt-1 w-full bg-white border rounded-sm shadow-lg max-h-60 overflow-y-auto" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
                         {[
                           "শিক্ষক",
                           "ব্যবসায়ী",
@@ -727,10 +779,10 @@ export default function RegistrationPage() {
                           "বেসরকারি চাকুরি",
                           "অন্যান্য",
                         ].map((job) => (
-                           <label
-                             key={job}
-                             className="flex items-center gap-2 px-3 py-2 text-lg cursor-pointer transition"
-                           >
+                          <label
+                            key={job}
+                            className="flex items-center gap-2 px-3 py-2 text-lg cursor-pointer transition"
+                          >
                             <input
                               type="checkbox"
                               className="accent-emerald-600"
@@ -848,7 +900,7 @@ export default function RegistrationPage() {
                 <p className="text-lg font-semibold mb-3" style={{ color: "#064E3B" }}>
                   বিকাশে সর্বমোট <span style={{ color: "#0A3D2A" }}>{bn(grandTotal)} টাকা</span> সেন্ডমানি করুন
                 </p>
-                
+
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-lg" style={{ color: "#6B7280" }}>সেন্ডমানি করুন এই নম্বারে ১:</span>
@@ -860,14 +912,44 @@ export default function RegistrationPage() {
                   </div>
                 </div>
 
-                <p className="text-sm mb-4" style={{ color: "#6B7280" }}>
-                  সেন্ডমানি করার পর নিচে ট্রানজেকশন আইডি এবং পেয়িং নম্বরের শেষ ৪ ডিজিট দিন।
-                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                      যে নম্বরে সেন্ডমানি করেছেন *
+                    </label>
+                    <select
+                      id="field-receiverNumber"
+                      value={receiverNumber}
+                      onChange={(e) => setReceiverNumber(e.target.value)}
+                      className={inputClass("field-receiverNumber")}
+                      required
+                    >
+                      <option value="">নম্বর নির্বাচন করুন</option>
+                      <option value="01775900779">01775900779</option>
+                      <option value="01727728792">01727728792</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                      কত টাকা পাঠিয়েছেন *
+                    </label>
+                    <input
+                      id="field-paidAmount"
+                      type="number"
+                      value={paidAmount}
+                      onChange={(e) => setPaidAmount(e.target.value)}
+                      placeholder="টাকার পরিমাণ"
+                      className={inputClass("field-paidAmount")}
+                      min="1"
+                      required
+                    />
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                  যে নাম্বার থেকে সেন্ডমানি করেছেন তার ট্রানজেকশন আইডি *
+                      যে নাম্বার থেকে সেন্ডমানি করেছেন তার ট্রানজেকশন আইডি *
                     </label>
                     <input
                       id="field-transactionId"
