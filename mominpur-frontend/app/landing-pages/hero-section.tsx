@@ -156,7 +156,7 @@ export default function HeroSection() {
 
         {/* মেইন লার্জ ও টাইটেল টেক্সট */}
         <h1
-          className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-6 drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)] leading-[1.2]"
+          className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-black tracking-tight mb-6 drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)] leading-[1.2]"
           style={{ fontFamily: FONT_FAMILY, color: "#0A3D2A" }}
         >
           ইত্তেহাদে আবনায়ে মুমিনপুর
@@ -183,18 +183,18 @@ export default function HeroSection() {
 
         {/* ইনফরমেশন কার্ড প্যানেল (তারিখ, স্থান ও কাউন্টডাউন) */}
         <div
-          className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 px-8 py-3.5 rounded-sm backdrop-blur-sm border transition-all duration-300 shadow-sm"
+          className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-8 gap-y-2 sm:gap-y-3 px-4 sm:px-8 py-3 sm:py-3.5 rounded-sm backdrop-blur-sm border transition-all duration-300 shadow-sm"
           style={{
             backgroundColor: "rgba(255, 255, 255, 0.75)",
             borderColor: "rgba(10,61,42,0.15)",
           }}
         >
-          <span className="flex items-center gap-2.5 text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
-            <StarMark className="w-3.5 h-4 text-emerald-800 shrink-0" />
+          <span className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
+            <StarMark className="w-3 h-3.5 sm:w-3.5 sm:h-4 text-emerald-800 shrink-0" />
             <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>১৬</span> ডিসেম্বর, <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>২০২৬</span>
           </span>
           <span className="hidden sm:inline text-emerald-800/30">|</span>
-          <span className="flex items-center gap-2.5 text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
+          <span className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-emerald-800">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
@@ -204,7 +204,7 @@ export default function HeroSection() {
           {countdown && (
             <>
               <span className="hidden sm:inline text-emerald-800/30">|</span>
-              <span className="flex items-center gap-2 text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
+              <span className="flex items-center gap-2 text-sm sm:text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-emerald-800">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>

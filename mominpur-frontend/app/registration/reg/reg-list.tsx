@@ -340,10 +340,12 @@ function EditModal({
 function DetailDrawer({
   reg,
   tx,
+  guestTxs,
   onClose,
 }: {
   reg: Registration;
   tx: Transaction | undefined;
+  guestTxs: Transaction[];
   onClose: () => void;
 }) {
   const meta = STATUS[reg.status] || STATUS.PENDING;
@@ -418,7 +420,7 @@ function DetailDrawer({
           {/* Transaction */}
           {tx && (
             <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-xl p-4 space-y-2">
-              <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">পেমেন্ট তথ্য</p>
+              <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">রেজিস্ট্রেশন পেমেন্ট</p>
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-emerald-600/70">ট্রানজেকশন ID</span>
@@ -434,13 +436,95 @@ function DetailDrawer({
                     <span className="font-medium text-emerald-700 dark:text-emerald-400">{tx.receiverNumber}</span>
                   </div>
                 )}
+                <div className="flex justify-between">
+                  <span className="text-emerald-600/70">রেজি. ফি</span>
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">{tx.totalAmount} &#2547;</span>
+                </div>
                 {tx.paidAmount != null && (
                   <div className="flex justify-between">
-                    <span className="text-emerald-600/70">প্রদত্ত টাকা</span>
+                    <span className="text-emerald-600/70">প্রদত্ত</span>
                     <span className="font-bold text-emerald-700 dark:text-emerald-400">{tx.paidAmount} &#2547;</span>
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Guest Add Transactions */}
+          {guestTxs.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider">অতিথি যোগের পেমেন্ট</p>
+              {guestTxs.map((gtx, i) => {
+                const statusMeta = gtx.status === "APPROVED"
+                  ? { label: "অনুমোদিত", cls: "text-emerald-700 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/50" }
+                  : gtx.status === "REJECTED"
+                  ? { label: "বাতিল", cls: "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/50" }
+                  : { label: "পেন্ডিং", cls: "text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/50" };
+                return (
+                  <div key={gtx.id} className="bg-amber-50 dark:bg-amber-950/20 rounded-xl p-4 space-y-2 border border-amber-100 dark:border-amber-800">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-amber-200 dark:bg-amber-800 flex items-center justify-center">
+                          <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300">{i + 1}</span>
+                        </div>
+                        <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                          {gtx.totalAmount / 510} জন অতিথি
+                        </span>
+                      </div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusMeta.cls}`}>
+                        {statusMeta.label}
+                      </span>
+                    </div>
+                    <div className="space-y-1.5 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-amber-600/70">ট্রানজেকশন ID</span>
+                        <span className="font-mono font-bold text-amber-700 dark:text-amber-400">{gtx.transactionId}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-amber-600/70">পেয়িং নম্বর</span>
+                        <span className="font-medium text-amber-700 dark:text-amber-400">****{gtx.payingNumber}</span>
+                      </div>
+                      {gtx.receiverNumber && (
+                        <div className="flex justify-between">
+                          <span className="text-amber-600/70">রিসিভার</span>
+                          <span className="font-medium text-amber-700 dark:text-amber-400">{gtx.receiverNumber}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-amber-600/70">অতিথি ফি</span>
+                        <span className="font-semibold text-amber-700 dark:text-amber-400">{gtx.totalAmount} &#2547;</span>
+                      </div>
+                      {gtx.paidAmount != null && (
+                        <div className="flex justify-between">
+                          <span className="text-amber-600/70">প্রদত্ত</span>
+                          <span className="font-bold text-amber-700 dark:text-amber-400">{gtx.paidAmount} &#2547;</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Total Summary */}
+              {tx && (
+                <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">মোট হিসাব</p>
+                  <div className="space-y-1.5 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">মোট দেয়</span>
+                      <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                        {tx.totalAmount + guestTxs.reduce((s, g) => s + (g.totalAmount || 0), 0)} &#2547;
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">মোট প্রদত্ত</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                        {(tx.paidAmount || 0) + guestTxs.reduce((s, g) => s + (g.paidAmount || 0), 0)} &#2547;
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -469,9 +553,9 @@ export default function RegList() {
   const [filterReceiver, setFilterReceiver] = useState("");
 
   const [verifyInputs, setVerifyInputs] = useState<Record<number, string>>({});
+  const [expandedTx, setExpandedTx] = useState<Record<number, boolean>>({});
   const [editing, setEditing] = useState<Registration | null>(null);
   const [viewing, setViewing] = useState<Registration | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const headers = authHeaders();
@@ -504,7 +588,10 @@ export default function RegList() {
     if (filterDistrict) f = f.filter((r) => r.permanentDistrict === filterDistrict);
     return [...new Set(f.map((r) => r.permanentThana).filter(Boolean))];
   }, [registrations, filterDivision, filterDistrict]);
-  const occupations = useMemo(() => [...new Set(registrations.map((r) => r.occupation).filter(Boolean))], [registrations]);
+  const occupations = useMemo(() => {
+    const all = registrations.map((r) => r.occupation).filter(Boolean).flatMap((o) => o.split(",").map((s) => s.trim()));
+    return [...new Set(all)];
+  }, [registrations]);
   const departmentsList = useMemo(() => {
     const all = registrations.map((r) => r.departments).filter(Boolean).flatMap((d) => d.split(",").map((s) => s.trim()));
     return [...new Set(all)];
@@ -518,15 +605,16 @@ export default function RegList() {
         const q = search.toLowerCase();
         if (![r.name, r.fatherName, r.phone, r.whatsapp].some((v) => v?.toLowerCase().includes(q))) return false;
       }
-      if (filterStatus && r.status !== filterStatus) return false;
+      if (filterStatus === "GUEST_PENDING") {
+        if (!transactions.some((t) => t.registrationId === r.id && t.type === "GUEST_ADD" && t.status === "PENDING")) return false;
+      } else if (filterStatus && r.status !== filterStatus) return false;
       if (filterDivision && r.permanentDivision !== filterDivision) return false;
       if (filterDistrict && r.permanentDistrict !== filterDistrict) return false;
       if (filterThana && r.permanentThana !== filterThana) return false;
       if (filterOccupation && !r.occupation?.includes(filterOccupation)) return false;
       if (filterDepartment && !r.departments?.includes(filterDepartment)) return false;
       if (filterReceiver) {
-        const tx = transactions.find((t) => t.registrationId === r.id);
-        if (!tx || tx.receiverNumber !== filterReceiver) return false;
+        if (!transactions.some((t) => t.registrationId === r.id && t.receiverNumber === filterReceiver)) return false;
       }
       return true;
     });
@@ -596,12 +684,15 @@ export default function RegList() {
   };
 
   const selectClass =
-    "text-sm px-3 py-2.5 border border-zinc-200 rounded-lg bg-white dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors";
+    "text-sm px-2.5 py-2 border border-zinc-200 rounded-lg bg-white dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors";
 
   // Counts
   const pendingCount = registrations.filter((r) => r.status === "PENDING").length;
   const approvedCount = registrations.filter((r) => r.status === "APPROVED").length;
   const rejectedCount = registrations.filter((r) => r.status === "REJECTED").length;
+  const guestPendingCount = registrations.filter((r) =>
+    transactions.some((t) => t.registrationId === r.id && t.type === "GUEST_ADD" && t.status === "PENDING")
+  ).length;
 
   if (loading) {
     return (
@@ -664,82 +755,86 @@ export default function RegList() {
             <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
             বাতিল {rejectedCount}
           </button>
-        </div>
-      </div>
-
-      {/* Search + Filter Toggle */}
-      <div className="flex gap-3">
-        <div className="relative flex-1">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="নাম, ফোন, পিতার নাম দিয়ে খুঁজুন..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full text-sm pl-10 pr-4 py-2.5 border border-zinc-200 rounded-xl bg-white dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
-          />
-        </div>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl border transition-colors ${
-            showFilters || hasFilters
-              ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-400"
-              : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
-          }`}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-          </svg>
-          ফিল্টার
-          {hasFilters && (
-            <span className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center">
-              {[filterDivision, filterDistrict, filterThana, filterOccupation, filterDepartment, filterStatus, filterReceiver].filter(Boolean).length}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* Filters Panel */}
-      {showFilters && (
-        <div className="bg-white rounded-xl border border-zinc-100 p-4 dark:bg-zinc-900 dark:border-zinc-800 shadow-sm">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <select value={filterDivision} onChange={(e) => { setFilterDivision(e.target.value); setFilterDistrict(""); setFilterThana(""); }} className={selectClass}>
-              <option value="">সব বিভাগ</option>
-              {divisions.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
-            <select value={filterDistrict} onChange={(e) => { setFilterDistrict(e.target.value); setFilterThana(""); }} className={selectClass}>
-              <option value="">সব জেলা</option>
-              {districts.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
-            <select value={filterThana} onChange={(e) => setFilterThana(e.target.value)} className={selectClass}>
-              <option value="">সব থানা</option>
-              {thanas.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <select value={filterOccupation} onChange={(e) => setFilterOccupation(e.target.value)} className={selectClass}>
-              <option value="">সব পেশা</option>
-              {occupations.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
-            <select value={filterDepartment} onChange={(e) => setFilterDepartment(e.target.value)} className={selectClass}>
-              <option value="">সব শ্রেণী</option>
-              {departmentsList.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
-            <select value={filterReceiver} onChange={(e) => setFilterReceiver(e.target.value)} className={selectClass}>
-              <option value="">সব একাউন্ট</option>
-              {receiverNumbers.map((n) => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </div>
-          {hasFilters && (
-            <button onClick={clearFilters} className="mt-3 text-xs font-medium text-red-500 hover:text-red-700 flex items-center gap-1">
+          {guestPendingCount > 0 && (
+            <button
+              onClick={() => {
+                const newVal = filterStatus === "GUEST_PENDING" ? "" : "GUEST_PENDING";
+                setFilterStatus(newVal);
+                // Auto-expand all transactions when filtering guest pending
+                if (newVal === "GUEST_PENDING") {
+                  const expanded: Record<number, boolean> = {};
+                  registrations.forEach((r) => {
+                    if (transactions.some((t) => t.registrationId === r.id && t.type === "GUEST_ADD" && t.status === "PENDING")) {
+                      expanded[r.id] = true;
+                    }
+                  });
+                  setExpandedTx(expanded);
+                }
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${
+                filterStatus === "GUEST_PENDING"
+                  ? "bg-orange-100 border-orange-300 text-orange-700"
+                  : "bg-orange-50 border-orange-200 text-orange-600 hover:border-orange-300 animate-pulse dark:bg-orange-950/30 dark:border-orange-800 dark:text-orange-400"
+              }`}
+            >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
               </svg>
-              সব ফিল্টার মুছুন
+              অতিথি আবেদন {guestPendingCount}
             </button>
           )}
         </div>
-      )}
+      </div>
+
+      {/* Search + Filters */}
+      <div className="bg-white rounded-xl border border-zinc-100 p-3 dark:bg-zinc-900 dark:border-zinc-800 shadow-sm">
+        <div className="flex flex-wrap gap-2 items-center">
+          <div className="relative">
+            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="নাম / ফোন খুঁজুন"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="text-sm pl-8 pr-3 py-2 w-44 border border-zinc-200 rounded-lg bg-zinc-50/50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+            />
+          </div>
+          <select value={filterDivision} onChange={(e) => { setFilterDivision(e.target.value); setFilterDistrict(""); setFilterThana(""); }} className={selectClass}>
+            <option value="">সব বিভাগ</option>
+            {divisions.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <select value={filterDistrict} onChange={(e) => { setFilterDistrict(e.target.value); setFilterThana(""); }} className={selectClass}>
+            <option value="">সব জেলা</option>
+            {districts.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <select value={filterThana} onChange={(e) => setFilterThana(e.target.value)} className={selectClass}>
+            <option value="">সব থানা</option>
+            {thanas.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <select value={filterOccupation} onChange={(e) => setFilterOccupation(e.target.value)} className={selectClass}>
+            <option value="">সব পেশা</option>
+            {occupations.map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
+          <select value={filterDepartment} onChange={(e) => setFilterDepartment(e.target.value)} className={selectClass}>
+            <option value="">সব শ্রেণী</option>
+            {departmentsList.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <select value={filterReceiver} onChange={(e) => setFilterReceiver(e.target.value)} className={selectClass}>
+            <option value="">সব একাউন্ট</option>
+            {receiverNumbers.map((n) => <option key={n} value={n}>{n}</option>)}
+          </select>
+          {hasFilters && (
+            <button onClick={clearFilters} className="inline-flex items-center justify-center gap-1 text-xs font-medium px-2 py-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg border border-red-200 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              মুছুন
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Result count */}
       {hasFilters && (
@@ -757,6 +852,7 @@ export default function RegList() {
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">#</th>
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">নাম</th>
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">ফোন</th>
+                <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">টাকা গ্রহণকারী</th>
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">পড়াশোনা</th>
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400 min-w-[200px]">ট্রানজেকশন যাচাই</th>
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400 text-right">রেজি. ফি</th>
@@ -768,7 +864,7 @@ export default function RegList() {
             <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-5 py-16 text-center">
+                  <td colSpan={10} className="px-5 py-16 text-center">
                     <div className="flex flex-col items-center gap-2 text-zinc-400">
                       <svg className="w-10 h-10 text-zinc-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -797,70 +893,137 @@ export default function RegList() {
                       <td className="px-5 py-3.5">
                         <p className="text-zinc-700 dark:text-zinc-300 font-mono text-xs">{r.phone}</p>
                       </td>
+                      <td className="px-5 py-3.5">
+                        <p className="text-zinc-500 dark:text-zinc-400 font-mono text-xs">{tx?.receiverNumber || "-"}</p>
+                      </td>
                       <td className="px-5 py-3.5 text-zinc-500 dark:text-zinc-400">{r.studyFrom} - {r.studyTo}</td>
                       <td className="px-5 py-3.5">
-                        {tx ? (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-lg">
-                                {tx.transactionId}
-                              </span>
-                              <span className="text-[10px] font-mono text-zinc-400">****{tx.payingNumber}</span>
-                            </div>
-                            {r.status === "PENDING" && (
-                              <input
-                                type="text"
-                                placeholder="ID যাচাই করুন"
-                                value={verifyInputs[r.id] || ""}
-                                onChange={(e) => setVerifyInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
-                                className={`text-xs font-mono px-2.5 py-1.5 border rounded-lg w-full focus:outline-none focus:ring-2 transition-colors ${
-                                  verified
-                                    ? "border-emerald-300 bg-emerald-50 text-emerald-700 focus:ring-emerald-500/20 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-400"
-                                    : (verifyInputs[r.id] || "").length > 0
-                                    ? "border-red-300 bg-red-50 text-red-600 focus:ring-red-500/20 dark:bg-red-900/30 dark:border-red-700 dark:text-red-400"
-                                    : "border-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 focus:ring-emerald-500/20"
-                                }`}
-                              />
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-xs text-zinc-300 dark:text-zinc-600">পেমেন্ট নেই</span>
-                        )}
-                        {/* GUEST_ADD Transactions */}
-                        {getGuestAddTransactions(r.id).map((gtx) => (
-                          <div key={gtx.id} className="mt-2 p-2 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
-                            <div className="flex items-center gap-1.5 mb-1">
-                              <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 px-1.5 py-0.5 rounded">অতিথি যোগ</span>
-                              <span className="text-[10px] text-amber-600">{gtx.totalAmount / 510} জন • {gtx.totalAmount}৳</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400">{gtx.transactionId}</span>
-                              <span className="text-[10px] font-mono text-zinc-400">****{gtx.payingNumber}</span>
-                            </div>
-                            {gtx.status === "PENDING" && (
-                              <div className="flex items-center gap-1.5 mt-1.5">
-                                <button
-                                  onClick={() => handleTransactionStatus(gtx.id, "APPROVED", r.id)}
-                                  className="text-[10px] font-semibold px-2 py-1 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
-                                >
-                                  অনুমোদন
-                                </button>
-                                <button
-                                  onClick={() => handleTransactionStatus(gtx.id, "REJECTED", r.id)}
-                                  className="text-[10px] font-semibold px-2 py-1 rounded-md text-red-600 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-950/50 transition-colors"
-                                >
-                                  বাতিল
-                                </button>
+                        {(() => {
+                          const guestTxs = getGuestAddTransactions(r.id);
+                          const allTxs = getAllTransactions(r.id);
+                          const pendingGuestCount = guestTxs.filter((g) => g.status === "PENDING").length;
+                          const isExpanded = expandedTx[r.id] || false;
+
+                          if (!tx && guestTxs.length === 0) {
+                            return <span className="text-xs text-zinc-300 dark:text-zinc-600">পেমেন্ট নেই</span>;
+                          }
+
+                          return (
+                            <div className="space-y-2">
+                              {/* Summary Row - always visible */}
+                              <div className="flex items-center gap-2">
+                                {tx && (
+                                  <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-lg">
+                                    {tx.transactionId}
+                                  </span>
+                                )}
+                                {pendingGuestCount > 0 && (
+                                  <span className="text-[10px] font-bold text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/50 px-1.5 py-0.5 rounded-full animate-pulse">
+                                    {pendingGuestCount} অতিথি আবেদন
+                                  </span>
+                                )}
+                                {guestTxs.length > 0 && guestTxs.every((g) => g.status === "APPROVED") && (
+                                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                                    ✓ {guestTxs.length} অতিথি
+                                  </span>
+                                )}
                               </div>
-                            )}
-                            {gtx.status === "APPROVED" && (
-                              <span className="inline-block mt-1 text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">✓ অনুমোদিত</span>
-                            )}
-                            {gtx.status === "REJECTED" && (
-                              <span className="inline-block mt-1 text-[10px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">✕ বাতিল</span>
-                            )}
-                          </div>
-                        ))}
+
+                              {/* Verify input for main registration */}
+                              {tx && r.status === "PENDING" && (
+                                <input
+                                  type="text"
+                                  placeholder="ID যাচাই করুন"
+                                  value={verifyInputs[r.id] || ""}
+                                  onChange={(e) => setVerifyInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
+                                  className={`text-xs font-mono px-2.5 py-1.5 border rounded-lg w-full focus:outline-none focus:ring-2 transition-colors ${
+                                    verified
+                                      ? "border-emerald-300 bg-emerald-50 text-emerald-700 focus:ring-emerald-500/20 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-400"
+                                      : (verifyInputs[r.id] || "").length > 0
+                                      ? "border-red-300 bg-red-50 text-red-600 focus:ring-red-500/20 dark:bg-red-900/30 dark:border-red-700 dark:text-red-400"
+                                      : "border-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 focus:ring-emerald-500/20"
+                                  }`}
+                                />
+                              )}
+
+                              {/* Dropdown Toggle - only if multiple transactions */}
+                              {allTxs.length > 1 && (
+                                <button
+                                  onClick={() => setExpandedTx((prev) => ({ ...prev, [r.id]: !prev[r.id] }))}
+                                  className="flex items-center gap-1 text-[11px] font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
+                                >
+                                  <svg className={`w-3.5 h-3.5 transition-transform ${isExpanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                  {isExpanded ? "সংকুচিত করুন" : `সব ট্রানজেকশন (${allTxs.length})`}
+                                </button>
+                              )}
+
+                              {/* Expanded Dropdown Content */}
+                              {isExpanded && (
+                                <div className="space-y-2 pt-1 border-t border-zinc-100 dark:border-zinc-800">
+                                  {/* Main Registration Tx */}
+                                  {tx && (
+                                    <div className="p-2 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-800">
+                                      <div className="flex items-center gap-1.5 mb-1">
+                                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/50 px-1.5 py-0.5 rounded">রেজিস্ট্রেশন</span>
+                                        <span className="text-[10px] text-emerald-600">{tx.totalAmount}৳</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-[11px] font-mono font-semibold text-emerald-700 dark:text-emerald-400">{tx.transactionId}</span>
+                                        <span className="text-[10px] font-mono text-zinc-400">****{tx.payingNumber}</span>
+                                      </div>
+                                      {tx.receiverNumber && (
+                                        <div className="text-[10px] text-zinc-400 mt-0.5">রিসিভার: {tx.receiverNumber}</div>
+                                      )}
+                                      <div className="text-[10px] text-zinc-400 mt-0.5">প্রদত্ত: {tx.paidAmount}৳</div>
+                                    </div>
+                                  )}
+
+                                  {/* Guest Add Txs */}
+                                  {guestTxs.map((gtx, gi) => (
+                                    <div key={gtx.id} className="p-2 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-800">
+                                      <div className="flex items-center justify-between mb-1">
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[10px] font-bold text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/50 px-1.5 py-0.5 rounded">অতিথি #{gi + 1}</span>
+                                          <span className="text-[10px] text-amber-600">{gtx.totalAmount / 510} জন • {gtx.totalAmount}৳</span>
+                                        </div>
+                                        {gtx.status === "APPROVED" && <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full">✓</span>}
+                                        {gtx.status === "REJECTED" && <span className="text-[9px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-full">✕</span>}
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-[11px] font-mono font-semibold text-amber-700 dark:text-amber-400">{gtx.transactionId}</span>
+                                        <span className="text-[10px] font-mono text-amber-500">****{gtx.payingNumber}</span>
+                                      </div>
+                                      {gtx.receiverNumber && (
+                                        <div className="text-[10px] text-zinc-400 mt-0.5">রিসিভার: {gtx.receiverNumber}</div>
+                                      )}
+                                      <div className="text-[10px] text-zinc-400 mt-0.5">প্রদত্ত: {gtx.paidAmount}৳</div>
+                                      {gtx.status === "PENDING" && (
+                                        <div className="flex items-center gap-1.5 mt-2">
+                                          <button
+                                            onClick={() => handleTransactionStatus(gtx.id, "APPROVED", r.id)}
+                                            className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-sm"
+                                          >
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                            অনুমোদন
+                                          </button>
+                                          <button
+                                            onClick={() => handleTransactionStatus(gtx.id, "REJECTED", r.id)}
+                                            className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-md text-red-600 bg-white border border-red-200 hover:bg-red-50 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800 transition-colors"
+                                          >
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                            বাতিল
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         {getAllTransactions(r.id).length > 0 ? (
@@ -964,7 +1127,7 @@ export default function RegList() {
       )}
 
       {viewing && (
-        <DetailDrawer reg={viewing} tx={getTransaction(viewing.id)} onClose={() => setViewing(null)} />
+        <DetailDrawer reg={viewing} tx={getTransaction(viewing.id)} guestTxs={getGuestAddTransactions(viewing.id)} onClose={() => setViewing(null)} />
       )}
     </div>
   );

@@ -50,7 +50,8 @@ export default function EventCard({ name, phone, guestCount }: EventCardProps) {
 
   const styles = {
     card: {
-      width: "500px",
+      width: "100%",
+      maxWidth: "500px",
       backgroundColor: "#FFFFFF",
       borderRadius: "16px",
       overflow: "hidden",
@@ -61,7 +62,7 @@ export default function EventCard({ name, phone, guestCount }: EventCardProps) {
     },
     header: {
       background: "linear-gradient(135deg, #0A3D2A 0%, #064E3B 100%)",
-      padding: "30px 24px",
+      padding: "20px 16px",
       textAlign: "center" as const,
       position: "relative" as const,
     },
@@ -78,7 +79,7 @@ export default function EventCard({ name, phone, guestCount }: EventCardProps) {
       fontWeight: 600,
     },
     organizationName: {
-      fontSize: "24px",
+      fontSize: "20px",
       fontWeight: 800,
       color: "#FFFFFF",
       lineHeight: 1.2,
@@ -91,7 +92,7 @@ export default function EventCard({ name, phone, guestCount }: EventCardProps) {
       fontWeight: 500,
     },
     body: {
-      padding: "30px",
+      padding: "20px",
     },
     guestSection: {
       textAlign: "center" as const,
@@ -151,8 +152,8 @@ export default function EventCard({ name, phone, guestCount }: EventCardProps) {
     qrSection: {
       display: "flex",
       alignItems: "center",
-      gap: "20px",
-      padding: "20px",
+      gap: "14px",
+      padding: "16px",
       backgroundColor: "#F0FDF4",
       borderRadius: "12px",
       border: "1px solid #DCFCE7",
@@ -193,7 +194,7 @@ export default function EventCard({ name, phone, guestCount }: EventCardProps) {
         <button
           onClick={handleDownload}
           disabled={downloading}
-          className="w-full max-w-[500px] flex items-center justify-center gap-2.5 px-8 py-3.5 text-white font-semibold rounded-xl hover:opacity-90 transition all duration-200 shadow-md disabled:opacity-60 mb-8 active:scale-[0.98]"
+          className="w-full max-w-[500px] flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 text-sm sm:text-base text-white font-semibold rounded-xl hover:opacity-90 transition all duration-200 shadow-md disabled:opacity-60 mb-6 sm:mb-8 active:scale-[0.98]"
           style={{ backgroundColor: "#0A3D2A" }}
         >
           {downloading ? (

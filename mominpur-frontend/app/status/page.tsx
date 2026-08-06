@@ -87,7 +87,7 @@ export default function StatusPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#FFFFFF" }}>
-      <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-16">
+      <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-8 sm:py-16">
         <div className="text-center mb-10">
           <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: "#ECFDF5" }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0A3D2A" strokeWidth="2">
@@ -103,7 +103,7 @@ export default function StatusPage() {
         </div>
 
         <form onSubmit={handleCheck} className="mb-8">
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="tel"
               value={phone}
@@ -111,7 +111,7 @@ export default function StatusPage() {
               placeholder="01XXXXXXXXX"
               maxLength={11}
               pattern="\d{11}"
-              className="flex-1 text-lg px-4 py-3 border rounded-sm bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="flex-1 text-base sm:text-lg px-4 py-3 border rounded-sm bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
               style={{ borderColor: "rgba(10,61,42,0.2)" }}
               required
             />
@@ -133,8 +133,8 @@ export default function StatusPage() {
         )}
 
         {result && (
-          <div className="p-6 rounded-sm border" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
-            <div className="flex items-center justify-between mb-4 pb-4" style={{ borderBottom: "1px solid rgba(10,61,42,0.1)" }}>
+          <div className="p-4 sm:p-6 rounded-sm border" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 pb-4" style={{ borderBottom: "1px solid rgba(10,61,42,0.1)" }}>
               <div>
                 <p className="text-sm" style={{ color: "#6B7280" }}>রেজিস্ট্রেশন ফলাফল</p>
                 <p className="text-lg font-bold" style={{ color: "#064E3B" }}>{result.name}</p>
@@ -179,7 +179,7 @@ export default function StatusPage() {
                 {/* Guest Add Button */}
                 {result.guestCount < MAX_GUESTS && !showGuestForm && (
                   <div className="mt-4 p-4 rounded-sm" style={{ backgroundColor: "#FFFBEB", border: "1px solid #FEF3C7" }}>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold" style={{ color: "#92400E" }}>
                           আপনার সাথে অতিথি নিয়ে আসতে চান?

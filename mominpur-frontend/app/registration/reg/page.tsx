@@ -309,13 +309,13 @@ export default function RegistrationPage() {
   };
 
   const inputClass = (fieldId?: string) =>
-    "w-full text-lg px-3 py-2 border rounded-sm bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500" +
+    "w-full text-base px-3 py-2 border rounded-sm bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500" +
     (fieldId && errorField === fieldId ? " border-red-500 bg-red-50 ring-1 ring-red-500" : "");
 
   return (
     <div className="flex flex-col min-h-screen font-sans antialiased" style={{ backgroundColor: "#FFFFFF", color: "#064E3B" }}>
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-10">
-        <div className="p-6 md:p-10" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
+        <div className="p-4 sm:p-6 md:p-10" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
           <div className="mb-8">
             <h2 className="text-xl font-bold" style={{ color: "#064E3B" }}>
               মিলনমেলা রেজিস্ট্রেশন ফর্ম
@@ -345,7 +345,7 @@ export default function RegistrationPage() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     নাম *
                   </label>
                   <input
@@ -359,7 +359,7 @@ export default function RegistrationPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     পিতার নাম *
                   </label>
                   <input
@@ -375,7 +375,7 @@ export default function RegistrationPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     মোবাইল নম্বর *
                   </label>
                   <input
@@ -392,7 +392,7 @@ export default function RegistrationPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     হোয়াটসঅ্যাপ নম্বর *
                   </label>
                   <input
@@ -418,7 +418,7 @@ export default function RegistrationPage() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     অধ্যয়ন শুরু *
                   </label>
                   <select
@@ -437,7 +437,7 @@ export default function RegistrationPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     অধ্যয়ন শেষ *
                   </label>
                   <select
@@ -457,14 +457,14 @@ export default function RegistrationPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     বিভাগ/জামাত *
                   </label>
                   <div ref={deptRef} className="relative">
                     <button
                       type="button"
                       onClick={() => setDeptOpen((o) => !o)}
-                      className={`w-full text-lg px-3 py-2 border rounded-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-emerald-500 ${deptOpen
+                      className={`w-full text-base px-3 py-2 border rounded-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-emerald-500 ${deptOpen
                           ? "border-emerald-500 ring-1 ring-emerald-500"
                           : ""
                         }`}
@@ -495,7 +495,7 @@ export default function RegistrationPage() {
                         {["নাজেরা", "হিফজ", "কিতাব"].map((dept) => (
                           <label
                             key={dept}
-                            className="flex items-center gap-2 px-3 py-2 text-lg cursor-pointer transition"
+                            className="flex items-center gap-2 px-3 py-2 text-base cursor-pointer transition"
                           >
                             <input
                               type="checkbox"
@@ -526,7 +526,7 @@ export default function RegistrationPage() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     বিভাগ *
                   </label>
                   <select
@@ -548,7 +548,7 @@ export default function RegistrationPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     জেলা *
                   </label>
                   <select
@@ -570,7 +570,7 @@ export default function RegistrationPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     থানা *
                   </label>
                   <select
@@ -590,7 +590,7 @@ export default function RegistrationPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                   গ্রাম/ঠিকানার বিস্তারিত *
                 </label>
                 <textarea
@@ -645,7 +645,7 @@ export default function RegistrationPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     বিভাগ *
                   </label>
                   <select
@@ -668,7 +668,7 @@ export default function RegistrationPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     জেলা *
                   </label>
                   <select
@@ -690,7 +690,7 @@ export default function RegistrationPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     থানা *
                   </label>
                   <select
@@ -710,7 +710,7 @@ export default function RegistrationPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                   বর্তমান ঠিকানার বিস্তারিত *
                 </label>
                 <textarea
@@ -733,14 +733,14 @@ export default function RegistrationPage() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     পেশা *
                   </label>
                   <div ref={occRef} className="relative">
                     <button
                       type="button"
                       onClick={() => setOccOpen((o) => !o)}
-                      className={`w-full text-lg px-3 py-2 border rounded-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-emerald-500 ${occOpen
+                      className={`w-full text-base px-3 py-2 border rounded-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-emerald-500 ${occOpen
                           ? "border-emerald-500 ring-1 ring-emerald-500"
                           : ""
                         }`}
@@ -781,7 +781,7 @@ export default function RegistrationPage() {
                         ].map((job) => (
                           <label
                             key={job}
-                            className="flex items-center gap-2 px-3 py-2 text-lg cursor-pointer transition"
+                            className="flex items-center gap-2 px-3 py-2 text-base cursor-pointer transition"
                           >
                             <input
                               type="checkbox"
@@ -803,7 +803,7 @@ export default function RegistrationPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                     পেশার বিস্তারিত বিবরণ
                   </label>
                   <input
@@ -833,7 +833,7 @@ export default function RegistrationPage() {
                     সর্বোচ্চ {bn(MAX_GUESTS)} জন। প্রতি অতিথির ফি {bn(GUEST_FEE)} টাকা।
                   </p>
 
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                     {Array.from({ length: MAX_GUESTS + 1 }, (_, count) => {
                       const selected = guestCount === count;
                       return (
@@ -902,19 +902,19 @@ export default function RegistrationPage() {
                 </p>
 
                 <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg" style={{ color: "#6B7280" }}>সেন্ডমানি করুন এই নম্বারে ১:</span>
-                    <span className="text-xl font-bold" style={{ color: "#0A3D2A" }}>01775900779</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm sm:text-base" style={{ color: "#6B7280" }}>নম্বর ১:</span>
+                    <span className="text-base sm:text-lg font-bold" style={{ color: "#0A3D2A" }}>01775900779</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg" style={{ color: "#6B7280" }}>সেন্ডমানি করুন এই নম্বারে ২:</span>
-                    <span className="text-xl font-bold" style={{ color: "#0A3D2A" }}>01727728792</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm sm:text-base" style={{ color: "#6B7280" }}>নম্বর ২:</span>
+                    <span className="text-base sm:text-lg font-bold" style={{ color: "#0A3D2A" }}>01727728792</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                    <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                       যে নম্বরে সেন্ডমানি করেছেন *
                     </label>
                     <select
@@ -930,7 +930,7 @@ export default function RegistrationPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                    <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                       কত টাকা পাঠিয়েছেন *
                     </label>
                     <input
@@ -948,7 +948,7 @@ export default function RegistrationPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                    <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                       যে নাম্বার থেকে সেন্ডমানি করেছেন তার ট্রানজেকশন আইডি *
                     </label>
                     <input
@@ -962,7 +962,7 @@ export default function RegistrationPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-lg font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                    <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
                       যে  নম্বরের থেকে সেন্ডমানি করেছেন তার শেষ ৪ ডিজিট *
                     </label>
                     <input
@@ -985,10 +985,10 @@ export default function RegistrationPage() {
               </div>
             </div>
 
-            <div className="pt-4 flex justify-end gap-3">
+            <div className="pt-4 flex flex-col-reverse sm:flex-row justify-end gap-3">
               <Link
                 href="/"
-                className="text-lg font-semibold py-2 px-5 rounded-sm transition"
+                className="text-base font-semibold py-2.5 px-5 rounded-sm transition text-center"
                 style={{ color: "#064E3B", backgroundColor: "#F3F4F6" }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#E5E7EB")}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#F3F4F6")}
@@ -998,7 +998,7 @@ export default function RegistrationPage() {
               <button
                 type="submit"
                 disabled={loading || selectedDepartments.length === 0 || selectedOccupations.length === 0 || !transactionId.trim() || lastFourDigits.length !== 4}
-                className="text-white text-lg font-semibold py-2 px-6 rounded-sm hover:opacity-90 transition disabled:opacity-50"
+                className="text-white text-base font-semibold py-2.5 px-6 rounded-sm hover:opacity-90 transition disabled:opacity-50"
                 style={{ backgroundColor: "#0A3D2A" }}
               >
                 {loading ? "সাবমিট হচ্ছে..." : "সাবমিট করুন"}
@@ -1008,7 +1008,7 @@ export default function RegistrationPage() {
         </div>
       </main>
 
-      <footer className="py-6 text-center text-lg" style={{ borderTop: "1px solid rgba(10,61,42,0.15)", backgroundColor: "#FFFFFF", color: "#6B7280" }}>
+      <footer className="py-6 text-center text-sm sm:text-base" style={{ borderTop: "1px solid rgba(10,61,42,0.15)", backgroundColor: "#FFFFFF", color: "#6B7280" }}>
         <p>© ২০২৬ ইত্তেহাদে আবনায়ে মুমিনপুর। সর্বস্বত্ব সংরক্ষিত।</p>
       </footer>
     </div>
