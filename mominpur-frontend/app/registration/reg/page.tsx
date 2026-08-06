@@ -42,6 +42,9 @@ export default function RegistrationPage() {
   const [transactionId, setTransactionId] = useState("");
   const [lastFourDigits, setLastFourDigits] = useState("");
 
+  // অতিথি — ০, ১ বা ২ জন। টাকার চূড়ান্ত হিসাব সার্ভারেই হয়, এখানে শুধু দেখানো।
+  const [guestCount, setGuestCount] = useState(0);
+
   const [deptOpen, setDeptOpen] = useState(false);
   const [occOpen, setOccOpen] = useState(false);
   const deptRef = useRef<HTMLDivElement>(null);
@@ -58,6 +61,18 @@ export default function RegistrationPage() {
     currentAddressDetails: "",
     occupationDetails: "",
   });
+
+  // ব্যাকএন্ডের FeeCalculator.java-র সাথে মিল রাখতে হবে।
+  const REGISTRATION_FEE = 1020;
+  const GUEST_FEE = 510;
+  const MAX_GUESTS = 2;
+
+  const guestTotal = guestCount * GUEST_FEE;
+  const grandTotal = REGISTRATION_FEE + guestTotal;
+
+  // "2,040" → "২,০৪০"। লোকেল স্পষ্ট করে দেওয়া, নইলে সার্ভার-ক্লায়েন্টে আলাদা হতে পারে।
+  const bn = (n: number) =>
+    n.toLocaleString("en-US").replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]);
 
   const startYear = 1963;
   const currentYear = 2026;
@@ -151,6 +166,7 @@ export default function RegistrationPage() {
 
     const payload = {
       ...form,
+      guestCount,
       departments: selectedDepartments.join(", "),
       occupation: selectedOccupations.join(", "),
       permanentDivision:
@@ -194,6 +210,7 @@ export default function RegistrationPage() {
         setSelectedOccupations([]);
         setTransactionId("");
         setLastFourDigits("");
+        setGuestCount(0);
         setForm({
           name: "",
           fatherName: "",
@@ -715,13 +732,81 @@ export default function RegistrationPage() {
                 সেন্ডমানি করুন
               </h3>
               <div className="p-4 rounded-sm" style={{ backgroundColor: "#F0FDF4", border: "1px solid rgba(10,61,42,0.15)" }}>
-                <div className="flex items-center justify-between mb-4 p-3 rounded-sm" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
-                  <span className="text-lg font-semibold" style={{ color: "#064E3B" }}>রেজিস্ট্রেশন ফি:</span>
-                  <span className="text-2xl font-bold" style={{ color: "#0A3D2A" }}>১,০২০ টাকা</span>
+                {/* অতিথি নির্বাচন */}
+                <div className="mb-4 p-3 rounded-sm" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
+                  <p className="text-lg font-semibold mb-1" style={{ color: "#064E3B" }}>
+                    আপনার সাথে কতজন অতিথি আসবেন?
+                  </p>
+                  <p className="text-sm mb-3" style={{ color: "#6B7280" }}>
+                    সর্বোচ্চ {bn(MAX_GUESTS)} জন। প্রতি অতিথির ফি {bn(GUEST_FEE)} টাকা।
+                  </p>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    {Array.from({ length: MAX_GUESTS + 1 }, (_, count) => {
+                      const selected = guestCount === count;
+                      return (
+                        <button
+                          key={count}
+                          type="button"
+                          onClick={() => setGuestCount(count)}
+                          aria-pressed={selected}
+                          className="py-2 px-2 rounded-sm text-center transition"
+                          style={{
+                            backgroundColor: selected ? "#0A3D2A" : "#FFFFFF",
+                            color: selected ? "#FFFFFF" : "#064E3B",
+                            border: selected
+                              ? "2px solid #0A3D2A"
+                              : "1px solid rgba(10,61,42,0.25)",
+                          }}
+                        >
+                          <span className="block text-lg font-semibold">
+                            {count === 0 ? "অতিথি নেই" : `${bn(count)} জন`}
+                          </span>
+                          <span
+                            className="block text-sm"
+                            style={{ color: selected ? "#C9BFA6" : "#6B7280" }}
+                          >
+                            {count === 0 ? "০ টাকা" : `${bn(count * GUEST_FEE)} টাকা`}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                
+
+                {/* টাকার হিসাব */}
+                <div className="mb-4 p-3 rounded-sm" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-lg" style={{ color: "#6B7280" }}>রেজিস্ট্রেশন ফি</span>
+                    <span className="text-lg font-semibold" style={{ color: "#064E3B" }}>
+                      {bn(REGISTRATION_FEE)} টাকা
+                    </span>
+                  </div>
+
+                  {guestCount > 0 && (
+                    <div className="flex items-center justify-between py-1">
+                      <span className="text-lg" style={{ color: "#6B7280" }}>
+                        অতিথি ({bn(guestCount)} × {bn(GUEST_FEE)})
+                      </span>
+                      <span className="text-lg font-semibold" style={{ color: "#064E3B" }}>
+                        {bn(guestTotal)} টাকা
+                      </span>
+                    </div>
+                  )}
+
+                  <div
+                    className="flex items-center justify-between mt-2 pt-3"
+                    style={{ borderTop: "1px solid rgba(10,61,42,0.15)" }}
+                  >
+                    <span className="text-lg font-semibold" style={{ color: "#064E3B" }}>সর্বমোট</span>
+                    <span className="text-2xl font-bold" style={{ color: "#0A3D2A" }}>
+                      {bn(grandTotal)} টাকা
+                    </span>
+                  </div>
+                </div>
+
                 <p className="text-lg font-semibold mb-3" style={{ color: "#064E3B" }}>
-                  বিকাশ সেন্ডমানি করুন
+                  বিকাশে সর্বমোট <span style={{ color: "#0A3D2A" }}>{bn(grandTotal)} টাকা</span> সেন্ডমানি করুন
                 </p>
                 
                 <div className="space-y-2 mb-4">

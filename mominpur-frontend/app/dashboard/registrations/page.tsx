@@ -11,13 +11,17 @@ function isAuthenticated(): boolean {
 
 export default function RegistrationsPage() {
   const router = useRouter();
-  const [authorized] = useState<boolean>(() => isAuthenticated());
+  // সার্ভারে localStorage নেই, তাই প্রথম রেন্ডারে সবসময় false — ক্লায়েন্টের
+  // প্রথম রেন্ডারও false, ফলে হাইড্রেশন মিসম্যাচ হয় না। যাচাই মাউন্টের পরে।
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    if (!authorized) {
+    if (isAuthenticated()) {
+      setAuthorized(true);
+    } else {
       router.push("/login");
     }
-  }, [authorized, router]);
+  }, [router]);
 
   if (!authorized) {
     return (

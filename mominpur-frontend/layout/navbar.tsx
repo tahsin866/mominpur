@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
+import { InlineScript } from "./inline-script";
+
+const STORAGE_KEY = "user";
 
 interface NavbarProps {
   onToggleSidebar: () => void;
@@ -15,7 +18,7 @@ interface UserData {
 
 function getUser(): UserData | null {
   if (typeof window === "undefined") return null;
-  const stored = localStorage.getItem("user");
+  const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return null;
   try {
     return JSON.parse(stored);
@@ -28,9 +31,10 @@ export default function Navbar({ onToggleSidebar }: NavbarProps) {
   const router = useRouter();
   const [user] = useState<UserData | null>(() => getUser());
   const [showDropdown, setShowDropdown] = useState(false);
+  const id = useId();
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem(STORAGE_KEY);
     router.push("/login");
   };
 
@@ -55,10 +59,16 @@ export default function Navbar({ onToggleSidebar }: NavbarProps) {
           onClick={() => setShowDropdown(!showDropdown)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-sm text-sm text-zinc-600 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
         >
-          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm dark:bg-emerald-900/50 dark:text-emerald-400">
+          <div
+            id={`${id}-initial`}
+            suppressHydrationWarning
+            className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm dark:bg-emerald-900/50 dark:text-emerald-400"
+          >
             {user?.name?.charAt(0) || "A"}
           </div>
-          <span className="hidden sm:block font-medium">{user?.name || "Admin"}</span>
+          <span id={`${id}-name`} suppressHydrationWarning className="hidden sm:block font-medium">
+            {user?.name || "Admin"}
+          </span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -94,6 +104,18 @@ export default function Navbar({ onToggleSidebar }: NavbarProps) {
           </>
         )}
       </div>
+
+      {/* হার্ড লোডে React হাইড্রেট হওয়ার আগেই localStorage থেকে নাম বসিয়ে দেয়,
+          ফলে সার্ভারের "A"/"Admin" ফ্ল্যাশ করে না এবং হাইড্রেশন মিসম্যাচও হয় না। */}
+      <InlineScript
+        html={`{try{var u=JSON.parse(localStorage.getItem(${JSON.stringify(
+          STORAGE_KEY
+        )})||"null");if(u&&u.name){var a=document.getElementById(${JSON.stringify(
+          `${id}-initial`
+        )});if(a)a.textContent=u.name.charAt(0);var n=document.getElementById(${JSON.stringify(
+          `${id}-name`
+        )});if(n)n.textContent=u.name}}catch(e){}}`}
+      />
     </header>
   );
 }

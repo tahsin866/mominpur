@@ -33,7 +33,14 @@ export default function Login() {
         }),
       });
 
-      const data = await response.json();
+      // ব্যাকএন্ড সফল হলে JSON, ব্যর্থ হলে প্লেইন টেক্সট পাঠায় — তাই আগে টেক্সট পড়ি
+      const raw = await response.text();
+      let data: any;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = { message: raw };
+      }
 
       if (!response.ok) {
         // ব্যাকএন্ড থেকে badRequest().body(e.getMessage()) আসলে তা হ্যান্ডেল করবে

@@ -24,6 +24,7 @@ services:
       - "3005:3000" # বাইরে ৩০০৫ (কনফ্লিক্ট এড়াতে), ভেতরে ৩০০০
     environment:
       - NEXT_PUBLIC_API_URL=http://76.13.183.6:8082 # এপিআই কল যাবে ৮০৮২ পোর্টে
+      - BACKEND_URL=http://backend:8080 # কম্পোজ নেটওয়ার্কের ভেতরে প্রক্সি টার্গেট
     restart: always
     depends_on:
       - backend
