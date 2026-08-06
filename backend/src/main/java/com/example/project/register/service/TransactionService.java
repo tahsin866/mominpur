@@ -40,6 +40,15 @@ public class TransactionService {
         return FeeCalculator.totalAmount(registration.getGuestCount());
     }
 
+    /** অতিথি যোগের ট্রানজেকশন — totalAmount ইতিমধ্যে সেট করা, recalculate করা হবে না। */
+    @Transactional
+    public Transaction createGuestTransaction(Transaction transaction) {
+        if (transaction.getStatus() == null) {
+            transaction.setStatus("PENDING");
+        }
+        return transactionRepository.save(transaction);
+    }
+
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
     }
@@ -53,7 +62,22 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found with id: " + id));
         transaction.setStatus(newStatus.toUpperCase());
-        return transactionRepository.save(transaction);
+        Transaction saved = transactionRepository.save(transaction);
+
+        // GUEST_ADD ট্রানজেকশন approve হলে রেজিস্ট্রেশনের guestCount আপডেট হবে
+        if ("APPROVED".equals(newStatus.toUpperCase()) && "GUEST_ADD".equals(transaction.getType())) {
+            Registration registration = registrationRepository.findById(transaction.getRegistrationId())
+                    .orElseThrow(() -> new RuntimeException("রেজিস্ট্রেশন খুঁজে পাওয়া যায়নি"));
+            int additionalGuests = transaction.getTotalAmount() / FeeCalculator.GUEST_FEE;
+            int newGuestCount = (registration.getGuestCount() != null ? registration.getGuestCount() : 0) + additionalGuests;
+            if (newGuestCount > FeeCalculator.MAX_GUESTS) {
+                newGuestCount = FeeCalculator.MAX_GUESTS;
+            }
+            registration.setGuestCount(newGuestCount);
+            registrationRepository.save(registration);
+        }
+
+        return saved;
     }
 
     @Transactional

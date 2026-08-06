@@ -31,4 +31,13 @@ public final class FeeCalculator {
     public static int totalAmount(Integer guestCount) {
         return REGISTRATION_FEE + (normalizeGuestCount(guestCount) * GUEST_FEE);
     }
+
+    /** পরবর্তীতে অতিথি যোগ করার খরচ। */
+    public static int guestAddAmount(int additionalGuests) {
+        if (additionalGuests < 1 || additionalGuests > MAX_GUESTS) {
+            throw new RuntimeException(
+                    "অতিথি সংখ্যা ১ থেকে " + MAX_GUESTS + " জনের মধ্যে হতে হবে।");
+        }
+        return additionalGuests * GUEST_FEE;
+    }
 }

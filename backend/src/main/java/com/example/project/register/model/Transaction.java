@@ -37,6 +37,12 @@ public class Transaction {
     @Column(name = "registration_amount", nullable = false, columnDefinition = "INTEGER DEFAULT 1020")
     private Integer totalAmount = 1020;
 
+    /**
+     * ট্রানজেকশনের ধরন: REGISTRATION (নতুন রেজিস্ট্রেশন) বা GUEST_ADD (পরে অতিথি যোগ)।
+     */
+    @Column(name = "transaction_type", nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'REGISTRATION'")
+    private String type = "REGISTRATION";
+
     @Column(nullable = false)
     private String status = "PENDING";
 

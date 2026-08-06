@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import EventCard from "./event-card";
+import GuestAddForm from "./guest-add-form";
 
 interface StatusResult {
+  id: number;
   name: string;
   phone: string;
   status: string;
@@ -12,17 +14,36 @@ interface StatusResult {
   submittedAt: string;
 }
 
+function bn(n: number): string {
+  const digits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(n).replace(/\d/g, (d) => digits[parseInt(d)]);
+}
+
+const MAX_GUESTS = 2;
+
 export default function StatusPage() {
   const [phone, setPhone] = useState("");
   const [result, setResult] = useState<StatusResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showGuestForm, setShowGuestForm] = useState(false);
+
+  const fetchStatus = async (phoneNum: string) => {
+    const res = await fetch(`/api/registrations/check-status?phone=${phoneNum}`);
+    if (res.ok) {
+      const data = await res.json();
+      setResult(data);
+      return true;
+    }
+    return false;
+  };
 
   const handleCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setResult(null);
+    setShowGuestForm(false);
 
     if (!/^\d{11}$/.test(phone)) {
       setError("অনুগ্রহ করে ১১ ডিজিটের মোবাইল নম্বর দিন।");
@@ -56,6 +77,12 @@ export default function StatusPage() {
       default:
         return { label: "পেন্ডিং", color: "text-yellow-700 bg-yellow-50 border-yellow-200", icon: "⏳" };
     }
+  };
+
+  const handleGuestAddSuccess = () => {
+    setShowGuestForm(false);
+    // Refresh status to get updated data
+    fetchStatus(phone);
   };
 
   return (
@@ -134,8 +161,12 @@ export default function StatusPage() {
                 </span>
               </div>
               <div className="flex justify-between text-sm">
+                <span style={{ color: "#6B7280" }}>অতিথি সংখ্যা</span>
+                <span className="font-medium" style={{ color: "#064E3B" }}>{bn(result.guestCount)} জন</span>
+              </div>
+              <div className="flex justify-between text-sm">
                 <span style={{ color: "#6B7280" }}>স্ট্যাটাস</span>
-                <span className="font-medium" style={{ color: "#064E3B" }}>{result.status}</span>
+                <span className="font-medium" style={{ color: "#064E3B" }}>{statusInfo(result.status).label}</span>
               </div>
             </div>
 
@@ -144,6 +175,48 @@ export default function StatusPage() {
                 <div className="mt-4 p-3 rounded-sm text-sm" style={{ backgroundColor: "#ECFDF5", color: "#064E3B" }}>
                   আলহামদুলিল্লাহ! আপনার আবেদন অনুমোদিত হয়েছে। মিলনমেলায় আপনার অংশগ্রহণের জন্য অগ্রিম শুভেচ্ছা।
                 </div>
+
+                {/* Guest Add Button */}
+                {result.guestCount < MAX_GUESTS && !showGuestForm && (
+                  <div className="mt-4 p-4 rounded-sm" style={{ backgroundColor: "#FFFBEB", border: "1px solid #FEF3C7" }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold" style={{ color: "#92400E" }}>
+                          আপনার সাথে অতিথি নিয়ে আসতে চান?
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: "#B45309" }}>
+                          আরো {bn(MAX_GUESTS - result.guestCount)} জন অতিথি যোগ করতে পারবেন। প্রতি অতিথি ৫১০ টাকা।
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowGuestForm(true)}
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white rounded-sm hover:opacity-90 transition"
+                        style={{ backgroundColor: "#D97706" }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4-4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <line x1="19" y1="8" x2="19" y2="14" />
+                          <line x1="22" y1="11" x2="16" y2="11" />
+                        </svg>
+                        অতিথি যোগ করুন
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Guest Add Form */}
+                {showGuestForm && (
+                  <GuestAddForm
+                    phone={result.phone}
+                    name={result.name}
+                    currentGuestCount={result.guestCount}
+                    registrationId={result.id}
+                    onSuccess={handleGuestAddSuccess}
+                    onCancel={() => setShowGuestForm(false)}
+                  />
+                )}
+
                 <EventCard name={result.name} phone={result.phone} guestCount={result.guestCount} />
               </>
             )}

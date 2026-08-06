@@ -34,6 +34,7 @@ interface Transaction {
   receiverNumber: string;
   paidAmount: number;
   totalAmount: number;
+  type: string;
   status: string;
   createdAt: string;
 }
@@ -537,7 +538,11 @@ export default function RegList() {
     setSearch(""); setFilterStatus(""); setFilterDivision(""); setFilterDistrict(""); setFilterThana(""); setFilterOccupation(""); setFilterDepartment(""); setFilterReceiver("");
   };
 
-  const getTransaction = (regId: number) => transactions.find((t) => t.registrationId === regId);
+  const getTransaction = (regId: number) => transactions.find((t) => t.registrationId === regId && t.type !== "GUEST_ADD");
+  const getGuestAddTransactions = (regId: number) => transactions.filter((t) => t.registrationId === regId && t.type === "GUEST_ADD");
+  const getAllTransactions = (regId: number) => transactions.filter((t) => t.registrationId === regId);
+  const getTotalAmount = (regId: number) => getAllTransactions(regId).reduce((sum, t) => sum + (t.totalAmount || 0), 0);
+  const getTotalPaid = (regId: number) => getAllTransactions(regId).reduce((sum, t) => sum + (t.paidAmount || 0), 0);
 
   const isVerified = (regId: number) => {
     const tx = getTransaction(regId);
@@ -550,6 +555,25 @@ export default function RegList() {
       const res = await fetch(`/api/registrations/${id}/status?status=${status}`, { method: "PATCH", headers: authHeaders() });
       if (!res.ok) throw new Error("স্ট্যাটাস আপডেট হয়নি");
       setRegistrations((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "সমস্যা হয়েছে");
+    }
+  };
+
+  const handleTransactionStatus = async (txId: number, status: string, regId: number) => {
+    try {
+      const res = await fetch(`/api/transactions/${txId}/status?status=${status}`, { method: "PATCH", headers: authHeaders() });
+      if (!res.ok) throw new Error("ট্রানজেকশন স্ট্যাটাস আপডেট হয়নি");
+      // Update transaction in local state
+      setTransactions((prev) => prev.map((t) => (t.id === txId ? { ...t, status } : t)));
+      // If approved GUEST_ADD, refresh registration data to get updated guestCount
+      if (status === "APPROVED") {
+        const regRes = await fetch("/api/registrations/all", { headers: authHeaders() });
+        if (regRes.ok) {
+          const data = await regRes.json();
+          setRegistrations(data);
+        }
+      }
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "সমস্যা হয়েছে");
     }
@@ -802,24 +826,59 @@ export default function RegList() {
                         ) : (
                           <span className="text-xs text-zinc-300 dark:text-zinc-600">পেমেন্ট নেই</span>
                         )}
+                        {/* GUEST_ADD Transactions */}
+                        {getGuestAddTransactions(r.id).map((gtx) => (
+                          <div key={gtx.id} className="mt-2 p-2 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 px-1.5 py-0.5 rounded">অতিথি যোগ</span>
+                              <span className="text-[10px] text-amber-600">{gtx.totalAmount / 510} জন • {gtx.totalAmount}৳</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400">{gtx.transactionId}</span>
+                              <span className="text-[10px] font-mono text-zinc-400">****{gtx.payingNumber}</span>
+                            </div>
+                            {gtx.status === "PENDING" && (
+                              <div className="flex items-center gap-1.5 mt-1.5">
+                                <button
+                                  onClick={() => handleTransactionStatus(gtx.id, "APPROVED", r.id)}
+                                  className="text-[10px] font-semibold px-2 py-1 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
+                                >
+                                  অনুমোদন
+                                </button>
+                                <button
+                                  onClick={() => handleTransactionStatus(gtx.id, "REJECTED", r.id)}
+                                  className="text-[10px] font-semibold px-2 py-1 rounded-md text-red-600 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-950/50 transition-colors"
+                                >
+                                  বাতিল
+                                </button>
+                              </div>
+                            )}
+                            {gtx.status === "APPROVED" && (
+                              <span className="inline-block mt-1 text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">✓ অনুমোদিত</span>
+                            )}
+                            {gtx.status === "REJECTED" && (
+                              <span className="inline-block mt-1 text-[10px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">✕ বাতিল</span>
+                            )}
+                          </div>
+                        ))}
                       </td>
                       <td className="px-5 py-3.5 text-right">
-                        {tx ? (
-                          <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{tx.totalAmount} &#2547;</span>
+                        {getAllTransactions(r.id).length > 0 ? (
+                          <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{getTotalAmount(r.id)} &#2547;</span>
                         ) : (
                           <span className="text-xs text-zinc-300 dark:text-zinc-600">-</span>
                         )}
                       </td>
                       <td className="px-5 py-3.5 text-right">
-                        {tx && tx.paidAmount != null ? (
+                        {getAllTransactions(r.id).length > 0 ? (
                           <span className={`text-sm font-bold ${
-                            tx.paidAmount >= tx.totalAmount
+                            getTotalPaid(r.id) >= getTotalAmount(r.id)
                               ? "text-emerald-600 dark:text-emerald-400"
-                              : tx.paidAmount > 0
+                              : getTotalPaid(r.id) > 0
                               ? "text-amber-600 dark:text-amber-400"
                               : "text-red-500"
                           }`}>
-                            {tx.paidAmount} &#2547;
+                            {getTotalPaid(r.id)} &#2547;
                           </span>
                         ) : (
                           <span className="text-xs text-zinc-300 dark:text-zinc-600">-</span>

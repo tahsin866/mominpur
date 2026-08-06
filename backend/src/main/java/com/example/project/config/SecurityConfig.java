@@ -57,6 +57,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // পাবলিক: রেজিস্ট্রেশন ফরম সাবমিট ও স্ট্যাটাস চেক
                 .requestMatchers(HttpMethod.POST, "/api/registrations/submit").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/registrations/add-guest").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/registrations/check-status").permitAll()
                 // পাবলিক: লোকেশন ডাটা
                 .requestMatchers("/api/location/**").permitAll()
