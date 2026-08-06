@@ -15,7 +15,7 @@ export default function LandingPage() {
   return (
     <div
       className="min-h-screen antialiased"
-      style={{ fontFamily: "'Hind Siliguri', 'SolaimanLipi', 'Aneuro', sans-serif", backgroundColor: "#FFFFFF", color: "#064E3B" }}
+      style={{ fontFamily: "'SolaimanLipi', sans-serif", backgroundColor: "#FFFFFF", color: "#064E3B" }}
     >
       <Navbar />
       <DawatnamaModal />

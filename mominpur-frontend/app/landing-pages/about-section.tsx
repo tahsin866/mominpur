@@ -116,7 +116,7 @@ interface GalleryPhoto {
 }
 
 // গ্লোবাল ফন্ট কনফিগারেশন
-const BANGLA_FONT = "'Hind Siliguri', 'SolaimanLipi', 'Aneuro', sans-serif";
+const BANGLA_FONT = "'SolaimanLipi', sans-serif";
 const NUMBER_FONT = "Inter, system-ui, -apple-system, sans-serif";
 
 export default function AboutSection() {

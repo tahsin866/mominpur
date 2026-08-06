@@ -49,7 +49,7 @@ export default function EventCard({ name, phone }: EventCardProps) {
       borderRadius: "16px", // আধুনিক রাউন্ডেড কর্নার
       overflow: "hidden",
       boxShadow: "0 10px 40px rgba(0,0,0,0.1)", // সফট শ্যাডো
-      fontFamily: "'Hind Siliguri', sans-serif", // নিশ্চিত করুন এই ফন্ট লোড করা আছে
+      fontFamily: "'SolaimanLipi', sans-serif",
       position: "relative" as const,
       border: "1px solid #E5E7EB",
     },
@@ -183,7 +183,7 @@ export default function EventCard({ name, phone }: EventCardProps) {
   return (
     <div className="mt-6 flex flex-col items-center">
       {/* UI Container to centralize and manage fonts */}
-      <div style={{ fontFamily: "'Hind Siliguri', sans-serif" }}>
+      <div style={{ fontFamily: "'SolaimanLipi', sans-serif" }}>
         {/* Download Button */}
         <button
           onClick={handleDownload}

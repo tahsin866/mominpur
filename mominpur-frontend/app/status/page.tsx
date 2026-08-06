@@ -59,15 +59,6 @@ export default function StatusPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#FFFFFF" }}>
-      <header className="py-6 px-4" style={{ backgroundColor: "#0A3D2A" }}>
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <h1 className="text-lg font-bold text-white">আবেদন স্ট্যাটাস চেক</h1>
-          <Link href="/" className="text-sm hover:text-white transition" style={{ color: "#C9BFA6" }}>
-            ← হোম
-          </Link>
-        </div>
-      </header>
-
       <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-16">
         <div className="text-center mb-10">
           <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: "#ECFDF5" }}>

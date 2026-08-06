@@ -12,13 +12,34 @@ const fallbackSlides: { filename: string; alt: string; caption?: string }[] = [
 ];
 
 // বাংলা লেখার জন্য প্রিমিয়াম ফন্ট ফ্যামিলি
-const FONT_FAMILY = "'Hind Siliguri', 'SolaimanLipi', 'Aneuro', sans-serif";
+const FONT_FAMILY = "'SolaimanLipi', sans-serif";
 // সংখ্যার নিখুঁত ভিজ্যুয়াল ক্ল্যারিটির জন্য স্ট্যান্ডার্ড ফন্ট স্ট্যাক
 const NUMBER_FONT_FAMILY = "Inter, system-ui, -apple-system, sans-serif";
+
+const EVENT_DATE = new Date("2026-12-16T00:00:00+06:00").getTime();
+const bnDigit = (n: number) =>
+  String(n).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]);
 
 export default function HeroSection() {
   const [current, setCurrent] = useState(0);
   const [slides, setSlides] = useState(fallbackSlides);
+  const [countdown, setCountdown] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
+
+  useEffect(() => {
+    function tick() {
+      const diff = EVENT_DATE - Date.now();
+      if (diff <= 0) { setCountdown(null); return; }
+      setCountdown({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      });
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     fetch(`${API}/api/photos/section/hero`)
@@ -160,11 +181,11 @@ export default function HeroSection() {
           </Link>
         </div>
 
-        {/* ইনফরমেশন কার্ড প্যানেল (তারিখ ও স্থান) */}
-        <div 
+        {/* ইনফরমেশন কার্ড প্যানেল (তারিখ, স্থান ও কাউন্টডাউন) */}
+        <div
           className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 px-8 py-3.5 rounded-sm backdrop-blur-sm border transition-all duration-300 shadow-sm"
-          style={{ 
-            backgroundColor: "rgba(255, 255, 255, 0.75)", 
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.75)",
             borderColor: "rgba(10,61,42,0.15)",
           }}
         >
@@ -180,6 +201,17 @@ export default function HeroSection() {
             </svg>
             মাদরাসা প্রাঙ্গন
           </span>
+          {countdown && (
+            <>
+              <span className="hidden sm:inline text-emerald-800/30">|</span>
+              <span className="flex items-center gap-2 text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-emerald-800">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.days)}</span> দিন <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.hours)}</span> ঘণ্টা <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.minutes)}</span> মি. <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.seconds)}</span> সে.
+              </span>
+            </>
+          )}
         </div>
 
 

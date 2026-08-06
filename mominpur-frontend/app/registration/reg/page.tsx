@@ -243,19 +243,6 @@ export default function RegistrationPage() {
 
   return (
     <div className="flex flex-col min-h-screen font-sans antialiased" style={{ backgroundColor: "#FFFFFF", color: "#064E3B" }}>
-      <header className="py-6 px-4 text-white" style={{ backgroundColor: "#0A3D2A" }}>
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <h1 className="text-lg font-bold">মিলনমেলা রেজিস্ট্রেশন</h1>
-          <Link
-            href="/"
-            className="text-lg hover:text-white transition"
-            style={{ color: "#C9BFA6" }}
-          >
-            ← হোম পেজে ফিরুন
-          </Link>
-        </div>
-      </header>
-
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-10">
         <div className="p-6 md:p-10" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
           <div className="mb-8">
