@@ -36,8 +36,8 @@ export default function Login() {
         throw new Error(data.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়");
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data));
+      sessionStorage.setItem("token", data.token);
+      sessionStorage.setItem("user", JSON.stringify(data));
       
       alert("লগইন সফল হয়েছে!");
       

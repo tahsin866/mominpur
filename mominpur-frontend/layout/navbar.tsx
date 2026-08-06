@@ -18,7 +18,7 @@ interface UserData {
 
 function getUser(): UserData | null {
   if (typeof window === "undefined") return null;
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = sessionStorage.getItem(STORAGE_KEY);
   if (!stored) return null;
   try {
     return JSON.parse(stored);
@@ -34,7 +34,7 @@ export default function Navbar({ onToggleSidebar }: NavbarProps) {
   const id = useId();
 
   const handleLogout = () => {
-    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
     router.push("/login");
   };
 
@@ -108,7 +108,7 @@ export default function Navbar({ onToggleSidebar }: NavbarProps) {
       {/* হার্ড লোডে React হাইড্রেট হওয়ার আগেই localStorage থেকে নাম বসিয়ে দেয়,
           ফলে সার্ভারের "A"/"Admin" ফ্ল্যাশ করে না এবং হাইড্রেশন মিসম্যাচও হয় না। */}
       <InlineScript
-        html={`{try{var u=JSON.parse(localStorage.getItem(${JSON.stringify(
+        html={`{try{var u=JSON.parse(sessionStorage.getItem(${JSON.stringify(
           STORAGE_KEY
         )})||"null");if(u&&u.name){var a=document.getElementById(${JSON.stringify(
           `${id}-initial`

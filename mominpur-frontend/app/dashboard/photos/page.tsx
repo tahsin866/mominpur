@@ -34,7 +34,7 @@ export default function PhotosPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
+    const user = sessionStorage.getItem("user");
     if (!user) {
       router.push("/login");
       return;
@@ -56,7 +56,7 @@ export default function PhotosPage() {
   };
 
   const getToken = () => {
-    const raw = localStorage.getItem("user");
+    const raw = sessionStorage.getItem("user");
     if (!raw) return null;
     try { return JSON.parse(raw).token; } catch { return null; }
   };

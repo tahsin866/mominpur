@@ -14,7 +14,7 @@ public class JwtService {
 
     // এন্টারপ্রাইজ গ্রেড সিকিউরিটির জন্য ২৫৬-বিটের সিক্রেট কি জেনারেট করা
     private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private static final long EXPIRATION_TIME = 86400000; // ২৪ ঘণ্টা (মিলিসেকেন্ডে)
+    private static final long EXPIRATION_TIME = 7200000; // ২ ঘণ্টা (মিলিসেকেন্ডে)
 
     public String generateToken(String username) {
         return Jwts.builder()

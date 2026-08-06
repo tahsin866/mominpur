@@ -6,7 +6,7 @@ import RegList from "../../registration/reg/reg-list";
 
 function isAuthenticated(): boolean {
   if (typeof window === "undefined") return false;
-  return !!localStorage.getItem("user");
+  return !!sessionStorage.getItem("user");
 }
 
 export default function RegistrationsPage() {

@@ -8,6 +8,7 @@ interface UserData {
   name: string;
   email: string;
   role: string;
+  token?: string;
 }
 
 interface Registration {
@@ -29,7 +30,7 @@ interface DashboardStats {
 
 function getUser(): UserData | null {
   if (typeof window === "undefined") return null;
-  const stored = localStorage.getItem("user");
+  const stored = sessionStorage.getItem("user");
   if (!stored) return null;
   try {
     return JSON.parse(stored);
@@ -82,7 +83,10 @@ export default function DashboardPage() {
       return;
     }
 
-    fetch("/api/registrations/stats")
+    const token = user?.token;
+    fetch("/api/registrations/stats", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((res) => {
         if (!res.ok) throw new Error("সার্ভার থেকে তথ্য পাওয়া যায়নি");
         return res.json();

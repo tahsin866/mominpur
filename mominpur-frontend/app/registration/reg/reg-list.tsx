@@ -109,9 +109,10 @@ function EditModal({
     setSaving(true);
     setError("");
     try {
+      const token = (() => { try { const raw = sessionStorage.getItem("user"); return JSON.parse(raw || "{}").token || ""; } catch { return ""; } })();
       const res = await fetch(`/api/registrations/${reg.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify(form),
       });
       if (!res.ok) {
@@ -282,16 +283,27 @@ export default function RegList() {
   const [verifyInputs, setVerifyInputs] = useState<Record<number, string>>({});
   const [editing, setEditing] = useState<Registration | null>(null);
 
+  const getToken = (): string => {
+    try {
+      const raw = sessionStorage.getItem("user") || localStorage.getItem("user");
+      return JSON.parse(raw || "{}").token || "";
+    } catch { return ""; }
+  };
+
+  const authHeaders = (): HeadersInit => {
+    const token = getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   useEffect(() => {
-    const raw = localStorage.getItem("user");
-    let token = "";
-    try { token = JSON.parse(raw || "{}").token || ""; } catch { token = ""; }
+    const headers = authHeaders();
 
     Promise.all([
-      fetch("/api/registrations/all").then((res) => res.json()),
-      fetch("/api/transactions/all", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      }).then((res) => {
+      fetch("/api/registrations/all", { headers }).then((res) => {
+        if (!res.ok) throw new Error("অনুমোদন প্রয়োজন");
+        return res.json();
+      }),
+      fetch("/api/transactions/all", { headers }).then((res) => {
         if (!res.ok) return [];
         return res.json();
       }).catch(() => []),
@@ -358,7 +370,7 @@ export default function RegList() {
     try {
       const res = await fetch(
         `/api/registrations/${id}/status?status=${status}`,
-        { method: "PATCH" }
+        { method: "PATCH", headers: authHeaders() }
       );
       if (!res.ok) throw new Error("স্ট্যাটাস আপডেট হয়নি");
       setRegistrations((prev) =>
@@ -374,7 +386,7 @@ export default function RegList() {
     try {
       const res = await fetch(
         `/api/registrations/${id}`,
-        { method: "DELETE" }
+        { method: "DELETE", headers: authHeaders() }
       );
       if (!res.ok) throw new Error("মুছে ফেলা যায়নি");
       setRegistrations((prev) => prev.filter((r) => r.id !== id));

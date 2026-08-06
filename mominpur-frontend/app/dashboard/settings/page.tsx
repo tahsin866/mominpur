@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 function getUserEmail(): string | null {
   if (typeof window === "undefined") return null;
-  const stored = localStorage.getItem("user");
+  const stored = sessionStorage.getItem("user");
   if (!stored) return null;
   try {
     const user = JSON.parse(stored);

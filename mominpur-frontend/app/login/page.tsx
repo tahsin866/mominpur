@@ -48,7 +48,7 @@ export default function Login() {
       }
 
       // সফলভাবে লগইন হলে (AuthResponse) টোকেন বা ইউজার ডাটা লোকালস্টোরেজে সেভ করতে পারেন
-      localStorage.setItem("user", JSON.stringify(data));
+      sessionStorage.setItem("user", JSON.stringify(data));
       
       alert("লগইন সফল হয়েছে!");
       

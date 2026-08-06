@@ -15,7 +15,15 @@ interface Message {
 
 function isAuthenticated(): boolean {
   if (typeof window === "undefined") return false;
-  return !!localStorage.getItem("user");
+  return !!sessionStorage.getItem("user");
+}
+
+function getAuthHeaders(): HeadersInit {
+  try {
+    const raw = sessionStorage.getItem("user");
+    const token = JSON.parse(raw || "{}").token || "";
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch { return {}; }
 }
 
 export default function MessagesPage() {
@@ -37,7 +45,7 @@ export default function MessagesPage() {
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch("/api/messages/all");
+      const res = await fetch("/api/messages/all", { headers: getAuthHeaders() });
       if (res.ok) {
         const data = await res.json();
         setMessages(data.sort((a: Message, b: Message) => b.id - a.id));
@@ -51,7 +59,7 @@ export default function MessagesPage() {
 
   const markAsRead = async (id: number) => {
     try {
-      await fetch(`/api/messages/${id}/read`, { method: "PATCH" });
+      await fetch(`/api/messages/${id}/read`, { method: "PATCH", headers: getAuthHeaders() });
       setMessages((prev) =>
         prev.map((m) => (m.id === id ? { ...m, status: "READ" } : m))
       );
@@ -66,7 +74,7 @@ export default function MessagesPage() {
   const deleteMessage = async (id: number) => {
     if (!confirm("আপনি কি এই বার্তা মুছে ফেলতে চান?")) return;
     try {
-      const res = await fetch(`/api/messages/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/messages/${id}`, { method: "DELETE", headers: getAuthHeaders() });
       if (res.ok) {
         setMessages((prev) => prev.filter((m) => m.id !== id));
         if (selected?.id === id) setSelected(null);

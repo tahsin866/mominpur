@@ -53,18 +53,20 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                // পাবলিক: লগইন/রেজিস্টার
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/registrations/**").permitAll()
+                // পাবলিক: রেজিস্ট্রেশন ফরম সাবমিট ও স্ট্যাটাস চেক
+                .requestMatchers(HttpMethod.POST, "/api/registrations/submit").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/registrations/check-status").permitAll()
+                // পাবলিক: লোকেশন ডাটা
                 .requestMatchers("/api/location/**").permitAll()
-                .requestMatchers("/api/photos/file/**").permitAll()
-                .requestMatchers("/api/photos").permitAll()
-                .requestMatchers("/api/photos/section/**").permitAll()
-                .requestMatchers("/api/messages/submit").permitAll()
-                .requestMatchers("/api/transactions/submit").permitAll()
-                .requestMatchers("/api/transactions/all").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/transactions/**").permitAll()
-                .requestMatchers("/api/registrations/check-status").permitAll()
-                .requestMatchers("/api/audit-logs/**").permitAll()
+                // পাবলিক: ছবি দেখা
+                .requestMatchers(HttpMethod.GET, "/api/photos/**").permitAll()
+                // পাবলিক: মেসেজ সাবমিট
+                .requestMatchers(HttpMethod.POST, "/api/messages/submit").permitAll()
+                // পাবলিক: ট্রানজেকশন সাবমিট
+                .requestMatchers(HttpMethod.POST, "/api/transactions/submit").permitAll()
+                // বাকি সব authenticated — অ্যাডমিন অপারেশন
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
