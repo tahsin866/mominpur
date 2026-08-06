@@ -11,8 +11,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://76.13.183.6:5432/mominpur
       - SPRING_DATASOURCE_USERNAME=mominpur_user
       - SPRING_DATASOURCE_PASSWORD=7xr&d6Wn@XQm4aK&
+      - UPLOAD_DIR=/run/media/aljami/New Volume/muminpur
     volumes:
-      - uploads:/app/uploads
+      - "/run/media/aljami/New Volume/muminpur:/run/media/aljami/New Volume/muminpur"
     restart: always
 
   # ফ্রন্টএন্ড সার্ভিস
@@ -21,13 +22,10 @@ services:
       context: ./mominpur-frontend
       dockerfile: Dockerfile
     ports:
-      - "3005:3000" # বাইরে ৩০০৫ (কনফ্লিক্ট এড়াতে), ভেতরে ৩০০০
+      - "3005:3000" # বাইরে ৩০০৫ (কনফ্লিক্ট এড়াতে), ভেতরে ৩০০০
     environment:
       - NEXT_PUBLIC_API_URL=http://76.13.183.6:8082 # এপিআই কল যাবে ৮০৮২ পোর্টে
       - BACKEND_URL=http://backend:8080 # কম্পোজ নেটওয়ার্কের ভেতরে প্রক্সি টার্গেট
     restart: always
     depends_on:
       - backend
-
-volumes:
-  uploads:

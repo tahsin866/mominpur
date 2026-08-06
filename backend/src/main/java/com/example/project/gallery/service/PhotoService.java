@@ -40,8 +40,7 @@ public class PhotoService {
         Files.copy(file.getInputStream(), filePath);
 
         Photo photo = new Photo();
-        photo.setFilename(filename);
-        photo.setOriginalFilename(originalFilename);
+        photo.setFilePath(filePath.toString());
         photo.setContentType(file.getContentType());
         photo.setSize(file.getSize());
         photo.setSection(section);
@@ -53,6 +52,11 @@ public class PhotoService {
         return photoRepository.findAllByOrderByCreatedAtDesc();
     }
 
+    public Photo getPhoto(Long id) {
+        return photoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Photo not found"));
+    }
+
     public List<Photo> getPhotosBySection(String section) {
         return photoRepository.findBySectionOrderByCreatedAtDesc(section);
     }
@@ -61,8 +65,7 @@ public class PhotoService {
         Photo photo = photoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Photo not found"));
 
-        Path filePath = Paths.get(uploadDir).resolve(photo.getFilename());
-        Files.deleteIfExists(filePath);
+        Files.deleteIfExists(Paths.get(photo.getFilePath()));
 
         photoRepository.deleteById(id);
     }

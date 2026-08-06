@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 
 interface Photo {
   id: number;
-  filename: string;
-  originalFilename: string;
+  filePath: string;
   contentType: string;
   size: number;
   section: string;
@@ -311,8 +310,8 @@ export default function PhotosPage() {
                   onClick={() => setPreview(photo)}
                 >
                   <img
-                    src={`${API}/api/photos/file/${photo.filename}`}
-                    alt={photo.originalFilename}
+                    src={`${API}/api/photos/${photo.id}/file`}
+                    alt={photo.filePath}
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
@@ -340,7 +339,7 @@ export default function PhotosPage() {
                 {/* Info */}
                 <div className="p-3">
                   <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300 truncate">
-                    {photo.originalFilename}
+                    {photo.filePath}
                   </p>
                   <div className="flex justify-between items-center mt-1.5">
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
@@ -375,15 +374,15 @@ export default function PhotosPage() {
             </button>
 
             <img
-              src={`${API}/api/photos/file/${preview.filename}`}
-              alt={preview.originalFilename}
+              src={`${API}/api/photos/${preview.id}/file`}
+              alt={preview.filePath}
               className="w-full max-h-[80vh] object-contain rounded-xl"
             />
 
             {/* Info bar */}
             <div className="mt-3 flex items-center justify-between text-white/80 text-sm">
               <div className="flex items-center gap-3">
-                <span className="font-medium text-white">{preview.originalFilename}</span>
+                <span className="font-medium text-white">{preview.filePath}</span>
                 <span className="px-2 py-0.5 rounded-full bg-white/20 text-xs">
                   {sections.find((s) => s.value === preview.section)?.label}
                 </span>

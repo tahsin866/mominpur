@@ -887,7 +887,7 @@ export default function RegList() {
                           className="text-left hover:text-emerald-600 transition-colors"
                         >
                           <p className="font-semibold text-zinc-900 dark:text-zinc-100">{r.name}</p>
-                          <p className="text-xs text-zinc-400 mt-0.5">{r.fatherName}</p>
+                          <p className="text-xs text-zinc-400 mt-0.5">পিতা: {r.fatherName}</p>
                         </button>
                       </td>
                       <td className="px-5 py-3.5">

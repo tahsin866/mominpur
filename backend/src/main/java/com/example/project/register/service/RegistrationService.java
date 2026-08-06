@@ -3,8 +3,10 @@ package com.example.project.register.service;
 import com.example.project.register.model.Address;
 import com.example.project.register.model.AddressType;
 import com.example.project.register.model.Registration;
+import com.example.project.register.model.Transaction;
 import com.example.project.register.repository.AddressRepository;
 import com.example.project.register.repository.RegistrationRepository;
+import com.example.project.register.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +28,9 @@ public class RegistrationService {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Autowired
     private AuditLogService auditLogService;
@@ -104,8 +109,19 @@ public class RegistrationService {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Registration not found with id: " + id));
         String oldStatus = registration.getStatus();
-        registration.setStatus(newStatus.toUpperCase());
+        String normalizedStatus = newStatus.toUpperCase();
+        registration.setStatus(normalizedStatus);
         Registration saved = registrationRepository.save(registration);
+
+        // Sync linked transaction statuses with registration status
+        List<Transaction> transactions = transactionRepository.findByRegistrationId(id);
+        for (Transaction tx : transactions) {
+            if ("PENDING".equals(tx.getStatus())) {
+                tx.setStatus(normalizedStatus);
+                transactionRepository.save(tx);
+            }
+        }
+
         auditLogService.log("STATUS_UPDATE", id,
                 "স্ট্যাটাস পরিবর্তন: " + oldStatus + " → " + saved.getStatus(),
                 Map.of("status", oldStatus),

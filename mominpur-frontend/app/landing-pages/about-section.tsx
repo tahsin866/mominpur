@@ -111,8 +111,7 @@ const organizers = [
 
 interface GalleryPhoto {
   id: number;
-  filename: string;
-  originalFilename: string;
+  filePath: string;
 }
 
 // গ্লোবাল ফন্ট কনফিগারেশন
@@ -348,8 +347,8 @@ export default function AboutSection() {
                 onClick={() => setLightbox(photo)}
               >
                 <Image
-                  src={`/api/photos/file/${photo.filename}`}
-                  alt={photo.originalFilename}
+                  src={`/api/photos/${photo.id}/file`}
+                  alt={photo.filePath}
                   fill
                   sizes="(max-width: 768px) 50vw, 33vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -384,8 +383,8 @@ export default function AboutSection() {
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={`/photos/${lightbox.filename}`}
-              alt={lightbox.originalFilename}
+              src={`/api/photos/${lightbox.id}/file`}
+              alt={lightbox.filePath}
               fill
               sizes="(max-width: 768px) 100vw, 75vw"
               className="object-contain rounded-sm"

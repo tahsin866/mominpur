@@ -7,7 +7,7 @@ import { StarMark } from "./components";
 
 const API = "";
 
-const fallbackSlides: { filename: string; alt: string; caption?: string }[] = [
+const fallbackSlides: { id?: number; filename: string; alt: string; caption?: string }[] = [
   { filename: "", alt: "ইত্তেহাদে আবনায়ে মুমিনপুর" },
 ];
 
@@ -54,10 +54,11 @@ export default function HeroSection() {
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setSlides(
-            data.map((p: { filename: string; originalFilename: string }) => ({
-              filename: p.filename,
-              alt: p.originalFilename,
-              caption: p.originalFilename,
+            data.map((p: { id: number; filePath: string }) => ({
+              id: p.id,
+              filename: p.filePath,
+              alt: p.filePath,
+              caption: p.filePath,
             }))
           );
         } else {
@@ -73,10 +74,11 @@ export default function HeroSection() {
             .then((all) => {
               if (Array.isArray(all) && all.length > 0) {
                 setSlides(
-                  all.map((p: { filename: string; originalFilename: string }) => ({
-                    filename: p.filename,
-                    alt: p.originalFilename,
-                    caption: p.originalFilename,
+                  all.map((p: { id: number; filePath: string }) => ({
+                    id: p.id,
+                    filename: p.filePath,
+                    alt: p.filePath,
+                    caption: p.filePath,
                   }))
                 );
               }
@@ -112,7 +114,7 @@ export default function HeroSection() {
         >
           {slide.filename ? (
             <Image
-              src={`${API}/api/photos/file/${slide.filename}`}
+              src={`${API}/api/photos/${slide.id}/file`}
               alt={slide.alt}
               fill
               className="object-cover transform scale-105 transition-transform duration-[4000ms] ease-out"
