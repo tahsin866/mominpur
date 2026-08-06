@@ -51,6 +51,7 @@ public class RegistrationController {
                     "name", r.getName(),
                     "phone", r.getPhone(),
                     "status", r.getStatus(),
+                    "guestCount", r.getGuestCount() != null ? r.getGuestCount() : 0,
                     "submittedAt", r.getSubmittedAt() != null ? r.getSubmittedAt().toString() : ""
                 )))
                 .orElse(ResponseEntity.notFound().build());

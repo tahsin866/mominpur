@@ -8,6 +8,7 @@ interface StatusResult {
   name: string;
   phone: string;
   status: string;
+  guestCount: number;
   submittedAt: string;
 }
 
@@ -143,7 +144,7 @@ export default function StatusPage() {
                 <div className="mt-4 p-3 rounded-sm text-sm" style={{ backgroundColor: "#ECFDF5", color: "#064E3B" }}>
                   আলহামদুলিল্লাহ! আপনার আবেদন অনুমোদিত হয়েছে। মিলনমেলায় আপনার অংশগ্রহণের জন্য অগ্রিম শুভেচ্ছা।
                 </div>
-                <EventCard name={result.name} phone={result.phone} />
+                <EventCard name={result.name} phone={result.phone} guestCount={result.guestCount} />
               </>
             )}
             {result.status === "REJECTED" && (
