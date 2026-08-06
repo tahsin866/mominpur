@@ -26,11 +26,12 @@ export default function CountdownBanner() {
         setTimeLeft(null);
         return;
       }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
-      setTimeLeft({ days, hours, minutes, seconds });
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      });
     }
 
     tick();
@@ -40,7 +41,7 @@ export default function CountdownBanner() {
 
   if (timeLeft === null && !expired) return null;
 
-  const boxes: { value: string; label: string }[] = expired
+  const boxes = expired
     ? []
     : [
         { value: bn(timeLeft!.days), label: "দিন" },
@@ -51,16 +52,16 @@ export default function CountdownBanner() {
 
   return (
     <div
-      style={{ backgroundColor: "#064E3B" }}
       className="py-4 px-4 text-center"
+      style={{ backgroundColor: "#FFFFFF" }}
     >
       {expired ? (
-        <p className="text-xl font-bold text-white">
+        <p className="text-xl font-bold" style={{ color: "#064E3B" }}>
           রেজিস্ট্রেশন সময় শেষ
         </p>
       ) : (
         <div className="max-w-md mx-auto">
-          <p className="text-sm font-medium text-emerald-200 mb-2">
+          <p className="text-lg font-semibold mb-2" style={{ color: "#064E3B" }}>
             রেজিস্ট্রেশন শেষ হতে বাকি
           </p>
           <div className="grid grid-cols-4 gap-2">

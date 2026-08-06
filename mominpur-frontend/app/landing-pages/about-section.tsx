@@ -25,10 +25,10 @@ const organizers = [
 
 
   // কার্যকরী কমিটির অন্যান্য সদস্য
-// { name: "হাফেজ মাওলানা মুহাম্মাদ রাশেদ বিন মুহসিন", role: "মুহতামিম" },
-//   { name: "মাওলানা ফয়জুল হক", role: "সহ-সচিব" },
-//   { name: "হাফেজ আব্দুল হাকিম", role: "কর্মসম্পাদক" },
-//   { name: "মাওলানা সলেম উদ্দিন", role: "সদস্য" },
+  // { name: "হাফেজ মাওলানা মুহাম্মাদ রাশেদ বিন মুহসিন", role: "মুহতামিম" },
+  //   { name: "মাওলানা ফয়জুল হক", role: "সহ-সচিব" },
+  //   { name: "হাফেজ আব্দুল হাকিম", role: "কর্মসম্পাদক" },
+  //   { name: "মাওলানা সলেম উদ্দিন", role: "সদস্য" },
   { name: "মুফতি সাঈদ আহমাদ সাহেব", role: "জামিয়াতুল আবরার (রাহমানিয়া)" },
   { name: "হাফেজ মাওলানা আহমাদুল্লাহ সাহেব ", role: "জামিয়াতুল আবরার (রাহমানিয়া)" },
   { name: "মুফতি শামসুল আরেফিন খান সাদী সাহেব", role: "কল‍্যানপুর" },
@@ -42,67 +42,67 @@ const organizers = [
   { name: "হাফেজ হুজাইফা", role: "মিরপুর" },
   { name: "হাফেজ আব্দুলাহ", role: "টংগি" },
 
-  { 
-    name: "খোরশেদ আলম", 
-    role: "উত্তরা", 
-    phone: "+880 1727-728792" 
+  {
+    name: "খোরশেদ আলম",
+    role: "উত্তরা",
+    phone: "+880 1727-728792"
   },
-  
+
   // সহকারী প্রধান উদ্যোক্তা
-  { 
-    name: "মোঃ মিফতাহ উদ্দিন", 
-    role: "মিরপুর", 
-    phone: "+880 1775-900779" 
+  {
+    name: "মোঃ মিফতাহ উদ্দিন",
+    role: "মিরপুর",
+    phone: "+880 1775-900779"
   },
-  { 
-    name: "মোঃ শাহেদ আহম্মেদ ", 
-    role: "সিলেট", 
-    phone: "+880 1717-870310" 
+  {
+    name: "মোঃ শাহেদ আহম্মেদ ",
+    role: "সিলেট",
+    phone: "+880 1717-870310"
   },
-  { 
-    name: "মোঃ হুমায়ন খান ", 
-    role: "সিলেট", 
-    phone: "+880 1713-811740" 
-  },
-
-
-
-
-// {
-// name: "মোঃ তালহা  ",
-// role: "গৌরিপুর",
-// phone: "+880 1670-185211"
-// }, 
-    { 
-    name: "মোঃ আবির ", 
-    role: "সিলেট", 
-    phone: "+880 1710-904042" 
-  },
-
-
-  { 
-    name: "মোঃ ইয়ামিন তালুকদার", 
-    role: " মুমিনপুর", 
-    phone: "+880 1737-876660" 
+  {
+    name: "মোঃ হুমায়ন খান ",
+    role: "সিলেট",
+    phone: "+880 1713-811740"
   },
 
 
 
-  { 
-    name: "শোয়াইব আহম্মেদ ", 
-    role: "সিলেট", 
-    phone: "+44 7979 647913" 
+
+  // {
+  // name: "মোঃ তালহা  ",
+  // role: "গৌরিপুর",
+  // phone: "+880 1670-185211"
+  // }, 
+  {
+    name: "মোঃ আবির ",
+    role: "সিলেট",
+    phone: "+880 1710-904042"
   },
 
-   { 
-    name: "মোঃ মাসুম  ", 
-    role: "নোয়াখালী", 
-    phone: "+88019 3529 6040" 
+
+  {
+    name: "মোঃ ইয়ামিন তালুকদার",
+    role: " মুমিনপুর",
+    phone: "+880 1737-876660"
   },
-  { 
-    name: "ওমায়ের ", 
-    role: "নোয়াখালি", 
-    phone: "+880 1848-001670" 
+
+
+
+  {
+    name: "শোয়াইব আহম্মেদ ",
+    role: "সিলেট",
+    phone: "+44 7979 647913"
+  },
+
+  {
+    name: "মোঃ মাসুম  ",
+    role: "নোয়াখালী",
+    phone: "+88019 3529 6040"
+  },
+  {
+    name: "ওমায়ের ",
+    role: "নোয়াখালি",
+    phone: "+880 1848-001670"
   },
   // { name: "মাওলানা ওমায়ের", role: "নোয়াখালী" },
   // { name: "হাফেজ মাওলানা মিফতাহ উদ্দিন", role: "মিরপুর" },
@@ -157,7 +157,7 @@ export default function AboutSection() {
 
   return (
     <section id="about" className="max-w-6xl mx-auto px-4 py-24 select-none" style={{ fontFamily: BANGLA_FONT }}>
-      
+
       {/* সেকশন হেডার */}
       <div className="text-center mb-20 relative">
         <p className="text-xs md:text-sm tracking-[0.3em] uppercase mb-3 font-semibold" style={{ color: "#0A3D2A" }}>
@@ -171,7 +171,7 @@ export default function AboutSection() {
 
       {/* মাদরাসা পরিচিতি ও তথ্য টেবিল প্যানেল */}
       <div className="grid lg:grid-cols-5 gap-12 items-stretch mb-24">
-        
+
         {/* টেক্সট এরিয়া */}
         <div className="lg:col-span-3 flex flex-col justify-center space-y-6 text-base md:text-lg leading-relaxed text-justify" style={{ color: "#064E3B" }}>
           <p className="bg-emerald-50/30 p-6 rounded-sm border-l-4 border-[#0A3D2A]">
@@ -200,11 +200,11 @@ export default function AboutSection() {
                   className={`flex justify-between items-start gap-4 pb-3 ${i !== info.length - 1 ? "border-b border-gray-100" : ""}`}
                 >
                   <span className="font-medium shrink-0" style={{ color: "#6B7280" }}>{item.k}</span>
-                  <span 
-                    className="font-bold text-right" 
-                    style={{ 
+                  <span
+                    className="font-bold text-right"
+                    style={{
                       color: "#064E3B",
-                      fontFamily: item.k === "প্রতিষ্ঠাকাল" ? NUMBER_FONT : BANGLA_FONT 
+                      fontFamily: item.k === "প্রতিষ্ঠাকাল" ? NUMBER_FONT : BANGLA_FONT
                     }}
                   >
                     {item.v}
@@ -238,7 +238,7 @@ export default function AboutSection() {
                 <span className="font-bold text-white">তথ্য পাঠানোর জন্য যোগাযোগ করুন:</span><br />
                 <a href="https://wa.me/8801848001670" className="inline-flex items-center gap-2 mt-2 px-5 py-2.5 bg-white text-[#0A3D2A] font-bold rounded-sm hover:bg-emerald-50 transition-colors">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                   </svg>
                   01848001670 (Whatsapp মোঃ ওমায়ের)
                 </a>
@@ -250,7 +250,7 @@ export default function AboutSection() {
 
       {/* আয়োজক ও কার্যকরী কমিটি সেকশন */}
       <div className="mb-24">
-        
+
         {/* সেকশন সাব-টাইটেল */}
         <div className="flex items-center gap-4 mb-14">
           <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-emerald-800/20"></span>
@@ -262,25 +262,25 @@ export default function AboutSection() {
 
         {/* সকল আয়োজক ও কমিটি */}
         <div className="relative h-full flex">
-            <CornerFlourish className="absolute -top-3 -left-3 w-8 h-8 text-[#0A3D2A]" />
-            <CornerFlourish className="absolute -bottom-3 -right-3 w-8 h-8 rotate-180 text-[#0A3D2A]" />
-            <div className="p-8 w-full rounded-sm flex flex-col justify-between" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)", boxShadow: "0 4px 20px rgba(10,61,42,0.03)" }}>
-              <ul className="space-y-4 text-sm md:text-base flex-1 flex flex-col justify-center">
-                {organizers
-                  .map((org, i, arr) => (
-                    <li key={`${org.name}-${org.role}`} className={`flex justify-between items-start gap-4 pb-3 ${i !== arr.length - 1 ? "border-b border-gray-100" : ""}`}>
-                      <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>{org.name}</span>
-                      <span className="font-medium shrink-0 text-right flex flex-col items-end" style={{ color: "#6B7280" }}>
-                        <span>{org.role}</span>
-                        {org.phone && (
-                          <span className="text-xs mt-0.5 font-semibold text-gray-500" style={{ fontFamily: NUMBER_FONT }}>{org.phone}</span>
-                        )}
-                      </span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
+          <CornerFlourish className="absolute -top-3 -left-3 w-8 h-8 text-[#0A3D2A]" />
+          <CornerFlourish className="absolute -bottom-3 -right-3 w-8 h-8 rotate-180 text-[#0A3D2A]" />
+          <div className="p-8 w-full rounded-sm flex flex-col justify-between" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)", boxShadow: "0 4px 20px rgba(10,61,42,0.03)" }}>
+            <ul className="space-y-4 text-sm md:text-base flex-1 flex flex-col justify-center">
+              {organizers
+                .map((org, i, arr) => (
+                  <li key={`${org.name}-${org.role}`} className={`flex justify-between items-start gap-4 pb-3 ${i !== arr.length - 1 ? "border-b border-gray-100" : ""}`}>
+                    <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>{org.name}</span>
+                    <span className="font-medium shrink-0 text-right flex flex-col items-end" style={{ color: "#6B7280" }}>
+                      <span>{org.role}</span>
+                      {org.phone && (
+                        <span className="text-xs mt-0.5 font-semibold text-gray-500" style={{ fontFamily: NUMBER_FONT }}>{org.phone}</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+            </ul>
           </div>
+        </div>
       </div>
 
       {/* ডিজাইন ও ডেভেলপমেন্ট সেকশন */}
@@ -305,7 +305,7 @@ export default function AboutSection() {
                   <span className="font-medium shrink-0" style={{ color: "#064E3B", fontFamily: NUMBER_FONT }}>০১৫৩৩৩৮৬৮৬৬</span>
                 </li>
                 <li className="flex justify-between items-start gap-4 pb-3 border-b border-gray-100">
-                  <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>আব্দুর রহমান আলজামি</span>
+                  <span className="font-bold shrink-0" style={{ color: "#064E3B" }}>আব্দুর রহমান আলজামী</span>
                   <span className="text-center" style={{ color: "#6B7280" }}>সফটওয়্যার ডেভেলপার, আল-হাইআতুল উলয়া লিল-জামি'আতিল কওমিয়া বাংলাদেশ</span>
                   <span className="font-medium shrink-0" style={{ color: "#064E3B", fontFamily: NUMBER_FONT }}>০১৯৯১৭৪৫২১৯</span>
                 </li>

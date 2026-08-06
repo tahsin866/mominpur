@@ -138,29 +138,42 @@ export default function RegistrationPage() {
   const curThanas =
     curDistricts.find((d) => String(d.desId) === curDistId)?.thanas || [];
 
+  const [errorField, setErrorField] = useState("");
+
+  const showError = (msg: string, fieldId: string) => {
+    setMessage("Error: " + msg);
+    setErrorField(fieldId);
+    setLoading(false);
+    setTimeout(() => {
+      document.getElementById("form-message")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+    setErrorField("");
+
+    if (form.studyFrom && form.studyTo && Number(form.studyTo) < Number(form.studyFrom)) {
+      showError("অধ্যয়ন শেষের বছর অবশ্যই অধ্যয়ন শুরুর বছরের সমান বা পরে হতে হবে। আপনি শুরু দিয়েছেন " + form.studyFrom + " আর শেষ দিয়েছেন " + form.studyTo + " — দয়া করে সঠিক তথ্য দিন।", "field-studyTo");
+      return;
+    }
 
     if (!isValidBdPhone(form.phone)) {
-      setMessage("Error: সঠিক মোবাইল নম্বর দিন (013, 014, 015, 016, 017, 018, 019 দিয়ে শুরু হতে হবে এবং ১১ ডিজিটের হতে হবে)।");
-      setLoading(false);
+      showError("সঠিক মোবাইল নম্বর দিন (013, 014, 015, 016, 017, 018, 019 দিয়ে শুরু হতে হবে এবং ১১ ডিজিটের হতে হবে)।", "field-phone");
       return;
     }
     if (!isValidBdPhone(form.whatsapp)) {
-      setMessage("Error: সঠিক হোয়াটসঅ্যাপ নম্বর দিন (013, 014, 015, 016, 017, 018, 019 দিয়ে শুরু হতে হবে এবং ১১ ডিজিটের হতে হবে)।");
-      setLoading(false);
+      showError("সঠিক হোয়াটসঅ্যাপ নম্বর দিন (013, 014, 015, 016, 017, 018, 019 দিয়ে শুরু হতে হবে এবং ১১ ডিজিটের হতে হবে)।", "field-whatsapp");
       return;
     }
     if (!transactionId.trim()) {
-      setMessage("Error: ট্রানজেকশন আইডি আবশ্যক।");
-      setLoading(false);
+      showError("ট্রানজেকশন আইডি আবশ্যক।", "field-transactionId");
       return;
     }
     if (!lastFourDigits.trim() || lastFourDigits.length !== 4) {
-      setMessage("Error: পেয়িং নম্বরের শেষ ৪ ডিজিট আবশ্যক।");
-      setLoading(false);
+      showError("পেয়িং নম্বরের শেষ ৪ ডিজিট আবশ্যক।", "field-lastFourDigits");
       return;
     }
 
@@ -193,8 +206,32 @@ export default function RegistrationPage() {
           body: JSON.stringify(payload),
         }
       );
-      const data = await res.json();
-      if (res.ok && data.id) {
+      let data: string | Record<string, unknown>;
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        data = await res.text();
+      }
+
+      // Duplicate check — backend returns 400 with DUPLICATE_PHONE or DUPLICATE_WHATSAPP prefix
+      if (!res.ok && typeof data === "string") {
+        if (data.includes("DUPLICATE_PHONE")) {
+          showError(data.replace("DUPLICATE_PHONE: ", ""), "field-phone");
+          return;
+        }
+        if (data.includes("DUPLICATE_WHATSAPP")) {
+          showError(data.replace("DUPLICATE_WHATSAPP: ", ""), "field-whatsapp");
+          return;
+        }
+        showError(data || "সমস্যা হয়েছে", "form-message");
+        setTimeout(() => {
+          document.getElementById("form-message")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
+        return;
+      }
+
+      if (res.ok && typeof data === "object" && data !== null && "id" in data) {
         // Submit transaction with registration ID
         await fetch("/api/transactions/submit", {
           method: "POST",
@@ -206,6 +243,9 @@ export default function RegistrationPage() {
           }),
         });
         setMessage("আলহামদুলিল্লাহ! আপনার ফরমটি সফলভাবে ডাটাবেজে সংরক্ষিত হয়েছে।");
+        setTimeout(() => {
+          document.getElementById("form-message")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
         setSelectedDepartments([]);
         setSelectedOccupations([]);
         setTransactionId("");
@@ -229,17 +269,26 @@ export default function RegistrationPage() {
         setCurDistId("");
         setCurThanaId("");
       } else {
-        setMessage("Error: " + (data.message || "সমস্যা হয়েছে"));
+        const errMsg = typeof data === "string" ? data : ((data as Record<string, unknown>)?.message as string || "সমস্যা হয়েছে");
+        setMessage("Error: " + errMsg);
+        setTimeout(() => {
+          document.getElementById("form-message")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
       }
-    } catch {
-      setMessage("Error: সার্ভারে সংযোগ করা যায়নি।");
+    } catch (err) {
+      const msg = err instanceof Error && err.message ? err.message : "সার্ভারে সংযোগ করা যায়নি। ইন্টারনেট সংযোগ চেক করুন এবং আবার চেষ্টা করুন।";
+      setMessage("Error: " + msg);
+      setTimeout(() => {
+        document.getElementById("form-message")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
     } finally {
       setLoading(false);
     }
   };
 
-  const inputClass =
-    "w-full text-lg px-3 py-2 border rounded-sm bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500";
+  const inputClass = (fieldId?: string) =>
+    "w-full text-lg px-3 py-2 border rounded-sm bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500" +
+    (fieldId && errorField === fieldId ? " border-red-500 bg-red-50 ring-1 ring-red-500" : "");
 
   return (
     <div className="flex flex-col min-h-screen font-sans antialiased" style={{ backgroundColor: "#FFFFFF", color: "#064E3B" }}>
@@ -256,6 +305,7 @@ export default function RegistrationPage() {
 
           {message && (
             <div
+              id="form-message"
               className={`mb-6 p-3 rounded-sm text-lg font-medium ${
                 message.startsWith("Error")
                   ? "bg-red-50 text-red-700 border border-red-200"
@@ -283,7 +333,7 @@ export default function RegistrationPage() {
                     value={form.name}
                     onChange={handleChange}
                     placeholder="আপনার নাম"
-                    className={inputClass}
+                    className={inputClass()}
                     required
                   />
                 </div>
@@ -297,7 +347,7 @@ export default function RegistrationPage() {
                     value={form.fatherName}
                     onChange={handleChange}
                     placeholder="পিতার নাম"
-                    className={inputClass}
+                    className={inputClass()}
                     required
                   />
                 </div>
@@ -308,12 +358,13 @@ export default function RegistrationPage() {
                     মোবাইল নম্বর *
                   </label>
                   <input
+                    id="field-phone"
                     type="tel"
                     name="phone"
                     value={form.phone}
                     onChange={handlePhoneChange}
                     placeholder="01XXXXXXXXX"
-                    className={inputClass}
+                    className={inputClass("field-phone")}
                     maxLength={11}
                     pattern="\d{11}"
                     required
@@ -324,12 +375,13 @@ export default function RegistrationPage() {
                     হোয়াটসঅ্যাপ নম্বর *
                   </label>
                   <input
+                    id="field-whatsapp"
                     type="tel"
                     name="whatsapp"
                     value={form.whatsapp}
                     onChange={handlePhoneChange}
                     placeholder="01XXXXXXXXX"
-                    className={inputClass}
+                    className={inputClass("field-whatsapp")}
                     maxLength={11}
                     pattern="\d{11}"
                     required
@@ -352,7 +404,7 @@ export default function RegistrationPage() {
                     name="studyFrom"
                     value={form.studyFrom}
                     onChange={handleChange}
-                    className={inputClass}
+                    className={inputClass()}
                     required
                   >
                     <option value="">শুরুর বছর</option>
@@ -368,10 +420,11 @@ export default function RegistrationPage() {
                     অধ্যয়ন শেষ *
                   </label>
                   <select
+                    id="field-studyTo"
                     name="studyTo"
                     value={form.studyTo}
                     onChange={handleChange}
-                    className={inputClass}
+                    className={inputClass("field-studyTo")}
                     required
                   >
                     <option value="">শেষের বছর</option>
@@ -464,7 +517,7 @@ export default function RegistrationPage() {
                       setPermDistId("");
                       setPermThanaId("");
                     }}
-                    className={inputClass}
+                    className={inputClass()}
                     required
                   >
                     <option value="">বিভাগ নির্বাচন করুন</option>
@@ -485,7 +538,7 @@ export default function RegistrationPage() {
                       setPermDistId(e.target.value);
                       setPermThanaId("");
                     }}
-                    className={inputClass}
+                    className={inputClass()}
                     disabled={!permDivId}
                     required
                   >
@@ -504,7 +557,7 @@ export default function RegistrationPage() {
                   <select
                     value={permThanaId}
                     onChange={(e) => setPermThanaId(e.target.value)}
-                    className={inputClass}
+                    className={inputClass()}
                     disabled={!permDistId}
                     required
                   >
@@ -527,7 +580,7 @@ export default function RegistrationPage() {
                   onChange={handleChange}
                   rows={2}
                   placeholder="গ্রাম, ডাকঘর ইত্যাদি..."
-                  className={inputClass}
+                  className={inputClass()}
                   required
                 ></textarea>
               </div>
@@ -550,7 +603,7 @@ export default function RegistrationPage() {
                       setCurDistId("");
                       setCurThanaId("");
                     }}
-                    className={inputClass}
+                    className={inputClass()}
                     required
                   >
                     <option value="">বিভাগ নির্বাচন করুন</option>
@@ -571,7 +624,7 @@ export default function RegistrationPage() {
                       setCurDistId(e.target.value);
                       setCurThanaId("");
                     }}
-                    className={inputClass}
+                    className={inputClass()}
                     disabled={!curDivId}
                     required
                   >
@@ -590,7 +643,7 @@ export default function RegistrationPage() {
                   <select
                     value={curThanaId}
                     onChange={(e) => setCurThanaId(e.target.value)}
-                    className={inputClass}
+                    className={inputClass()}
                     disabled={!curDistId}
                     required
                   >
@@ -613,7 +666,7 @@ export default function RegistrationPage() {
                   onChange={handleChange}
                   rows={2}
                   placeholder="বাসা নম্বর, রোড, এলাকা ইত্যাদি..."
-                  className={inputClass}
+                  className={inputClass()}
                   required
                 ></textarea>
               </div>
@@ -707,7 +760,7 @@ export default function RegistrationPage() {
                     value={form.occupationDetails}
                     onChange={handleChange}
                     placeholder="প্রতিষ্ঠানের নাম, পদবী, বিবরণ"
-                    className={inputClass}
+                    className={inputClass()}
                   />
                 </div>
               </div>
@@ -817,11 +870,12 @@ export default function RegistrationPage() {
                   যে নাম্বার থেকে সেন্ডমানি করেছেন তার ট্রানজেকশন আইডি *
                     </label>
                     <input
+                      id="field-transactionId"
                       type="text"
                       value={transactionId}
                       onChange={(e) => setTransactionId(e.target.value)}
                       placeholder="ট্রানজেকশন আইডি লিখুন"
-                      className={inputClass}
+                      className={inputClass("field-transactionId")}
                       required
                     />
                   </div>
@@ -830,8 +884,10 @@ export default function RegistrationPage() {
                       যে  নম্বরের থেকে সেন্ডমানি করেছেন তার শেষ ৪ ডিজিট *
                     </label>
                     <input
+                      id="field-lastFourDigits"
                       type="text"
                       value={lastFourDigits}
+                      className={inputClass("field-lastFourDigits")}
                       onChange={(e) => {
                         const val = e.target.value;
                         if (val === "" || /^\d{0,4}$/.test(val)) {
@@ -839,7 +895,6 @@ export default function RegistrationPage() {
                         }
                       }}
                       placeholder="৪ ডিজিট"
-                      className={inputClass}
                       maxLength={4}
                       required
                     />

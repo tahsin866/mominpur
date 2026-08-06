@@ -38,6 +38,12 @@ public class RegistrationService {
         if (registration.getWhatsapp() == null || !registration.getWhatsapp().matches("^\\d{11}$")) {
             throw new RuntimeException("হোয়াটসঅ্যাপ নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
         }
+        if (registrationRepository.findByPhone(registration.getPhone()).isPresent()) {
+            throw new RuntimeException("DUPLICATE_PHONE: এই মোবাইল নম্বর (" + registration.getPhone() + ") দিয়ে ইতোমধ্যে রেজিস্ট্রেশন করা হয়েছে। একই মোবাইল নম্বর দিয়ে পুনরায় রেজিস্ট্রেশন করা যাবে না।");
+        }
+        if (registrationRepository.existsByWhatsapp(registration.getWhatsapp())) {
+            throw new RuntimeException("DUPLICATE_WHATSAPP: এই হোয়াটসঅ্যাপ নম্বর (" + registration.getWhatsapp() + ") দিয়ে ইতোমধ্যে রেজিস্ট্রেশন করা হয়েছে। একই হোয়াটসঅ্যাপ নম্বর দিয়ে পুনরায় রেজিস্ট্রেশন করা যাবে না।");
+        }
         registration.setGuestCount(FeeCalculator.normalizeGuestCount(registration.getGuestCount()));
         if (registration.getStatus() == null) {
             registration.setStatus("PENDING");
