@@ -176,8 +176,9 @@ public class RegistrationService {
                 .orElseThrow(() -> new RuntimeException("Registration not found with id: " + id));
         attachAddresses(existing);
         auditLogService.log("DELETE", id, "রেজিস্ট্রেশন মুছে ফেলা হয়েছে", existing, null, currentUser());
-        // foreign key-এর কারণে ঠিকানা আগে মুছতে হবে, নইলে ডিলিট আটকে যাবে।
+        // foreign key-এর কারণে ঠিকানা ও লেনদেন আগে মুছতে হবে, নইলে ডিলিট আটকে যাবে।
         addressRepository.deleteByRegistrationId(id);
+        transactionRepository.deleteByRegistrationId(id);
         registrationRepository.deleteById(id);
     }
 

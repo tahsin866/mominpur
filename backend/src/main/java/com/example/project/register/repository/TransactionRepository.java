@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findByRegistrationId(Long registrationId);
+
+    /** রেজিস্ট্রেশন মুছলে তার সব লেনদেনও মুছে ফেলার জন্য। */
+    void deleteByRegistrationId(Long registrationId);
 }
