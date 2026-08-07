@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -46,15 +45,25 @@ public class PhotoController {
         return ResponseEntity.ok(photoService.getPhotosBySection(section));
     }
 
-    @GetMapping("/file/{filename}")
-    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-        File file = Paths.get("uploads").resolve(filename).toFile();
+    @GetMapping("/{id}/file")
+    public ResponseEntity<Resource> getFile(@PathVariable Long id) {
+        Photo photo = photoService.getPhoto(id);
+        File file = new File(photo.getFilePath());
         if (!file.exists()) {
             return ResponseEntity.notFound().build();
         }
+
+        // Detect content type from extension
+        MediaType mediaType = MediaType.IMAGE_JPEG;
+        String name = file.getName().toLowerCase();
+        if (name.endsWith(".png")) mediaType = MediaType.IMAGE_PNG;
+        else if (name.endsWith(".gif")) mediaType = MediaType.IMAGE_GIF;
+        else if (name.endsWith(".webp")) mediaType = MediaType.parseMediaType("image/webp");
+        else if (name.endsWith(".svg")) mediaType = MediaType.parseMediaType("image/svg+xml");
+
         Resource resource = new FileSystemResource(file);
         return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
+                .contentType(mediaType)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
                 .body(resource);
     }

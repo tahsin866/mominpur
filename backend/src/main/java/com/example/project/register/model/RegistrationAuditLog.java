@@ -24,11 +24,11 @@ public class RegistrationAuditLog {
     private String details;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "new_value")
+    @Column(name = "new_value", columnDefinition = "jsonb")
     private Map<String, Object> newValue;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "old_value")
+    @Column(name = "old_value", columnDefinition = "jsonb")
     private Map<String, Object> oldValue;
 
     @Column(name = "performed_at")

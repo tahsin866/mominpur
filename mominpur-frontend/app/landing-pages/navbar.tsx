@@ -1,10 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { useState } from "react";
 
 const navLinks = [
-  { label: "মুমিনপুর সম্পর্কে", href: "#about" },
+  { label: "মুমিনপুর সম্পর্কে", href: "/#about" },
   { label: "আবেদন স্ট্যাটাস চেক", href: "/status" },
-  { label: "যোগাযোগ", href: "#contact" },
+  { label: "যোগাযোগ", href: "/#contact" },
 ];
 
 export default function Navbar() {

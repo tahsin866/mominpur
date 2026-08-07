@@ -17,9 +17,7 @@ public class Photo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String filename;
-
-    private String originalFilename;
+    private String filePath;
 
     private String contentType;
 

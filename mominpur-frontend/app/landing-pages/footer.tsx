@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 // গ্লোবাল ফন্ট কনফিগারেশন
-const BANGLA_FONT = "'Hind Siliguri', 'SolaimanLipi', 'Aneuro', sans-serif";
+const BANGLA_FONT = "'SolaimanLipi', sans-serif";
 
 export default function Footer() {
   return (

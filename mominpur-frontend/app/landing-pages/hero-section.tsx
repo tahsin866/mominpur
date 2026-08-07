@@ -7,18 +7,39 @@ import { StarMark } from "./components";
 
 const API = "";
 
-const fallbackSlides: { filename: string; alt: string; caption?: string }[] = [
+const fallbackSlides: { id?: number; filename: string; alt: string; caption?: string }[] = [
   { filename: "", alt: "ইত্তেহাদে আবনায়ে মুমিনপুর" },
 ];
 
 // বাংলা লেখার জন্য প্রিমিয়াম ফন্ট ফ্যামিলি
-const FONT_FAMILY = "'Hind Siliguri', 'SolaimanLipi', 'Aneuro', sans-serif";
+const FONT_FAMILY = "'SolaimanLipi', sans-serif";
 // সংখ্যার নিখুঁত ভিজ্যুয়াল ক্ল্যারিটির জন্য স্ট্যান্ডার্ড ফন্ট স্ট্যাক
 const NUMBER_FONT_FAMILY = "Inter, system-ui, -apple-system, sans-serif";
+
+const EVENT_DATE = new Date("2026-12-16T00:00:00+06:00").getTime();
+const bnDigit = (n: number) =>
+  String(n).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]);
 
 export default function HeroSection() {
   const [current, setCurrent] = useState(0);
   const [slides, setSlides] = useState(fallbackSlides);
+  const [countdown, setCountdown] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
+
+  useEffect(() => {
+    function tick() {
+      const diff = EVENT_DATE - Date.now();
+      if (diff <= 0) { setCountdown(null); return; }
+      setCountdown({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      });
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     fetch(`${API}/api/photos/section/hero`)
@@ -33,10 +54,11 @@ export default function HeroSection() {
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setSlides(
-            data.map((p: { filename: string; originalFilename: string }) => ({
-              filename: p.filename,
-              alt: p.originalFilename,
-              caption: p.originalFilename,
+            data.map((p: { id: number; filePath: string }) => ({
+              id: p.id,
+              filename: p.filePath,
+              alt: p.filePath,
+              caption: p.filePath,
             }))
           );
         } else {
@@ -52,10 +74,11 @@ export default function HeroSection() {
             .then((all) => {
               if (Array.isArray(all) && all.length > 0) {
                 setSlides(
-                  all.map((p: { filename: string; originalFilename: string }) => ({
-                    filename: p.filename,
-                    alt: p.originalFilename,
-                    caption: p.originalFilename,
+                  all.map((p: { id: number; filePath: string }) => ({
+                    id: p.id,
+                    filename: p.filePath,
+                    alt: p.filePath,
+                    caption: p.filePath,
                   }))
                 );
               }
@@ -91,7 +114,7 @@ export default function HeroSection() {
         >
           {slide.filename ? (
             <Image
-              src={`${API}/api/photos/file/${slide.filename}`}
+              src={`${API}/api/photos/${slide.id}/file`}
               alt={slide.alt}
               fill
               className="object-cover transform scale-105 transition-transform duration-[4000ms] ease-out"
@@ -135,7 +158,7 @@ export default function HeroSection() {
 
         {/* মেইন লার্জ ও টাইটেল টেক্সট */}
         <h1
-          className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-6 drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)] leading-[1.2]"
+          className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-black tracking-tight mb-6 drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)] leading-[1.2]"
           style={{ fontFamily: FONT_FAMILY, color: "#0A3D2A" }}
         >
           ইত্তেহাদে আবনায়ে মুমিনপুর
@@ -160,26 +183,37 @@ export default function HeroSection() {
           </Link>
         </div>
 
-        {/* ইনফরমেশন কার্ড প্যানেল (তারিখ ও স্থান) */}
-        <div 
-          className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 px-8 py-3.5 rounded-sm backdrop-blur-sm border transition-all duration-300 shadow-sm"
-          style={{ 
-            backgroundColor: "rgba(255, 255, 255, 0.75)", 
+        {/* ইনফরমেশন কার্ড প্যানেল (তারিখ, স্থান ও কাউন্টডাউন) */}
+        <div
+          className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-8 gap-y-2 sm:gap-y-3 px-4 sm:px-8 py-3 sm:py-3.5 rounded-sm backdrop-blur-sm border transition-all duration-300 shadow-sm"
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.75)",
             borderColor: "rgba(10,61,42,0.15)",
           }}
         >
-          <span className="flex items-center gap-2.5 text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
-            <StarMark className="w-3.5 h-4 text-emerald-800 shrink-0" />
+          <span className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
+            <StarMark className="w-3 h-3.5 sm:w-3.5 sm:h-4 text-emerald-800 shrink-0" />
             <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>১৬</span> ডিসেম্বর, <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>২০২৬</span>
           </span>
           <span className="hidden sm:inline text-emerald-800/30">|</span>
-          <span className="flex items-center gap-2.5 text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
+          <span className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-emerald-800">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
             </svg>
             মাদরাসা প্রাঙ্গন
           </span>
+          {countdown && (
+            <>
+              <span className="hidden sm:inline text-emerald-800/30">|</span>
+              <span className="flex items-center gap-2 text-sm sm:text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-emerald-800">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.days)}</span> দিন <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.hours)}</span> ঘণ্টা <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.minutes)}</span> মি. <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.seconds)}</span> সে.
+              </span>
+            </>
+          )}
         </div>
 
 

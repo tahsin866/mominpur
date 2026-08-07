@@ -13,6 +13,8 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // একই মোবাইল দিয়ে দ্বিতীয়বার যেন রেজিস্ট্রেশন না করতে পারে
     Optional<Registration> findByPhone(String phone);
 
+    boolean existsByWhatsapp(String whatsapp);
+
     long countByStatus(String status);
 
     List<Registration> findTop5ByOrderBySubmittedAtDesc();
