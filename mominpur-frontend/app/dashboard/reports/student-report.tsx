@@ -134,12 +134,25 @@ export default function StudentReport({ registrations }: { registrations: Regist
     };
   }
 
-  function handleExportPDF() {
+  async function handleExportPDF() {
     const { columns, rows } = getTableData();
-    const summaryLines = [
-      `Total: ${summary.total}, Approved: ${summary.approved}, Pending: ${summary.pending}, Rejected: ${summary.rejected}`,
-    ];
-    exportPDF("Student Report", columns, rows, summaryLines);
+    try {
+      await exportPDF({
+        title: "আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর",
+        subtitle: "স্টুডেন্ট রিপোর্ট",
+        details: [
+          { label: "মোট", value: `${summary.total.toLocaleString("en-US")}` },
+          { label: "অনুমোদিত", value: `${summary.approved.toLocaleString("en-US")}` },
+          { label: "পেন্ডিং", value: `${summary.pending.toLocaleString("en-US")}` },
+          { label: "বাতিল", value: `${summary.rejected.toLocaleString("en-US")}` },
+        ],
+        columns,
+        rows,
+      });
+    } catch (error) {
+      console.error("PDF export error:", error);
+      alert("দুঃখিত, PDF তৈরি করা যায়নি। আবার চেষ্টা করুন।");
+    }
   }
 
   function handleExportExcel() {
