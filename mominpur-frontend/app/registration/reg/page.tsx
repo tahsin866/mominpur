@@ -63,6 +63,7 @@ export default function RegistrationPage() {
     permanentAddressDetails: "",
     currentAddressDetails: "",
     occupationDetails: "",
+    bloodGroup: "",
   });
 
   // ব্যাকএন্ডের FeeCalculator.java-র সাথে মিল রাখতে হবে।
@@ -171,6 +172,10 @@ export default function RegistrationPage() {
     }
     if (!isValidBdPhone(form.whatsapp)) {
       showError("সঠিক হোয়াটসঅ্যাপ নম্বর দিন (013, 014, 015, 016, 017, 018, 019 দিয়ে শুরু হতে হবে এবং ১১ ডিজিটের হতে হবে)।", "field-whatsapp");
+      return;
+    }
+    if (!form.bloodGroup) {
+      showError("ব্লাড গ্রুপ নির্বাচন করুন।", "field-bloodGroup");
       return;
     }
     if (!receiverNumber) {
@@ -283,6 +288,7 @@ export default function RegistrationPage() {
           permanentAddressDetails: "",
           currentAddressDetails: "",
           occupationDetails: "",
+          bloodGroup: "",
         });
         setPermDivId("");
         setPermDistId("");
@@ -407,6 +413,26 @@ export default function RegistrationPage() {
                     pattern="\d{11}"
                     required
                   />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                    ব্লাড গ্রুপ *
+                  </label>
+                  <select
+                    id="field-bloodGroup"
+                    name="bloodGroup"
+                    value={form.bloodGroup}
+                    onChange={handleChange}
+                    className={inputClass("field-bloodGroup")}
+                    required
+                  >
+                    <option value="">ব্লাড গ্রুপ নির্বাচন করুন</option>
+                    {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
+                      <option key={bg} value={bg}>{bg}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>

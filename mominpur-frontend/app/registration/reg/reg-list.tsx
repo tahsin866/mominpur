@@ -8,6 +8,7 @@ interface Registration {
   fatherName: string;
   phone: string;
   whatsapp: string;
+  bloodGroup: string;
   studyFrom: string;
   studyTo: string;
   departments: string;
@@ -44,6 +45,7 @@ interface EditForm {
   fatherName: string;
   phone: string;
   whatsapp: string;
+  bloodGroup: string;
   studyFrom: string;
   studyTo: string;
   departments: string;
@@ -123,6 +125,7 @@ function EditModal({
     fatherName: reg.fatherName || "",
     phone: reg.phone || "",
     whatsapp: reg.whatsapp || "",
+    bloodGroup: reg.bloodGroup || "",
     studyFrom: reg.studyFrom || "",
     studyTo: reg.studyTo || "",
     departments: reg.departments || "",
@@ -141,7 +144,7 @@ function EditModal({
   const [error, setError] = useState("");
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -222,6 +225,15 @@ function EditModal({
             <div>
               <label className={labelClass}>হোয়াটসঅ্যাপ নম্বর *</label>
               <input type="tel" name="whatsapp" value={form.whatsapp} onChange={handleChange} maxLength={11} className={inputClass} required />
+            </div>
+            <div>
+              <label className={labelClass}>ব্লাড গ্রুপ *</label>
+              <select name="bloodGroup" value={form.bloodGroup} onChange={handleChange} className={inputClass} required>
+                <option value="">নির্বাচন করুন</option>
+                {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
+                  <option key={bg} value={bg}>{bg}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className={labelClass}>অধ্যয়ন শুরু *</label>
@@ -354,6 +366,7 @@ function DetailDrawer({
     { label: "পিতার নাম", value: reg.fatherName },
     { label: "ফোন", value: reg.phone },
     { label: "হোয়াটসঅ্যাপ", value: reg.whatsapp },
+    { label: "ব্লাড গ্রুপ", value: reg.bloodGroup },
     { label: "অধ্যয়নকাল", value: `${reg.studyFrom} - ${reg.studyTo}` },
     { label: "বিভাগ/জামাত", value: reg.departments },
     { label: "পেশা", value: reg.occupation },
@@ -458,8 +471,8 @@ function DetailDrawer({
                 const statusMeta = gtx.status === "APPROVED"
                   ? { label: "অনুমোদিত", cls: "text-emerald-700 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/50" }
                   : gtx.status === "REJECTED"
-                  ? { label: "বাতিল", cls: "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/50" }
-                  : { label: "পেন্ডিং", cls: "text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/50" };
+                    ? { label: "বাতিল", cls: "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/50" }
+                    : { label: "পেন্ডিং", cls: "text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/50" };
                 return (
                   <div key={gtx.id} className="bg-amber-50 dark:bg-amber-950/20 rounded-xl p-4 space-y-2 border border-amber-100 dark:border-amber-800">
                     <div className="flex items-center justify-between">
@@ -550,7 +563,11 @@ export default function RegList() {
   const [filterOccupation, setFilterOccupation] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterBloodGroup, setFilterBloodGroup] = useState("");
   const [filterReceiver, setFilterReceiver] = useState("");
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [verifyInputs, setVerifyInputs] = useState<Record<number, string>>({});
   const [expandedTx, setExpandedTx] = useState<Record<number, boolean>>({});
@@ -597,10 +614,16 @@ export default function RegList() {
     return [...new Set(all)];
   }, [registrations]);
 
+  const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+  const bloodGroups = useMemo(
+    () => BLOOD_GROUPS.filter((bg) => registrations.some((r) => r.bloodGroup === bg)),
+    [registrations]
+  );
+
   const receiverNumbers = useMemo(() => [...new Set(transactions.map((t) => t.receiverNumber).filter(Boolean))], [transactions]);
 
   const filtered = useMemo(() => {
-    return registrations.filter((r) => {
+    const result = registrations.filter((r) => {
       if (search) {
         const q = search.toLowerCase();
         if (![r.name, r.fatherName, r.phone, r.whatsapp].some((v) => v?.toLowerCase().includes(q))) return false;
@@ -613,17 +636,35 @@ export default function RegList() {
       if (filterThana && r.permanentThana !== filterThana) return false;
       if (filterOccupation && !r.occupation?.includes(filterOccupation)) return false;
       if (filterDepartment && !r.departments?.includes(filterDepartment)) return false;
+      if (filterBloodGroup && r.bloodGroup !== filterBloodGroup) return false;
       if (filterReceiver) {
         if (!transactions.some((t) => t.registrationId === r.id && t.receiverNumber === filterReceiver)) return false;
       }
       return true;
     });
-  }, [registrations, transactions, search, filterStatus, filterDivision, filterDistrict, filterThana, filterOccupation, filterDepartment, filterReceiver]);
+    return result.sort((a, b) => {
+      const da = a.submittedAt ? new Date(a.submittedAt).getTime() || 0 : 0;
+      const db = b.submittedAt ? new Date(b.submittedAt).getTime() || 0 : 0;
+      if (da !== db) return db - da;
+      return b.id - a.id;
+    });
+  }, [registrations, transactions, search, filterStatus, filterDivision, filterDistrict, filterThana, filterOccupation, filterDepartment, filterBloodGroup, filterReceiver]);
 
-  const hasFilters = !!(search || filterStatus || filterDivision || filterDistrict || filterThana || filterOccupation || filterDepartment || filterReceiver);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const pagedRows = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, filterStatus, filterDivision, filterDistrict, filterThana, filterOccupation, filterDepartment, filterBloodGroup, filterReceiver]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  const hasFilters = !!(search || filterStatus || filterDivision || filterDistrict || filterThana || filterOccupation || filterDepartment || filterBloodGroup || filterReceiver);
 
   const clearFilters = () => {
-    setSearch(""); setFilterStatus(""); setFilterDivision(""); setFilterDistrict(""); setFilterThana(""); setFilterOccupation(""); setFilterDepartment(""); setFilterReceiver("");
+    setSearch(""); setFilterStatus(""); setFilterDivision(""); setFilterDistrict(""); setFilterThana(""); setFilterOccupation(""); setFilterDepartment(""); setFilterBloodGroup(""); setFilterReceiver("");
   };
 
   const getTransaction = (regId: number) => transactions.find((t) => t.registrationId === regId && t.type !== "GUEST_ADD");
@@ -694,6 +735,10 @@ export default function RegList() {
     transactions.some((t) => t.registrationId === r.id && t.type === "GUEST_ADD" && t.status === "PENDING")
   ).length;
 
+  const approvedRegs = registrations.filter((r) => r.status === "APPROVED");
+  const registeredCount = approvedRegs.length;
+  const totalGuests = approvedRegs.reduce((sum, r) => sum + (r.guestCount || 0), 0);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -730,27 +775,24 @@ export default function RegList() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setFilterStatus(filterStatus === "PENDING" ? "" : "PENDING")}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${
-              filterStatus === "PENDING" ? "bg-amber-100 border-amber-300 text-amber-700" : "bg-white border-zinc-200 text-zinc-600 hover:border-amber-300 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
-            }`}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${filterStatus === "PENDING" ? "bg-amber-100 border-amber-300 text-amber-700" : "bg-white border-zinc-200 text-zinc-600 hover:border-amber-300 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
+              }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
             পেন্ডিং {pendingCount}
           </button>
           <button
             onClick={() => setFilterStatus(filterStatus === "APPROVED" ? "" : "APPROVED")}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${
-              filterStatus === "APPROVED" ? "bg-emerald-100 border-emerald-300 text-emerald-700" : "bg-white border-zinc-200 text-zinc-600 hover:border-emerald-300 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
-            }`}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${filterStatus === "APPROVED" ? "bg-emerald-100 border-emerald-300 text-emerald-700" : "bg-white border-zinc-200 text-zinc-600 hover:border-emerald-300 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
+              }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             অনুমোদিত {approvedCount}
           </button>
           <button
             onClick={() => setFilterStatus(filterStatus === "REJECTED" ? "" : "REJECTED")}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${
-              filterStatus === "REJECTED" ? "bg-red-100 border-red-300 text-red-700" : "bg-white border-zinc-200 text-zinc-600 hover:border-red-300 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
-            }`}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${filterStatus === "REJECTED" ? "bg-red-100 border-red-300 text-red-700" : "bg-white border-zinc-200 text-zinc-600 hover:border-red-300 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
+              }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
             বাতিল {rejectedCount}
@@ -771,11 +813,10 @@ export default function RegList() {
                   setExpandedTx(expanded);
                 }
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${
-                filterStatus === "GUEST_PENDING"
-                  ? "bg-orange-100 border-orange-300 text-orange-700"
-                  : "bg-orange-50 border-orange-200 text-orange-600 hover:border-orange-300 animate-pulse dark:bg-orange-950/30 dark:border-orange-800 dark:text-orange-400"
-              }`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${filterStatus === "GUEST_PENDING"
+                ? "bg-orange-100 border-orange-300 text-orange-700"
+                : "bg-orange-50 border-orange-200 text-orange-600 hover:border-orange-300 animate-pulse dark:bg-orange-950/30 dark:border-orange-800 dark:text-orange-400"
+                }`}
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
@@ -783,6 +824,22 @@ export default function RegList() {
               অতিথি আবেদন {guestPendingCount}
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Attendance report */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="bg-white rounded-xl border border-zinc-100 p-4 shadow-sm dark:bg-zinc-900 dark:border-zinc-800">
+          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">অনুমোদিত নিবন্ধন</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{registeredCount} <span className="text-sm font-medium text-zinc-400">জন</span></p>
+        </div>
+        <div className="bg-white rounded-xl border border-zinc-100 p-4 shadow-sm dark:bg-zinc-900 dark:border-zinc-800">
+          <p className="text-xs font-semibold uppercase tracking-wider text-amber-500 mb-1">অতিথি</p>
+          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{totalGuests} <span className="text-sm font-medium text-zinc-400">জন</span></p>
+        </div>
+        <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-1">সর্বমোট অংশগ্রহণকারী</p>
+          <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">{registeredCount + totalGuests} <span className="text-sm font-medium text-zinc-400">জন</span></p>
         </div>
       </div>
 
@@ -821,6 +878,10 @@ export default function RegList() {
             <option value="">সব শ্রেণী</option>
             {departmentsList.map((d) => <option key={d} value={d}>{d}</option>)}
           </select>
+          <select value={filterBloodGroup} onChange={(e) => setFilterBloodGroup(e.target.value)} className={selectClass}>
+            <option value="">সব ব্লাড গ্রুপ</option>
+            {bloodGroups.map((bg) => <option key={bg} value={bg}>{bg}</option>)}
+          </select>
           <select value={filterReceiver} onChange={(e) => setFilterReceiver(e.target.value)} className={selectClass}>
             <option value="">সব একাউন্ট</option>
             {receiverNumbers.map((n) => <option key={n} value={n}>{n}</option>)}
@@ -852,9 +913,10 @@ export default function RegList() {
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">#</th>
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">নাম</th>
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">ফোন</th>
-                <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">টাকা গ্রহণকারী</th>
-                <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">পড়াশোনা</th>
-                <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400 min-w-[200px]">ট্রানজেকশন যাচাই</th>
+                <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">ব্লাড গ্রুপ</th>
+                <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">পেয়িং নম্বর (শেষ ৪)</th>
+                <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400 min-w-[200px]">ট্রানজেকশন</th>
+                <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">রিসিভার</th>
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400 text-right">রেজি. ফি</th>
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400 text-right">প্রদত্ত</th>
                 <th className="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400 text-center">স্ট্যাটাস</th>
@@ -862,9 +924,9 @@ export default function RegList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
-              {filtered.length === 0 ? (
+              {pagedRows.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-5 py-16 text-center">
+                  <td colSpan={11} className="px-5 py-16 text-center">
                     <div className="flex flex-col items-center gap-2 text-zinc-400">
                       <svg className="w-10 h-10 text-zinc-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -874,13 +936,13 @@ export default function RegList() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((r, idx) => {
+                pagedRows.map((r, idx) => {
                   const tx = getTransaction(r.id);
                   const verified = isVerified(r.id);
                   const meta = STATUS[r.status] || STATUS.PENDING;
                   return (
                     <tr key={r.id} className="group hover:bg-zinc-50/80 dark:hover:bg-zinc-800/30 transition-colors">
-                      <td className="px-5 py-3.5 text-zinc-400 text-xs font-mono">{idx + 1}</td>
+                      <td className="px-5 py-3.5 text-zinc-400 text-xs font-mono">{(page - 1) * pageSize + idx + 1}</td>
                       <td className="px-5 py-3.5">
                         <button
                           onClick={() => setViewing(r)}
@@ -894,9 +956,21 @@ export default function RegList() {
                         <p className="text-zinc-700 dark:text-zinc-300 font-mono text-xs">{r.phone}</p>
                       </td>
                       <td className="px-5 py-3.5">
-                        <p className="text-zinc-500 dark:text-zinc-400 font-mono text-xs">{tx?.receiverNumber || "-"}</p>
+                        {r.bloodGroup ? (
+                          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-bold rounded-full bg-red-50 text-red-600 border border-red-100 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50">
+                            {r.bloodGroup}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-300 dark:text-zinc-600">-</span>
+                        )}
                       </td>
-                      <td className="px-5 py-3.5 text-zinc-500 dark:text-zinc-400">{r.studyFrom} - {r.studyTo}</td>
+                      <td className="px-5 py-3.5">
+                        {tx ? (
+                          <span className="text-zinc-700 dark:text-zinc-300 font-mono text-xs">****{tx.payingNumber}</span>
+                        ) : (
+                          <span className="text-xs text-zinc-300 dark:text-zinc-600">-</span>
+                        )}
+                      </td>
                       <td className="px-5 py-3.5">
                         {(() => {
                           const guestTxs = getGuestAddTransactions(r.id);
@@ -936,13 +1010,12 @@ export default function RegList() {
                                   placeholder="ID যাচাই করুন"
                                   value={verifyInputs[r.id] || ""}
                                   onChange={(e) => setVerifyInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
-                                  className={`text-xs font-mono px-2.5 py-1.5 border rounded-lg w-full focus:outline-none focus:ring-2 transition-colors ${
-                                    verified
-                                      ? "border-emerald-300 bg-emerald-50 text-emerald-700 focus:ring-emerald-500/20 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-400"
-                                      : (verifyInputs[r.id] || "").length > 0
+                                  className={`text-xs font-mono px-2.5 py-1.5 border rounded-lg w-full focus:outline-none focus:ring-2 transition-colors ${verified
+                                    ? "border-emerald-300 bg-emerald-50 text-emerald-700 focus:ring-emerald-500/20 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-400"
+                                    : (verifyInputs[r.id] || "").length > 0
                                       ? "border-red-300 bg-red-50 text-red-600 focus:ring-red-500/20 dark:bg-red-900/30 dark:border-red-700 dark:text-red-400"
                                       : "border-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 focus:ring-emerald-500/20"
-                                  }`}
+                                    }`}
                                 />
                               )}
 
@@ -1025,6 +1098,9 @@ export default function RegList() {
                           );
                         })()}
                       </td>
+                      <td className="px-5 py-3.5">
+                        <p className="text-zinc-500 dark:text-zinc-400 font-mono text-xs">{tx?.receiverNumber || "-"}</p>
+                      </td>
                       <td className="px-5 py-3.5 text-right">
                         {getAllTransactions(r.id).length > 0 ? (
                           <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{getTotalAmount(r.id)} &#2547;</span>
@@ -1034,13 +1110,12 @@ export default function RegList() {
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         {getAllTransactions(r.id).length > 0 ? (
-                          <span className={`text-sm font-bold ${
-                            getTotalPaid(r.id) >= getTotalAmount(r.id)
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : getTotalPaid(r.id) > 0
+                          <span className={`text-sm font-bold ${getTotalPaid(r.id) >= getTotalAmount(r.id)
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : getTotalPaid(r.id) > 0
                               ? "text-amber-600 dark:text-amber-400"
                               : "text-red-500"
-                          }`}>
+                            }`}>
                             {getTotalPaid(r.id)} &#2547;
                           </span>
                         ) : (
@@ -1080,11 +1155,10 @@ export default function RegList() {
                                 onClick={() => handleStatus(r.id, "APPROVED")}
                                 disabled={!verified}
                                 title={verified ? "" : "প্রথমে ট্রানজেকশন ID যাচাই করুন"}
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                                  verified
-                                    ? "text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm"
-                                    : "text-zinc-400 bg-zinc-100 cursor-not-allowed dark:text-zinc-500 dark:bg-zinc-800"
-                                }`}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${verified
+                                  ? "text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm"
+                                  : "text-zinc-400 bg-zinc-100 cursor-not-allowed dark:text-zinc-500 dark:bg-zinc-800"
+                                  }`}
                               >
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75" />
@@ -1121,6 +1195,77 @@ export default function RegList() {
           </table>
         </div>
       </div>
+
+      {/* Pagination */}
+      {filtered.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+            <span className="text-xs">প্রতি পৃষ্ঠায়</span>
+            <select
+              value={pageSize}
+              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+              className={selectClass}
+            >
+              <option value={10}>১০</option>
+              <option value={50}>৫০</option>
+              <option value={100}>১০০</option>
+            </select>
+            <span className="text-xs">
+              {Math.min((page - 1) * pageSize + 1, filtered.length)}-{Math.min(page * pageSize, filtered.length)} / {filtered.length} জন
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="inline-flex items-center gap-1 px-3 py-2 text-xs font-medium rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              আগে
+            </button>
+
+            {(() => {
+              const buttons: React.ReactNode[] = [];
+              let last = 0;
+              for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || Math.abs(i - page) <= 1) {
+                  if (i - last > 1) {
+                    buttons.push(<span key={`gap-${i}`} className="px-1 text-xs text-zinc-400">…</span>);
+                  }
+                  buttons.push(
+                    <button
+                      key={i}
+                      onClick={() => setPage(i)}
+                      className={`min-w-[32px] px-2 py-1.5 text-xs font-semibold rounded-lg transition-colors ${i === page
+                        ? "bg-emerald-600 text-white shadow-sm"
+                        : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                        }`}
+                    >
+                      {i}
+                    </button>
+                  );
+                  last = i;
+                }
+              }
+              return buttons;
+            })()}
+
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="inline-flex items-center gap-1 px-3 py-2 text-xs font-medium rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              পরে
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {editing && (
         <EditModal reg={editing} onClose={() => setEditing(null)} onSave={handleEditSave} />

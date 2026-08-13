@@ -1,5 +1,5 @@
 package com.example.project.register.controller;
-import com.example.project.register.model.Registration;
+import com.example.project.register.dto.RegistrationDTO;
 import com.example.project.register.model.Transaction;
 import com.example.project.register.service.FeeCalculator;
 import com.example.project.register.service.RegistrationService;
@@ -22,9 +22,9 @@ public class RegistrationController {
     private TransactionService transactionService;
 
     @PostMapping("/submit")
-    public ResponseEntity<?> submitRegistration(@RequestBody Registration registration) {
+    public ResponseEntity<?> submitRegistration(@RequestBody RegistrationDTO registration) {
         try {
-            Registration saved = registrationService.createRegistration(registration);
+            RegistrationDTO saved = registrationService.createRegistration(registration);
             return ResponseEntity.ok(saved);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -70,7 +70,7 @@ public class RegistrationController {
             String phone = (String) body.get("phone");
             int additionalGuests = ((Number) body.get("additionalGuests")).intValue();
 
-            Registration reg = registrationService.getRegistrationByPhone(phone)
+            RegistrationDTO reg = registrationService.getRegistrationByPhone(phone)
                     .orElseThrow(() -> new RuntimeException("এই নম্বরে কোনো রেজিস্ট্রেশন পাওয়া যায়নি।"));
 
             if (!"APPROVED".equals(reg.getStatus())) {
@@ -117,7 +117,7 @@ public class RegistrationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateRegistration(@PathVariable Long id, @RequestBody Registration registration) {
+    public ResponseEntity<?> updateRegistration(@PathVariable Long id, @RequestBody RegistrationDTO registration) {
         try {
             return ResponseEntity.ok(registrationService.updateRegistration(id, registration));
         } catch (Exception e) {

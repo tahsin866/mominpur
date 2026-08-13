@@ -1,5 +1,6 @@
 package com.example.project.register.service;
 
+import com.example.project.register.dto.RegistrationDTO;
 import com.example.project.register.model.Address;
 import com.example.project.register.model.AddressType;
 import com.example.project.register.model.Registration;
@@ -36,34 +37,35 @@ public class RegistrationService {
     private AuditLogService auditLogService;
 
     @Transactional
-    public Registration createRegistration(Registration registration) {
-        if (registration.getPhone() == null || !registration.getPhone().matches("^\\d{11}$")) {
+    public RegistrationDTO createRegistration(RegistrationDTO dto) {
+        if (dto.getPhone() == null || !dto.getPhone().matches("^\\d{11}$")) {
             throw new RuntimeException("মোবাইল নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
         }
-        if (registration.getWhatsapp() == null || !registration.getWhatsapp().matches("^\\d{11}$")) {
+        if (dto.getWhatsapp() == null || !dto.getWhatsapp().matches("^\\d{11}$")) {
             throw new RuntimeException("হোয়াটসঅ্যাপ নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
         }
-        if (registrationRepository.findByPhone(registration.getPhone()).isPresent()) {
-            throw new RuntimeException("DUPLICATE_PHONE: এই মোবাইল নম্বর (" + registration.getPhone() + ") দিয়ে ইতোমধ্যে রেজিস্ট্রেশন করা হয়েছে। একই মোবাইল নম্বর দিয়ে পুনরায় রেজিস্ট্রেশন করা যাবে না।");
+        if (registrationRepository.findByPhone(dto.getPhone()).isPresent()) {
+            throw new RuntimeException("DUPLICATE_PHONE: এই মোবাইল নম্বর (" + dto.getPhone() + ") দিয়ে ইতোমধ্যে রেজিস্ট্রেশন করা হয়েছে। একই মোবাইল নম্বর দিয়ে পুনরায় রেজিস্ট্রেশন করা যাবে না।");
         }
-        if (registrationRepository.existsByWhatsapp(registration.getWhatsapp())) {
-            throw new RuntimeException("DUPLICATE_WHATSAPP: এই হোয়াটসঅ্যাপ নম্বর (" + registration.getWhatsapp() + ") দিয়ে ইতোমধ্যে রেজিস্ট্রেশন করা হয়েছে। একই হোয়াটসঅ্যাপ নম্বর দিয়ে পুনরায় রেজিস্ট্রেশন করা যাবে না।");
+        if (registrationRepository.existsByWhatsapp(dto.getWhatsapp())) {
+            throw new RuntimeException("DUPLICATE_WHATSAPP: এই হোয়াটসঅ্যাপ নম্বর (" + dto.getWhatsapp() + ") দিয়ে ইতোমধ্যে রেজিস্ট্রেশন করা হয়েছে। একই হোয়াটসঅ্যাপ নম্বর দিয়ে পুনরায় রেজিস্ট্রেশন করা যাবে না।");
         }
-        registration.setGuestCount(FeeCalculator.normalizeGuestCount(registration.getGuestCount()));
+        Registration registration = new Registration();
+        copyFields(registration, dto);
+        registration.setGuestCount(FeeCalculator.normalizeGuestCount(dto.getGuestCount()));
         if (registration.getStatus() == null) {
             registration.setStatus("PENDING");
         }
         Registration saved = registrationRepository.save(registration);
         // ঠিকানা registrations টেবিলে নেই — আলাদা addresses টেবিলে যায়।
-        saveAddresses(saved, registration);
-        auditLogService.log("CREATE", saved.getId(), "নতুন রেজিস্ট্রেশন তৈরি হয়েছে", null, saved, currentUser());
-        return saved;
+        saveAddresses(saved, dto);
+        auditLogService.log("CREATE", saved.getId(), "নতুন রেজিস্ট্রেশন তৈরি হয়েছে", null, buildResponse(saved, dto), currentUser());
+        return buildResponse(saved, dto);
     }
 
-    public List<Registration> getAllRegistrations() {
+    public List<RegistrationDTO> getAllRegistrations() {
         List<Registration> registrations = registrationRepository.findAll();
-        attachAddresses(registrations);
-        return registrations;
+        return attachAddresses(registrations);
     }
 
     public Map<String, Object> getStats() {
@@ -96,11 +98,11 @@ public class RegistrationService {
         return stats;
     }
 
-    public Optional<Registration> getRegistrationById(Long id) {
+    public Optional<RegistrationDTO> getRegistrationById(Long id) {
         return registrationRepository.findById(id).map(this::attachAddresses);
     }
 
-    public Optional<Registration> getRegistrationByPhone(String phone) {
+    public Optional<RegistrationDTO> getRegistrationByPhone(String phone) {
         return registrationRepository.findByPhone(phone).map(this::attachAddresses);
     }
 
@@ -131,51 +133,35 @@ public class RegistrationService {
     }
 
     @Transactional
-    public Registration updateRegistration(Long id, Registration updated) {
-        if (updated.getPhone() == null || !updated.getPhone().matches("^\\d{11}$")) {
+    public RegistrationDTO updateRegistration(Long id, RegistrationDTO dto) {
+        if (dto.getPhone() == null || !dto.getPhone().matches("^\\d{11}$")) {
             throw new RuntimeException("মোবাইল নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
         }
-        if (updated.getWhatsapp() == null || !updated.getWhatsapp().matches("^\\d{11}$")) {
+        if (dto.getWhatsapp() == null || !dto.getWhatsapp().matches("^\\d{11}$")) {
             throw new RuntimeException("হোয়াটসঅ্যাপ নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
         }
         Registration existing = registrationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Registration not found with id: " + id));
         // পুরনো ঠিকানাও স্ন্যাপশটে থাকা দরকার, নইলে অডিট লগে ঠিকানার পরিবর্তন হারিয়ে যাবে।
-        attachAddresses(existing);
-        Map<String, Object> oldSnapshot = auditLogService.toMap(existing);
-        existing.setName(updated.getName());
-        existing.setFatherName(updated.getFatherName());
-        existing.setPhone(updated.getPhone());
-        existing.setWhatsapp(updated.getWhatsapp());
-        existing.setStudyFrom(updated.getStudyFrom());
-        existing.setStudyTo(updated.getStudyTo());
-        existing.setDepartments(updated.getDepartments());
-        existing.setPermanentDivision(updated.getPermanentDivision());
-        existing.setPermanentDistrict(updated.getPermanentDistrict());
-        existing.setPermanentThana(updated.getPermanentThana());
-        existing.setPermanentAddressDetails(updated.getPermanentAddressDetails());
-        existing.setCurrentDivision(updated.getCurrentDivision());
-        existing.setCurrentDistrict(updated.getCurrentDistrict());
-        existing.setCurrentThana(updated.getCurrentThana());
-        existing.setCurrentAddressDetails(updated.getCurrentAddressDetails());
-        existing.setOccupation(updated.getOccupation());
-        existing.setOccupationDetails(updated.getOccupationDetails());
+        RegistrationDTO oldDto = attachAddresses(existing);
+        copyFields(existing, dto);
         // অ্যাডমিন এডিট ফর্ম guestCount পাঠায় না — না পাঠালে আগেরটাই থাকবে, মুছে যাবে না।
-        if (updated.getGuestCount() != null) {
-            existing.setGuestCount(FeeCalculator.normalizeGuestCount(updated.getGuestCount()));
+        if (dto.getGuestCount() != null) {
+            existing.setGuestCount(FeeCalculator.normalizeGuestCount(dto.getGuestCount()));
         }
         Registration saved = registrationRepository.save(existing);
-        saveAddresses(saved, existing);
-        auditLogService.log("UPDATE", id, "রেজিস্ট্রেশন তথ্য আপডেট হয়েছে", oldSnapshot, saved, currentUser());
-        return saved;
+        saveAddresses(saved, dto);
+        RegistrationDTO newDto = buildResponse(saved, dto);
+        auditLogService.log("UPDATE", id, "রেজিস্ট্রেশন তথ্য আপডেট হয়েছে", oldDto, newDto, currentUser());
+        return newDto;
     }
 
     @Transactional
     public void deleteRegistration(Long id) {
         Registration existing = registrationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Registration not found with id: " + id));
-        attachAddresses(existing);
-        auditLogService.log("DELETE", id, "রেজিস্ট্রেশন মুছে ফেলা হয়েছে", existing, null, currentUser());
+        RegistrationDTO oldDto = attachAddresses(existing);
+        auditLogService.log("DELETE", id, "রেজিস্ট্রেশন মুছে ফেলা হয়েছে", oldDto, null, currentUser());
         // foreign key-এর কারণে ঠিকানা ও লেনদেন আগে মুছতে হবে, নইলে ডিলিট আটকে যাবে।
         addressRepository.deleteByRegistrationId(id);
         transactionRepository.deleteByRegistrationId(id);
@@ -183,11 +169,59 @@ public class RegistrationService {
     }
 
     // ------------------------------------------------------------------
-    // ঠিকানা: registrations টেবিলের কলাম ↔ addresses টেবিলের সারি
+    // Mapping helpers: entity ↔ DTO, ঠিকানা: addresses টেবিলের সারি ↔ DTO
     // ------------------------------------------------------------------
 
+    private void copyFields(Registration target, RegistrationDTO source) {
+        target.setName(source.getName());
+        target.setFatherName(source.getFatherName());
+        target.setPhone(source.getPhone());
+        target.setWhatsapp(source.getWhatsapp());
+        target.setBloodGroup(source.getBloodGroup());
+        target.setStudyFrom(source.getStudyFrom());
+        target.setStudyTo(source.getStudyTo());
+        target.setDepartments(source.getDepartments());
+        target.setOccupation(source.getOccupation());
+        target.setOccupationDetails(source.getOccupationDetails());
+    }
+
+    private RegistrationDTO toDto(Registration r) {
+        RegistrationDTO dto = new RegistrationDTO();
+        dto.setId(r.getId());
+        dto.setName(r.getName());
+        dto.setFatherName(r.getFatherName());
+        dto.setPhone(r.getPhone());
+        dto.setWhatsapp(r.getWhatsapp());
+        dto.setBloodGroup(r.getBloodGroup());
+        dto.setStudyFrom(r.getStudyFrom());
+        dto.setStudyTo(r.getStudyTo());
+        dto.setDepartments(r.getDepartments());
+        dto.setOccupation(r.getOccupation());
+        dto.setOccupationDetails(r.getOccupationDetails());
+        dto.setGuestCount(r.getGuestCount());
+        dto.setStatus(r.getStatus());
+        dto.setSubmittedAt(r.getSubmittedAt());
+        return dto;
+    }
+
+    /** entity + ফর্ম-সোর্সের ঠিকানা মিলিয়ে API ফেরত দেওয়ার অবজেক্ট বানায়। */
+    private RegistrationDTO buildResponse(Registration saved, RegistrationDTO addressSource) {
+        RegistrationDTO dto = toDto(saved);
+        if (addressSource != null) {
+            dto.setPermanentDivision(addressSource.getPermanentDivision());
+            dto.setPermanentDistrict(addressSource.getPermanentDistrict());
+            dto.setPermanentThana(addressSource.getPermanentThana());
+            dto.setPermanentAddressDetails(addressSource.getPermanentAddressDetails());
+            dto.setCurrentDivision(addressSource.getCurrentDivision());
+            dto.setCurrentDistrict(addressSource.getCurrentDistrict());
+            dto.setCurrentThana(addressSource.getCurrentThana());
+            dto.setCurrentAddressDetails(addressSource.getCurrentAddressDetails());
+        }
+        return dto;
+    }
+
     /** ফরম থেকে আসা ঠিকানা দুটি সারি হিসেবে সেভ করে (থাকলে আপডেট, না থাকলে নতুন)। */
-    private void saveAddresses(Registration saved, Registration source) {
+    private void saveAddresses(Registration saved, RegistrationDTO source) {
         List<Address> existing = addressRepository.findByRegistrationId(saved.getId());
 
         Address permanent = pick(existing, AddressType.PERMANENT);
@@ -207,9 +241,6 @@ public class RegistrationService {
         current.setAddressDetails(source.getCurrentAddressDetails());
 
         addressRepository.saveAll(List.of(permanent, current));
-
-        // ফেরত দেওয়া অবজেক্টেও ঠিকানা থাকুক, যাতে ফ্রন্টএন্ড সাথে সাথেই দেখাতে পারে।
-        copyAddressFields(saved, source);
     }
 
     private Address pick(List<Address> addresses, AddressType type) {
@@ -219,50 +250,43 @@ public class RegistrationService {
                 .orElseGet(Address::new);
     }
 
-    /** এক রেজিস্ট্রেশনের ঠিকানা addresses টেবিল থেকে তুলে transient ফিল্ডে বসায়। */
-    private Registration attachAddresses(Registration registration) {
-        applyAddresses(registration, addressRepository.findByRegistrationId(registration.getId()));
-        return registration;
+    /** এক রেজিস্ট্রেশনের ঠিকানা addresses টেবিল থেকে তুলে DTO-তে বসায়। */
+    private RegistrationDTO attachAddresses(Registration registration) {
+        RegistrationDTO dto = toDto(registration);
+        applyAddresses(dto, addressRepository.findByRegistrationId(registration.getId()));
+        return dto;
     }
 
     /** তালিকার জন্য — সব ঠিকানা এক কোয়েরিতে এনে বণ্টন করে। */
-    private void attachAddresses(List<Registration> registrations) {
+    private List<RegistrationDTO> attachAddresses(List<Registration> registrations) {
         if (registrations.isEmpty()) {
-            return;
+            return List.of();
         }
         List<Long> ids = registrations.stream().map(Registration::getId).toList();
         Map<Long, List<Address>> byRegistration = addressRepository.findByRegistrationIdIn(ids)
                 .stream()
                 .collect(Collectors.groupingBy(Address::getRegistrationId));
-        registrations.forEach(r ->
-                applyAddresses(r, byRegistration.getOrDefault(r.getId(), List.of())));
+        return registrations.stream().map(r -> {
+            RegistrationDTO dto = toDto(r);
+            applyAddresses(dto, byRegistration.getOrDefault(r.getId(), List.of()));
+            return dto;
+        }).toList();
     }
 
-    private void applyAddresses(Registration registration, List<Address> addresses) {
+    private void applyAddresses(RegistrationDTO dto, List<Address> addresses) {
         for (Address address : addresses) {
             if (address.getAddressType() == AddressType.PERMANENT) {
-                registration.setPermanentDivision(address.getDivision());
-                registration.setPermanentDistrict(address.getDistrict());
-                registration.setPermanentThana(address.getThana());
-                registration.setPermanentAddressDetails(address.getAddressDetails());
+                dto.setPermanentDivision(address.getDivision());
+                dto.setPermanentDistrict(address.getDistrict());
+                dto.setPermanentThana(address.getThana());
+                dto.setPermanentAddressDetails(address.getAddressDetails());
             } else if (address.getAddressType() == AddressType.CURRENT) {
-                registration.setCurrentDivision(address.getDivision());
-                registration.setCurrentDistrict(address.getDistrict());
-                registration.setCurrentThana(address.getThana());
-                registration.setCurrentAddressDetails(address.getAddressDetails());
+                dto.setCurrentDivision(address.getDivision());
+                dto.setCurrentDistrict(address.getDistrict());
+                dto.setCurrentThana(address.getThana());
+                dto.setCurrentAddressDetails(address.getAddressDetails());
             }
         }
-    }
-
-    private void copyAddressFields(Registration target, Registration source) {
-        target.setPermanentDivision(source.getPermanentDivision());
-        target.setPermanentDistrict(source.getPermanentDistrict());
-        target.setPermanentThana(source.getPermanentThana());
-        target.setPermanentAddressDetails(source.getPermanentAddressDetails());
-        target.setCurrentDivision(source.getCurrentDivision());
-        target.setCurrentDistrict(source.getCurrentDistrict());
-        target.setCurrentThana(source.getCurrentThana());
-        target.setCurrentAddressDetails(source.getCurrentAddressDetails());
     }
 
     private String currentUser() {
