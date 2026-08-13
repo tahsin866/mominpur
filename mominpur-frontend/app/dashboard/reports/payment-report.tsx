@@ -16,20 +16,34 @@ interface Transaction {
   createdAt: string;
 }
 
-type ViewMode = "date" | "month" | "receiver";
+interface Registration {
+  id: number;
+  name: string;
+  phone: string;
+  status: string;
+}
+
+type ViewMode = "date" | "month" | "receiver" | "detail";
 
 const inputClass =
   "w-full text-sm px-3 py-2 border border-zinc-200 rounded-lg bg-white dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors";
 const labelClass = "block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1";
 
-export default function PaymentReport({ transactions }: { transactions: Transaction[] }) {
+export default function PaymentReport({ transactions, registrations }: { transactions: Transaction[]; registrations: Registration[] }) {
   const [view, setView] = useState<ViewMode>("date");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [receiverFilter, setReceiverFilter] = useState("");
 
+  const approvedRegIds = useMemo(
+    () => new Set(registrations.filter((r) => r.status === "APPROVED").map((r) => r.id)),
+    [registrations]
+  );
+
   const filtered = useMemo(() => {
-    let list = transactions;
+    let list = transactions.filter(
+      (t) => t.status === "APPROVED" && approvedRegIds.has(t.registrationId)
+    );
     if (dateFrom) {
       const from = new Date(dateFrom);
       list = list.filter((t) => new Date(t.createdAt) >= from);
@@ -43,7 +57,7 @@ export default function PaymentReport({ transactions }: { transactions: Transact
       list = list.filter((t) => t.receiverNumber === receiverFilter);
     }
     return list;
-  }, [transactions, dateFrom, dateTo, receiverFilter]);
+  }, [transactions, approvedRegIds, dateFrom, dateTo, receiverFilter]);
 
   const receiverNumbers = useMemo(
     () => [...new Set(transactions.map((t) => t.receiverNumber))].filter(Boolean),
@@ -51,28 +65,37 @@ export default function PaymentReport({ transactions }: { transactions: Transact
   );
 
   const summary = useMemo(() => {
-    const approved = filtered.filter((t) => t.status === "APPROVED");
-    const pending = filtered.filter((t) => t.status === "PENDING");
-    const totalIncome = approved.reduce((s, t) => s + t.paidAmount, 0);
-    const pendingIncome = pending.reduce((s, t) => s + t.paidAmount, 0);
+    const totalIncome = filtered.reduce((s, t) => s + t.paidAmount, 0);
 
     const perReceiver: Record<string, number> = {};
-    approved.forEach((t) => {
+    filtered.forEach((t) => {
       perReceiver[t.receiverNumber] = (perReceiver[t.receiverNumber] || 0) + t.paidAmount;
     });
 
-    return { totalIncome, pendingIncome, approvedCount: approved.length, pendingCount: pending.length, perReceiver };
+    return { totalIncome, approvedCount: filtered.length, perReceiver };
   }, [filtered]);
 
+  const systemTotal = useMemo(
+    () => filtered.reduce((s, t) => s + (t.totalAmount || 0), 0),
+    [filtered]
+  );
+
+  const dateRangeLabel = useMemo(() => {
+    if (filtered.length === 0) return "-";
+    const times = filtered.map((t) => new Date(t.createdAt).getTime()).filter((n) => !isNaN(n));
+    if (times.length === 0) return "-";
+    const from = dateFrom ? formatDate(dateFrom) : formatDate(new Date(Math.min(...times)).toISOString());
+    const to = dateTo ? formatDate(dateTo) : formatDate(new Date(Math.max(...times)).toISOString());
+    return `${from} থেকে ${to} পর্যন্ত`;
+  }, [filtered, dateFrom, dateTo]);
+
   const dateWise = useMemo(() => {
-    const map: Record<string, { count: number; total: number; approved: number; pending: number }> = {};
+    const map: Record<string, { count: number; total: number }> = {};
     filtered.forEach((t) => {
       const key = new Date(t.createdAt).toISOString().split("T")[0];
-      if (!map[key]) map[key] = { count: 0, total: 0, approved: 0, pending: 0 };
+      if (!map[key]) map[key] = { count: 0, total: 0 };
       map[key].count++;
       map[key].total += t.paidAmount;
-      if (t.status === "APPROVED") map[key].approved += t.paidAmount;
-      if (t.status === "PENDING") map[key].pending += t.paidAmount;
     });
     return Object.entries(map)
       .sort(([a], [b]) => b.localeCompare(a))
@@ -80,15 +103,13 @@ export default function PaymentReport({ transactions }: { transactions: Transact
   }, [filtered]);
 
   const monthWise = useMemo(() => {
-    const map: Record<string, { count: number; total: number; approved: number; pending: number }> = {};
+    const map: Record<string, { count: number; total: number }> = {};
     filtered.forEach((t) => {
       const d = new Date(t.createdAt);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      if (!map[key]) map[key] = { count: 0, total: 0, approved: 0, pending: 0 };
+      if (!map[key]) map[key] = { count: 0, total: 0 };
       map[key].count++;
       map[key].total += t.paidAmount;
-      if (t.status === "APPROVED") map[key].approved += t.paidAmount;
-      if (t.status === "PENDING") map[key].pending += t.paidAmount;
     });
     return Object.entries(map)
       .sort(([a], [b]) => b.localeCompare(a))
@@ -96,14 +117,12 @@ export default function PaymentReport({ transactions }: { transactions: Transact
   }, [filtered]);
 
   const receiverWise = useMemo(() => {
-    const map: Record<string, { count: number; total: number; approved: number; pending: number }> = {};
+    const map: Record<string, { count: number; total: number }> = {};
     filtered.forEach((t) => {
       const key = t.receiverNumber || "Unknown";
-      if (!map[key]) map[key] = { count: 0, total: 0, approved: 0, pending: 0 };
+      if (!map[key]) map[key] = { count: 0, total: 0 };
       map[key].count++;
       map[key].total += t.paidAmount;
-      if (t.status === "APPROVED") map[key].approved += t.paidAmount;
-      if (t.status === "PENDING") map[key].pending += t.paidAmount;
     });
     return Object.entries(map).map(([number, d]) => ({ number, ...d }));
   }, [filtered]);
@@ -112,35 +131,79 @@ export default function PaymentReport({ transactions }: { transactions: Transact
     { key: "date", label: "Date Wise" },
     { key: "month", label: "Month Wise" },
     { key: "receiver", label: "Receiver Wise" },
+    { key: "detail", label: "Detailed" },
   ];
+
+  const regMap = useMemo(() => {
+    const m = new Map<number, Registration>();
+    registrations.forEach((r) => m.set(r.id, r));
+    return m;
+  }, [registrations]);
+
+  const detailRows = useMemo(
+    () =>
+      filtered
+        .map((t) => {
+          const reg = regMap.get(t.registrationId);
+          return {
+            date: t.createdAt,
+            name: reg?.name || "-",
+            phone: reg?.phone || "-",
+            payingNumber: t.payingNumber || "-",
+            transactionId: t.transactionId || "-",
+            receiverNumber: t.receiverNumber || "-",
+            amount: t.paidAmount,
+          };
+        })
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [filtered, regMap]
+  );
 
   function getTableData(): { columns: string[]; rows: (string | number)[][] } {
     if (view === "date") {
       return {
-        columns: ["Date", "Transactions", "Total Amount", "Approved", "Pending"],
-        rows: dateWise.map((d) => [formatDate(d.date), d.count, d.total, d.approved, d.pending]),
+        columns: ["Date", "Transactions", "Total Amount"],
+        rows: dateWise.map((d) => [formatDate(d.date), d.count, d.total]),
       };
     }
     if (view === "month") {
       return {
-        columns: ["Month", "Transactions", "Total Amount", "Approved", "Pending"],
-        rows: monthWise.map((d) => [formatMonth(d.month), d.count, d.total, d.approved, d.pending]),
+        columns: ["Month", "Transactions", "Total Amount"],
+        rows: monthWise.map((d) => [formatMonth(d.month), d.count, d.total]),
+      };
+    }
+    if (view === "detail") {
+      return {
+        columns: ["SL", "Date", "Name", "Phone", "Last 4", "Transaction ID", "Receiver", "Amount"],
+        rows: detailRows.map((d, i) => [i + 1, formatDate(d.date), d.name, d.phone, d.payingNumber, d.transactionId, d.receiverNumber, d.amount]),
       };
     }
     return {
-      columns: ["Number", "Total Transactions", "Total Amount", "Approved Amount", "Pending Amount"],
-      rows: receiverWise.map((d) => [d.number, d.count, d.total, d.approved, d.pending]),
+      columns: ["Number", "Total Transactions", "Total Amount"],
+      rows: receiverWise.map((d) => [d.number, d.count, d.total]),
     };
   }
 
-  function handleExportPDF() {
+  async function handleExportPDF() {
     const { columns, rows } = getTableData();
-    const summaryLines = [
-      `Total Approved Income: ${summary.totalIncome} BDT`,
-      `Pending Income: ${summary.pendingIncome} BDT`,
-      `Total Transactions: ${filtered.length}`,
-    ];
-    exportPDF("Payment Report", columns, rows, summaryLines);
+    try {
+      await exportPDF({
+        title: "আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর",
+        subtitle: "নিবন্ধন পেমেন্ট রিপোর্ট",
+        details: [
+          { label: "তারিখ", value: dateRangeLabel },
+          { label: "রিসিভার নম্বর", value: receiverFilter || "সকল" },
+          { label: "সিস্টেম টোটাল", value: `${systemTotal.toLocaleString("en-US")} BDT` },
+          { label: "প্রদত্ত টোটাল", value: `${summary.totalIncome.toLocaleString("en-US")} BDT` },
+          { label: "মোট ট্রানজেকশন", value: `${filtered.length.toLocaleString("en-US")}` },
+        ],
+        columns,
+        rows,
+      });
+    } catch (error) {
+      console.error("PDF export error:", error);
+      alert("দুঃখিত, PDF তৈরি করা যায়নি। আবার চেষ্টা করুন।");
+    }
   }
 
   function handleExportExcel() {
@@ -150,26 +213,29 @@ export default function PaymentReport({ transactions }: { transactions: Transact
         columns: ["Description", "Value"],
         rows: [
           ["Total Approved Income", summary.totalIncome],
-          ["Pending Income", summary.pendingIncome],
           ["Approved Transactions", summary.approvedCount],
-          ["Pending Transactions", summary.pendingCount],
           ...Object.entries(summary.perReceiver).map(([num, amt]) => [`${num} Income`, amt]),
         ],
       },
       {
         name: "Date Wise",
-        columns: ["Date", "Transactions", "Total Amount", "Approved", "Pending"],
-        rows: dateWise.map((d) => [d.date, d.count, d.total, d.approved, d.pending]),
+        columns: ["Date", "Transactions", "Total Amount"],
+        rows: dateWise.map((d) => [d.date, d.count, d.total]),
       },
       {
         name: "Month Wise",
-        columns: ["Month", "Transactions", "Total Amount", "Approved", "Pending"],
-        rows: monthWise.map((d) => [d.month, d.count, d.total, d.approved, d.pending]),
+        columns: ["Month", "Transactions", "Total Amount"],
+        rows: monthWise.map((d) => [d.month, d.count, d.total]),
       },
       {
         name: "Receiver Wise",
-        columns: ["Number", "Total Transactions", "Total Amount", "Approved Amount", "Pending Amount"],
-        rows: receiverWise.map((d) => [d.number, d.count, d.total, d.approved, d.pending]),
+        columns: ["Number", "Total Transactions", "Total Amount"],
+        rows: receiverWise.map((d) => [d.number, d.count, d.total]),
+      },
+      {
+        name: "Detailed",
+        columns: ["SL", "Date", "Name", "Phone", "Last 4", "Transaction ID", "Receiver", "Amount"],
+        rows: detailRows.map((d, i) => [i + 1, d.date, d.name, d.phone, d.payingNumber, d.transactionId, d.receiverNumber, d.amount]),
       },
     ]);
   }
@@ -217,8 +283,8 @@ export default function PaymentReport({ transactions }: { transactions: Transact
           <div className="absolute -right-3 -bottom-3 w-16 h-16 rounded-full bg-white/10" />
         </div>
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 p-4 text-white shadow-sm">
-          <p className="text-xs font-medium text-white/80 uppercase tracking-wider">Pending Income</p>
-          <p className="text-2xl font-bold mt-1">{summary.pendingIncome.toLocaleString()} <span className="text-sm font-normal">BDT</span></p>
+          <p className="text-xs font-medium text-white/80 uppercase tracking-wider">System Total</p>
+          <p className="text-2xl font-bold mt-1">{systemTotal.toLocaleString()} <span className="text-sm font-normal">BDT</span></p>
           <div className="absolute -right-3 -bottom-3 w-16 h-16 rounded-full bg-white/10" />
         </div>
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 p-4 text-white shadow-sm">

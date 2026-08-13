@@ -155,7 +155,7 @@ export default function ReportsPage() {
 
       {/* Tab content */}
       {tab === "payment" ? (
-        <PaymentReport transactions={transactions} />
+        <PaymentReport transactions={transactions} registrations={registrations} />
       ) : (
         <StudentReport registrations={registrations} />
       )}
