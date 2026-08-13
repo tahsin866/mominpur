@@ -13,9 +13,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ARG BACKEND_URL
-ENV BACKEND_URL=$BACKEND_URL
-
 RUN npm run build
 
 # Runner stage

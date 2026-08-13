@@ -22,8 +22,6 @@ services:
     build:
       context: ./mominpur-frontend
       dockerfile: Dockerfile
-      args:
-        BACKEND_URL: http://backend:8080
     ports:
       - "3005:3000" # বাইরে ৩০০৫ (কনফ্লিক্ট এড়াতে), ভেতরে ৩০০০
     environment:

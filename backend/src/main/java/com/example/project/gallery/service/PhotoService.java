@@ -24,7 +24,7 @@ public class PhotoService {
     private String uploadDir;
 
     public Photo upload(MultipartFile file, String section) throws IOException {
-        Path uploadPath = Paths.get(uploadDir);
+        Path uploadPath = Paths.get(uploadDir).resolve("photos");
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
