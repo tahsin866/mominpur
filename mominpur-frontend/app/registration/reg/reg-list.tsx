@@ -227,8 +227,8 @@ function EditModal({
               <input type="tel" name="whatsapp" value={form.whatsapp} onChange={handleChange} maxLength={11} className={inputClass} required />
             </div>
             <div>
-              <label className={labelClass}>ব্লাড গ্রুপ *</label>
-              <select name="bloodGroup" value={form.bloodGroup} onChange={handleChange} className={inputClass} required>
+              <label className={labelClass}>ব্লাড গ্রুপ</label>
+              <select name="bloodGroup" value={form.bloodGroup} onChange={handleChange} className={inputClass}>
                 <option value="">নির্বাচন করুন</option>
                 {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
                   <option key={bg} value={bg}>{bg}</option>

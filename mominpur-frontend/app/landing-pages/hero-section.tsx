@@ -83,10 +83,10 @@ export default function HeroSection() {
                 );
               }
             })
-            .catch(() => {});
+            .catch(() => { });
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const next = useCallback(() => {
@@ -143,12 +143,12 @@ export default function HeroSection() {
 
       {/* মূল কন্টেন্ট কন্টেইনার */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full max-w-5xl mx-auto px-4 text-center">
-        
+
         {/* সাব-হেডিং এনভায়রনমেন্ট */}
         <div className="flex items-center justify-center gap-3 mb-6" style={{ color: "#0A3D2A" }}>
           <span className="h-[1px] w-12 bg-emerald-800/30" />
-          <span 
-            className="text-sm md:text-base font-semibold tracking-[0.25em] uppercase" 
+          <span
+            className="text-sm md:text-base font-semibold tracking-[0.25em] uppercase"
             style={{ fontFamily: FONT_FAMILY, color: "#0A3D2A" }}
           >
             ঐতিহাসিক পুনর্মিলনী ও স্মৃতিচারণ <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>২০২৬</span>
@@ -165,11 +165,11 @@ export default function HeroSection() {
         </h1>
 
         {/* ডেসক্রিপশন টেক্সট - সংখ্যাগুলোকে আলাদা স্প্যানে নিয়ে ফন্ট ফিক্স করা হয়েছে */}
-        <p 
-          className="max-w-2xl mx-auto text-base md:text-xl mb-10 font-medium leading-relaxed" 
+        <p
+          className="max-w-2xl mx-auto text-base md:text-xl mb-10 font-medium leading-relaxed"
           style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}
         >
-          স্মৃতির টানে, চেনা প্রাঙ্গণে... <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>১৯৬৪</span> সাল থেকে <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>২০২৬</span> সকল প্রাক্তনের স্মৃতিচারণ ও পুনর্মিলনী।
+          স্মৃতির টানে, চেনা প্রাঙ্গণে... <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>১৯৬৪</span> সাল থেকে <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>২০২৫</span> সকল প্রাক্তনের স্মৃতিচারণ ও পুনর্মিলনী।
         </p>
 
         {/* রেজিস্ট্রেশন কল-টু-অ্যাকশন বাটন */}
