@@ -12,9 +12,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://76.13.183.6:5432/mominpur
       - SPRING_DATASOURCE_USERNAME=mominpur_user
       - SPRING_DATASOURCE_PASSWORD=7xr&d6Wn@XQm4aK&
-      - UPLOAD_DIR=/run/media/aljami/New Volume/muminpur
+      - UPLOAD_DIR=/root/mominpur/storage
     volumes:
-      - "/run/media/aljami/New Volume/muminpur:/run/media/aljami/New Volume/muminpur"
+      - "/root/mominpur/storage:/root/mominpur/storage"
     restart: always
 
   # ফ্রন্টএন্ড সার্ভিস
