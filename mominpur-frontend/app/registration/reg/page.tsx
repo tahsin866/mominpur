@@ -121,12 +121,9 @@ export default function RegistrationPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const isValidBdPhone = (value: string) =>
-    /^01[3-9]\d{8}$/.test(value);
-
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (value === "" || /^\d{0,11}$/.test(value)) {
+    if (value === "" || /^\d*$/.test(value)) {
       setForm({ ...form, [name]: value });
     }
   };
@@ -166,12 +163,12 @@ export default function RegistrationPage() {
       return;
     }
 
-    if (!isValidBdPhone(form.phone)) {
-      showError("সঠিক মোবাইল নম্বর দিন (013, 014, 015, 016, 017, 018, 019 দিয়ে শুরু হতে হবে এবং ১১ ডিজিটের হতে হবে)।", "field-phone");
+    if (!form.phone.trim()) {
+      showError("মোবাইল নম্বর আবশ্যক।", "field-phone");
       return;
     }
-    if (!isValidBdPhone(form.whatsapp)) {
-      showError("সঠিক হোয়াটসঅ্যাপ নম্বর দিন (013, 014, 015, 016, 017, 018, 019 দিয়ে শুরু হতে হবে এবং ১১ ডিজিটের হতে হবে)।", "field-whatsapp");
+    if (!form.whatsapp.trim()) {
+      showError("হোয়াটসঅ্যাপ নম্বর আবশ্যক।", "field-whatsapp");
       return;
     }
     if (!receiverNumber) {
@@ -388,8 +385,6 @@ export default function RegistrationPage() {
                     onChange={handlePhoneChange}
                     placeholder="01XXXXXXXXX"
                     className={inputClass("field-phone")}
-                    maxLength={11}
-                    pattern="\d{11}"
                     required
                   />
                 </div>
@@ -405,8 +400,6 @@ export default function RegistrationPage() {
                     onChange={handlePhoneChange}
                     placeholder="01XXXXXXXXX"
                     className={inputClass("field-whatsapp")}
-                    maxLength={11}
-                    pattern="\d{11}"
                     required
                   />
                 </div>
