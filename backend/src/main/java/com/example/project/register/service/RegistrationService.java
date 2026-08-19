@@ -38,11 +38,11 @@ public class RegistrationService {
 
     @Transactional
     public RegistrationDTO createRegistration(RegistrationDTO dto) {
-        if (dto.getPhone() == null || !dto.getPhone().matches("^\\d{11}$")) {
-            throw new RuntimeException("মোবাইল নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
+        if (dto.getPhone() == null || dto.getPhone().trim().isEmpty()) {
+            throw new RuntimeException("মোবাইল নম্বর আবশ্যক।");
         }
-        if (dto.getWhatsapp() == null || !dto.getWhatsapp().matches("^\\d{11}$")) {
-            throw new RuntimeException("হোয়াটসঅ্যাপ নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
+        if (dto.getWhatsapp() == null || dto.getWhatsapp().trim().isEmpty()) {
+            throw new RuntimeException("হোয়াটসঅ্যাপ নম্বর আবশ্যক।");
         }
         if (registrationRepository.findByPhone(dto.getPhone()).isPresent()) {
             throw new RuntimeException("DUPLICATE_PHONE: এই মোবাইল নম্বর (" + dto.getPhone() + ") দিয়ে ইতোমধ্যে রেজিস্ট্রেশন করা হয়েছে। একই মোবাইল নম্বর দিয়ে পুনরায় রেজিস্ট্রেশন করা যাবে না।");
@@ -134,11 +134,11 @@ public class RegistrationService {
 
     @Transactional
     public RegistrationDTO updateRegistration(Long id, RegistrationDTO dto) {
-        if (dto.getPhone() == null || !dto.getPhone().matches("^\\d{11}$")) {
-            throw new RuntimeException("মোবাইল নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
+        if (dto.getPhone() == null || dto.getPhone().trim().isEmpty()) {
+            throw new RuntimeException("মোবাইল নম্বর আবশ্যক।");
         }
-        if (dto.getWhatsapp() == null || !dto.getWhatsapp().matches("^\\d{11}$")) {
-            throw new RuntimeException("হোয়াটসঅ্যাপ নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
+        if (dto.getWhatsapp() == null || dto.getWhatsapp().trim().isEmpty()) {
+            throw new RuntimeException("হোয়াটসঅ্যাপ নম্বর আবশ্যক।");
         }
         Registration existing = registrationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Registration not found with id: " + id));
@@ -212,10 +212,12 @@ public class RegistrationService {
             dto.setPermanentDistrict(addressSource.getPermanentDistrict());
             dto.setPermanentThana(addressSource.getPermanentThana());
             dto.setPermanentAddressDetails(addressSource.getPermanentAddressDetails());
+            dto.setPermanentCountry(addressSource.getPermanentCountry());
             dto.setCurrentDivision(addressSource.getCurrentDivision());
             dto.setCurrentDistrict(addressSource.getCurrentDistrict());
             dto.setCurrentThana(addressSource.getCurrentThana());
             dto.setCurrentAddressDetails(addressSource.getCurrentAddressDetails());
+            dto.setCurrentCountry(addressSource.getCurrentCountry());
         }
         return dto;
     }
@@ -231,6 +233,7 @@ public class RegistrationService {
         permanent.setDistrict(source.getPermanentDistrict());
         permanent.setThana(source.getPermanentThana());
         permanent.setAddressDetails(source.getPermanentAddressDetails());
+        permanent.setCountry(source.getPermanentCountry());
 
         Address current = pick(existing, AddressType.CURRENT);
         current.setRegistrationId(saved.getId());
@@ -239,6 +242,7 @@ public class RegistrationService {
         current.setDistrict(source.getCurrentDistrict());
         current.setThana(source.getCurrentThana());
         current.setAddressDetails(source.getCurrentAddressDetails());
+        current.setCountry(source.getCurrentCountry());
 
         addressRepository.saveAll(List.of(permanent, current));
     }
@@ -280,11 +284,13 @@ public class RegistrationService {
                 dto.setPermanentDistrict(address.getDistrict());
                 dto.setPermanentThana(address.getThana());
                 dto.setPermanentAddressDetails(address.getAddressDetails());
+                dto.setPermanentCountry(address.getCountry());
             } else if (address.getAddressType() == AddressType.CURRENT) {
                 dto.setCurrentDivision(address.getDivision());
                 dto.setCurrentDistrict(address.getDistrict());
                 dto.setCurrentThana(address.getThana());
                 dto.setCurrentAddressDetails(address.getAddressDetails());
+                dto.setCurrentCountry(address.getCountry());
             }
         }
     }

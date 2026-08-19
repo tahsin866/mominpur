@@ -142,6 +142,9 @@ export default function RegistrationPage() {
 
   const [errorField, setErrorField] = useState("");
   const [sameAddress, setSameAddress] = useState(false);
+  const [isForeign, setIsForeign] = useState(false);
+  const [foreignCountry, setForeignCountry] = useState("");
+  const [foreignAddressDetails, setForeignAddressDetails] = useState("");
 
   const showError = (msg: string, fieldId: string) => {
     setMessage("Error: " + msg);
@@ -194,22 +197,34 @@ export default function RegistrationPage() {
       guestCount,
       departments: selectedDepartments.join(", "),
       occupation: selectedOccupations.join(", "),
-      permanentDivision:
-        permDivisions.find((d) => String(d.id) === permDivId)?.division || "",
-      permanentDistrict:
-        permDistricts.find((d) => String(d.desId) === permDistId)?.district ||
-        "",
-      permanentThana:
-        permThanas.find((t) => String(t.id) === permThanaId)?.thana || "",
-      currentDivision: sameAddress
-        ? permDivisions.find((d) => String(d.id) === permDivId)?.division || ""
-        : curDivisions.find((d) => String(d.id) === curDivId)?.division || "",
-      currentDistrict: sameAddress
-        ? permDistricts.find((d) => String(d.desId) === permDistId)?.district || ""
-        : curDistricts.find((d) => String(d.desId) === curDistId)?.district || "",
-      currentThana: sameAddress
-        ? permThanas.find((t) => String(t.id) === permThanaId)?.thana || ""
-        : curThanas.find((t) => String(t.id) === curThanaId)?.thana || "",
+      permanentDivision: isForeign
+        ? ""
+        : permDivisions.find((d) => String(d.id) === permDivId)?.division || "",
+      permanentDistrict: isForeign
+        ? ""
+        : permDistricts.find((d) => String(d.desId) === permDistId)?.district || "",
+      permanentThana: isForeign
+        ? ""
+        : permThanas.find((t) => String(t.id) === permThanaId)?.thana || "",
+      permanentAddressDetails: isForeign ? foreignAddressDetails : form.permanentAddressDetails,
+      permanentCountry: isForeign ? foreignCountry : "",
+      currentDivision: isForeign
+        ? ""
+        : sameAddress
+          ? permDivisions.find((d) => String(d.id) === permDivId)?.division || ""
+          : curDivisions.find((d) => String(d.id) === curDivId)?.division || "",
+      currentDistrict: isForeign
+        ? ""
+        : sameAddress
+          ? permDistricts.find((d) => String(d.desId) === permDistId)?.district || ""
+          : curDistricts.find((d) => String(d.desId) === curDistId)?.district || "",
+      currentThana: isForeign
+        ? ""
+        : sameAddress
+          ? permThanas.find((t) => String(t.id) === permThanaId)?.thana || ""
+          : curThanas.find((t) => String(t.id) === curThanaId)?.thana || "",
+      currentAddressDetails: isForeign ? foreignAddressDetails : form.currentAddressDetails,
+      currentCountry: isForeign ? foreignCountry : "",
     };
 
     try {
@@ -271,6 +286,9 @@ export default function RegistrationPage() {
         setPaidAmount("");
         setGuestCount(0);
         setSameAddress(false);
+        setIsForeign(false);
+        setForeignCountry("");
+        setForeignAddressDetails("");
         setForm({
           name: "",
           fatherName: "",
@@ -306,6 +324,20 @@ export default function RegistrationPage() {
       setLoading(false);
     }
   };
+
+  const COUNTRIES = [
+    "Afghanistan", "Algeria", "Argentina", "Australia", "Bahrain", "Bangladesh", "Belgium",
+    "Brazil", "Brunei", "Cambodia", "Canada", "China", "Cyprus", "Denmark",
+    "Egypt", "Finland", "France", "Germany", "Ghana", "Greece", "Hungary",
+    "India", "Indonesia", "Iran", "Iraq", "Ireland", "Italy", "Japan",
+    "Jordan", "Kazakhstan", "Kenya", "Kuwait", "Lebanon", "Libya", "Malaysia",
+    "Maldives", "Morocco", "Myanmar", "Nepal", "Netherlands", "New Zealand",
+    "Nigeria", "Norway", "Oman", "Pakistan", "Palestine", "Philippines", "Poland",
+    "Qatar", "Romania", "Russia", "Saudi Arabia", "Singapore", "Somalia", "South Africa",
+    "South Korea", "Spain", "Sri Lanka", "Sudan", "Sweden", "Switzerland",
+    "Syria", "Taiwan", "Tanzania", "Thailand", "Tunisia", "Turkey", "UAE",
+    "Uganda", "United Kingdom", "United States", "Uzbekistan", "Vietnam", "Yemen",
+  ];
 
   const inputClass = (fieldId?: string) =>
     "w-full text-base px-3 py-2 border rounded-sm bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500" +
@@ -535,210 +567,283 @@ export default function RegistrationPage() {
 
             {/* 3. Permanent Address */}
             <div className="space-y-3">
-              <h3 className="text-lg font-bold border-b pb-1" style={{ color: "#0A3D2A", borderColor: "rgba(10,61,42,0.15)" }}>
-                স্থায়ী ঠিকানা
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    বিভাগ *
-                  </label>
-                  <select
-                    value={permDivId}
-                    onChange={(e) => {
-                      setPermDivId(e.target.value);
-                      setPermDistId("");
-                      setPermThanaId("");
-                    }}
-                    className={inputClass()}
-                    required
-                  >
-                    <option value="">{divisionsLoading ? "লোড হচ্ছে..." : "বিভাগ নির্বাচন করুন"}</option>
-                    {permDivisions.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.division}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    জেলা *
-                  </label>
-                  <select
-                    value={permDistId}
-                    onChange={(e) => {
-                      setPermDistId(e.target.value);
-                      setPermThanaId("");
-                    }}
-                    className={inputClass()}
-                    disabled={!permDivId}
-                    required
-                  >
-                    <option value="">জেলা নির্বাচন করুন</option>
-                    {permDistricts.map((d) => (
-                      <option key={d.desId} value={d.desId}>
-                        {d.district}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    থানা *
-                  </label>
-                  <select
-                    value={permThanaId}
-                    onChange={(e) => setPermThanaId(e.target.value)}
-                    className={inputClass()}
-                    disabled={!permDistId}
-                    required
-                  >
-                    <option value="">থানা নির্বাচন করুন</option>
-                    {permThanas.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.thana}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                  গ্রাম/ঠিকানার বিস্তারিত *
-                </label>
-                <textarea
-                  name="permanentAddressDetails"
-                  value={form.permanentAddressDetails}
-                  onChange={handleChange}
-                  rows={2}
-                  placeholder="গ্রাম, ডাকঘর ইত্যাদি..."
-                  className={inputClass()}
-                  required
-                ></textarea>
-              </div>
-            </div>
-
-            {/* 4. Current Address */}
-            <div className="space-y-3">
               <div className="flex items-center justify-between border-b pb-1" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
                 <h3 className="text-lg font-bold" style={{ color: "#0A3D2A" }}>
-                  বর্তমান ঠিকানা
+                  স্থায়ী ঠিকানা
                 </h3>
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
                     type="checkbox"
-                    checked={sameAddress}
+                    checked={isForeign}
                     onChange={(e) => {
                       const checked = e.target.checked;
-                      setSameAddress(checked);
+                      setIsForeign(checked);
                       if (checked) {
-                        setCurDivId(permDivId);
-                        setCurDistId(permDistId);
-                        setCurThanaId(permThanaId);
-                        setForm((prev) => ({
-                          ...prev,
-                          currentAddressDetails: prev.permanentAddressDetails,
-                        }));
-                      } else {
+                        setPermDivId("");
+                        setPermDistId("");
+                        setPermThanaId("");
                         setCurDivId("");
                         setCurDistId("");
                         setCurThanaId("");
-                        setForm((prev) => ({
-                          ...prev,
-                          currentAddressDetails: "",
-                        }));
+                        setSameAddress(false);
+                        setForm((prev) => ({ ...prev, permanentAddressDetails: "", currentAddressDetails: "" }));
+                      } else {
+                        setForeignCountry("");
+                        setForeignAddressDetails("");
                       }
                     }}
                     className="w-4 h-4 accent-emerald-700 rounded"
                   />
                   <span className="text-sm font-medium" style={{ color: "#064E3B" }}>
-                    স্থায়ী ঠিকানার সাথে একই
+                    প্রবাসী/বিদেশি
                   </span>
                 </label>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              {isForeign ? (
+                <div className="space-y-4 p-4 rounded-sm" style={{ backgroundColor: "#F0FDF4", border: "1px solid rgba(10,61,42,0.15)" }}>
+                  <p className="text-sm font-semibold" style={{ color: "#064E3B" }}>
+                    বিদেশি ঠিকানা
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                        দেশ *
+                      </label>
+                      <select
+                        value={foreignCountry}
+                        onChange={(e) => setForeignCountry(e.target.value)}
+                        className={inputClass()}
+                        required
+                      >
+                        <option value="">দেশ নির্বাচন করুন</option>
+                        {COUNTRIES.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                      বিস্তারিত ঠিকানা *
+                    </label>
+                    <textarea
+                      value={foreignAddressDetails}
+                      onChange={(e) => setForeignAddressDetails(e.target.value)}
+                      rows={3}
+                      placeholder="শহর, এলাকা, পোস্টাল কোড, ফোন নম্বর ইত্যাদি..."
+                      className={inputClass()}
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                        বিভাগ *
+                      </label>
+                      <select
+                        value={permDivId}
+                        onChange={(e) => {
+                          setPermDivId(e.target.value);
+                          setPermDistId("");
+                          setPermThanaId("");
+                        }}
+                        className={inputClass()}
+                        required
+                      >
+                        <option value="">{divisionsLoading ? "লোড হচ্ছে..." : "বিভাগ নির্বাচন করুন"}</option>
+                        {permDivisions.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.division}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                        জেলা *
+                      </label>
+                      <select
+                        value={permDistId}
+                        onChange={(e) => {
+                          setPermDistId(e.target.value);
+                          setPermThanaId("");
+                        }}
+                        className={inputClass()}
+                        disabled={!permDivId}
+                        required
+                      >
+                        <option value="">জেলা নির্বাচন করুন</option>
+                        {permDistricts.map((d) => (
+                          <option key={d.desId} value={d.desId}>
+                            {d.district}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                        থানা *
+                      </label>
+                      <select
+                        value={permThanaId}
+                        onChange={(e) => setPermThanaId(e.target.value)}
+                        className={inputClass()}
+                        disabled={!permDistId}
+                        required
+                      >
+                        <option value="">থানা নির্বাচন করুন</option>
+                        {permThanas.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.thana}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                      গ্রাম/ঠিকানার বিস্তারিত *
+                    </label>
+                    <textarea
+                      name="permanentAddressDetails"
+                      value={form.permanentAddressDetails}
+                      onChange={handleChange}
+                      rows={2}
+                      placeholder="গ্রাম, ডাকঘর ইত্যাদি..."
+                      className={inputClass()}
+                      required
+                    ></textarea>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* 4. Current Address — only when NOT foreign */}
+            {!isForeign && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b pb-1" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
+                  <h3 className="text-lg font-bold" style={{ color: "#0A3D2A" }}>
+                    বর্তমান ঠিকানা
+                  </h3>
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={sameAddress}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setSameAddress(checked);
+                        if (checked) {
+                          setCurDivId(permDivId);
+                          setCurDistId(permDistId);
+                          setCurThanaId(permThanaId);
+                          setForm((prev) => ({
+                            ...prev,
+                            currentAddressDetails: prev.permanentAddressDetails,
+                          }));
+                        } else {
+                          setCurDivId("");
+                          setCurDistId("");
+                          setCurThanaId("");
+                          setForm((prev) => ({
+                            ...prev,
+                            currentAddressDetails: "",
+                          }));
+                        }
+                      }}
+                      className="w-4 h-4 accent-emerald-700 rounded"
+                    />
+                    <span className="text-sm font-medium" style={{ color: "#064E3B" }}>
+                      স্থায়ী ঠিকানার সাথে একই
+                    </span>
+                  </label>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                      বিভাগ *
+                    </label>
+                    <select
+                      value={sameAddress ? permDivId : curDivId}
+                      onChange={(e) => {
+                        setCurDivId(e.target.value);
+                        setCurDistId("");
+                        setCurThanaId("");
+                      }}
+                      className={inputClass()}
+                      disabled={sameAddress}
+                      required
+                    >
+                      <option value="">{divisionsLoading ? "লোড হচ্ছে..." : "বিভাগ নির্বাচন করুন"}</option>
+                      {curDivisions.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.division}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                      জেলা *
+                    </label>
+                    <select
+                      value={sameAddress ? permDistId : curDistId}
+                      onChange={(e) => {
+                        setCurDistId(e.target.value);
+                        setCurThanaId("");
+                      }}
+                      className={inputClass()}
+                      disabled={sameAddress || !(sameAddress ? permDivId : curDivId)}
+                      required
+                    >
+                      <option value="">জেলা নির্বাচন করুন</option>
+                      {(sameAddress ? permDistricts : curDistricts).map((d) => (
+                        <option key={d.desId} value={d.desId}>
+                          {d.district}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
+                      থানা *
+                    </label>
+                    <select
+                      value={sameAddress ? permThanaId : curThanaId}
+                      onChange={(e) => setCurThanaId(e.target.value)}
+                      className={inputClass()}
+                      disabled={sameAddress || !(sameAddress ? permDistId : curDistId)}
+                      required
+                    >
+                      <option value="">থানা নির্বাচন করুন</option>
+                      {(sameAddress ? permThanas : curThanas).map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.thana}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    বিভাগ *
+                    বর্তমান ঠিকানার বিস্তারিত *
                   </label>
-                  <select
-                    value={sameAddress ? permDivId : curDivId}
-                    onChange={(e) => {
-                      setCurDivId(e.target.value);
-                      setCurDistId("");
-                      setCurThanaId("");
-                    }}
+                  <textarea
+                    name="currentAddressDetails"
+                    value={sameAddress ? form.permanentAddressDetails : form.currentAddressDetails}
+                    onChange={handleChange}
+                    rows={2}
+                    placeholder="বাসা নম্বর, রোড, এলাকা ইত্যাদি..."
                     className={inputClass()}
                     disabled={sameAddress}
                     required
-                  >
-                    <option value="">{divisionsLoading ? "লোড হচ্ছে..." : "বিভাগ নির্বাচন করুন"}</option>
-                    {curDivisions.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.division}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    জেলা *
-                  </label>
-                  <select
-                    value={sameAddress ? permDistId : curDistId}
-                    onChange={(e) => {
-                      setCurDistId(e.target.value);
-                      setCurThanaId("");
-                    }}
-                    className={inputClass()}
-                    disabled={sameAddress || !(sameAddress ? permDivId : curDivId)}
-                    required
-                  >
-                    <option value="">জেলা নির্বাচন করুন</option>
-                    {(sameAddress ? permDistricts : curDistricts).map((d) => (
-                      <option key={d.desId} value={d.desId}>
-                        {d.district}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    থানা *
-                  </label>
-                  <select
-                    value={sameAddress ? permThanaId : curThanaId}
-                    onChange={(e) => setCurThanaId(e.target.value)}
-                    className={inputClass()}
-                    disabled={sameAddress || !(sameAddress ? permDistId : curDistId)}
-                    required
-                  >
-                    <option value="">থানা নির্বাচন করুন</option>
-                    {(sameAddress ? permThanas : curThanas).map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.thana}
-                      </option>
-                    ))}
-                  </select>
+                  ></textarea>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                  বর্তমান ঠিকানার বিস্তারিত *
-                </label>
-                <textarea
-                  name="currentAddressDetails"
-                  value={sameAddress ? form.permanentAddressDetails : form.currentAddressDetails}
-                  onChange={handleChange}
-                  rows={2}
-                  placeholder="বাসা নম্বর, রোড, এলাকা ইত্যাদি..."
-                  className={inputClass()}
-                  disabled={sameAddress}
-                  required
-                ></textarea>
-              </div>
-            </div>
+            )}
 
             {/* 5. Occupation & Security */}
             <div className="space-y-3">

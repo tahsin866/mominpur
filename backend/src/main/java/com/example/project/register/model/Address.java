@@ -29,6 +29,8 @@ public class Address {
 
     private String thana;
 
+    private String country;
+
     @Column(name = "address_details", columnDefinition = "TEXT")
     private String addressDetails;
 }
