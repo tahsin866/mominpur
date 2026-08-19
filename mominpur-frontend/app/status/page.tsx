@@ -45,8 +45,8 @@ export default function StatusPage() {
     setResult(null);
     setShowGuestForm(false);
 
-    if (!/^\d{11}$/.test(phone)) {
-      setError("অনুগ্রহ করে ১১ ডিজিটের মোবাইল নম্বর দিন।");
+    if (!phone.trim()) {
+      setError("মোবাইল নম্বর দিন।");
       setLoading(false);
       return;
     }
@@ -108,9 +108,7 @@ export default function StatusPage() {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="01XXXXXXXXX"
-              maxLength={11}
-              pattern="\d{11}"
+              placeholder="মোবাইল নম্বর লিখুন"
               className="flex-1 text-base sm:text-lg px-4 py-3 border rounded-sm bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
               style={{ borderColor: "rgba(10,61,42,0.2)" }}
               required
