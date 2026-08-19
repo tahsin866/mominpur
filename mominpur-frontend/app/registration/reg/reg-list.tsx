@@ -25,6 +25,8 @@ interface Registration {
   status: string;
   submittedAt: string;
   guestCount: number;
+  permanentCountry: string;
+  currentCountry: string;
 }
 
 interface Transaction {
@@ -59,6 +61,8 @@ interface EditForm {
   currentAddressDetails: string;
   occupation: string;
   occupationDetails: string;
+  permanentCountry: string;
+  currentCountry: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -139,6 +143,8 @@ function EditModal({
     currentAddressDetails: reg.currentAddressDetails || "",
     occupation: reg.occupation || "",
     occupationDetails: reg.occupationDetails || "",
+    permanentCountry: reg.permanentCountry || "",
+    currentCountry: reg.currentCountry || "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -258,24 +264,37 @@ function EditModal({
               </svg>
               স্থায়ী ঠিকানা
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className={labelClass}>বিভাগ *</label>
-                <input name="permanentDivision" value={form.permanentDivision} onChange={handleChange} className={inputClass} required />
+            {form.permanentCountry ? (
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>দেশ</label>
+                  <input name="permanentCountry" value={form.permanentCountry} onChange={handleChange} className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>বিস্তারিত *</label>
+                  <textarea name="permanentAddressDetails" value={form.permanentAddressDetails} onChange={handleChange} rows={2} className={inputClass} required />
+                </div>
               </div>
-              <div>
-                <label className={labelClass}>জেলা *</label>
-                <input name="permanentDistrict" value={form.permanentDistrict} onChange={handleChange} className={inputClass} required />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className={labelClass}>বিভাগ *</label>
+                  <input name="permanentDivision" value={form.permanentDivision} onChange={handleChange} className={inputClass} required />
+                </div>
+                <div>
+                  <label className={labelClass}>জেলা *</label>
+                  <input name="permanentDistrict" value={form.permanentDistrict} onChange={handleChange} className={inputClass} required />
+                </div>
+                <div>
+                  <label className={labelClass}>থানা *</label>
+                  <input name="permanentThana" value={form.permanentThana} onChange={handleChange} className={inputClass} required />
+                </div>
+                <div className="sm:col-span-3">
+                  <label className={labelClass}>বিস্তারিত *</label>
+                  <textarea name="permanentAddressDetails" value={form.permanentAddressDetails} onChange={handleChange} rows={2} className={inputClass} required />
+                </div>
               </div>
-              <div>
-                <label className={labelClass}>থানা *</label>
-                <input name="permanentThana" value={form.permanentThana} onChange={handleChange} className={inputClass} required />
-              </div>
-              <div className="sm:col-span-3">
-                <label className={labelClass}>বিস্তারিত *</label>
-                <textarea name="permanentAddressDetails" value={form.permanentAddressDetails} onChange={handleChange} rows={2} className={inputClass} required />
-              </div>
-            </div>
+            )}
           </div>
 
           {/* বর্তমান ঠিকানা */}
@@ -286,24 +305,37 @@ function EditModal({
               </svg>
               বর্তমান ঠিকানা
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className={labelClass}>বিভাগ *</label>
-                <input name="currentDivision" value={form.currentDivision} onChange={handleChange} className={inputClass} required />
+            {form.currentCountry ? (
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>দেশ</label>
+                  <input name="currentCountry" value={form.currentCountry} onChange={handleChange} className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>বিস্তারিত *</label>
+                  <textarea name="currentAddressDetails" value={form.currentAddressDetails} onChange={handleChange} rows={2} className={inputClass} required />
+                </div>
               </div>
-              <div>
-                <label className={labelClass}>জেলা *</label>
-                <input name="currentDistrict" value={form.currentDistrict} onChange={handleChange} className={inputClass} required />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className={labelClass}>বিভাগ *</label>
+                  <input name="currentDivision" value={form.currentDivision} onChange={handleChange} className={inputClass} required />
+                </div>
+                <div>
+                  <label className={labelClass}>জেলা *</label>
+                  <input name="currentDistrict" value={form.currentDistrict} onChange={handleChange} className={inputClass} required />
+                </div>
+                <div>
+                  <label className={labelClass}>থানা *</label>
+                  <input name="currentThana" value={form.currentThana} onChange={handleChange} className={inputClass} required />
+                </div>
+                <div className="sm:col-span-3">
+                  <label className={labelClass}>বিস্তারিত *</label>
+                  <textarea name="currentAddressDetails" value={form.currentAddressDetails} onChange={handleChange} rows={2} className={inputClass} required />
+                </div>
               </div>
-              <div>
-                <label className={labelClass}>থানা *</label>
-                <input name="currentThana" value={form.currentThana} onChange={handleChange} className={inputClass} required />
-              </div>
-              <div className="sm:col-span-3">
-                <label className={labelClass}>বিস্তারিত *</label>
-                <textarea name="currentAddressDetails" value={form.currentAddressDetails} onChange={handleChange} rows={2} className={inputClass} required />
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -418,15 +450,27 @@ function DetailDrawer({
           <div className="space-y-4">
             <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4">
               <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">স্থায়ী ঠিকানা</p>
-              <p className="text-sm text-zinc-800 dark:text-zinc-200">
-                {[reg.permanentAddressDetails, reg.permanentThana, reg.permanentDistrict, reg.permanentDivision].filter(Boolean).join(", ")}
-              </p>
+              {reg.permanentCountry ? (
+                <p className="text-sm text-zinc-800 dark:text-zinc-200">
+                  {reg.permanentCountry}{reg.permanentAddressDetails ? `, ${reg.permanentAddressDetails}` : ""}
+                </p>
+              ) : (
+                <p className="text-sm text-zinc-800 dark:text-zinc-200">
+                  {[reg.permanentAddressDetails, reg.permanentThana, reg.permanentDistrict, reg.permanentDivision].filter(Boolean).join(", ")}
+                </p>
+              )}
             </div>
             <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4">
               <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">বর্তমান ঠিকানা</p>
-              <p className="text-sm text-zinc-800 dark:text-zinc-200">
-                {[reg.currentAddressDetails, reg.currentThana, reg.currentDistrict, reg.currentDivision].filter(Boolean).join(", ")}
-              </p>
+              {reg.currentCountry ? (
+                <p className="text-sm text-zinc-800 dark:text-zinc-200">
+                  {reg.currentCountry}{reg.currentAddressDetails ? `, ${reg.currentAddressDetails}` : ""}
+                </p>
+              ) : (
+                <p className="text-sm text-zinc-800 dark:text-zinc-200">
+                  {[reg.currentAddressDetails, reg.currentThana, reg.currentDistrict, reg.currentDivision].filter(Boolean).join(", ")}
+                </p>
+              )}
             </div>
           </div>
 

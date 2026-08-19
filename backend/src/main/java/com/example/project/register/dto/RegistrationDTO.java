@@ -38,6 +38,8 @@ public class RegistrationDTO {
 
     private String permanentAddressDetails;
 
+    private String permanentCountry;
+
     private String currentDivision;
 
     private String currentDistrict;
@@ -45,6 +47,8 @@ public class RegistrationDTO {
     private String currentThana;
 
     private String currentAddressDetails;
+
+    private String currentCountry;
 
     private String occupation;
 
