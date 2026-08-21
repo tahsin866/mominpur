@@ -10,12 +10,15 @@ interface Registration {
   name: string;
   fatherName: string;
   phone: string;
+  bloodGroup: string;
   studyFrom: string;
   studyTo: string;
   departments: string;
   permanentDivision: string;
   permanentDistrict: string;
   permanentThana: string;
+  permanentCountry: string;
+  occupation: string;
   status: string;
   submittedAt: string;
   guestCount: number;

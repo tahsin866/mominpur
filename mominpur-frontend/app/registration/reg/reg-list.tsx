@@ -601,6 +601,7 @@ export default function RegList() {
   const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
+  const [filterCountry, setFilterCountry] = useState("");
   const [filterDivision, setFilterDivision] = useState("");
   const [filterDistrict, setFilterDistrict] = useState("");
   const [filterThana, setFilterThana] = useState("");
@@ -638,7 +639,11 @@ export default function RegList() {
       .finally(() => setLoading(false));
   }, []);
 
-  const divisions = useMemo(() => [...new Set(registrations.map((r) => r.permanentDivision).filter(Boolean))], [registrations]);
+  const countries = useMemo(() => [...new Set(registrations.map((r) => r.permanentCountry).filter(Boolean))].sort(), [registrations]);
+  const divisions = useMemo(() => {
+    const src = filterCountry ? registrations.filter((r) => r.permanentCountry === filterCountry) : registrations;
+    return [...new Set(src.map((r) => r.permanentDivision).filter(Boolean))];
+  }, [registrations, filterCountry]);
   const districts = useMemo(() => {
     if (!filterDivision) return [...new Set(registrations.map((r) => r.permanentDistrict).filter(Boolean))];
     return [...new Set(registrations.filter((r) => r.permanentDivision === filterDivision).map((r) => r.permanentDistrict).filter(Boolean))];
@@ -675,6 +680,7 @@ export default function RegList() {
       if (filterStatus === "GUEST_PENDING") {
         if (!transactions.some((t) => t.registrationId === r.id && t.type === "GUEST_ADD" && t.status === "PENDING")) return false;
       } else if (filterStatus && r.status !== filterStatus) return false;
+      if (filterCountry && r.permanentCountry !== filterCountry) return false;
       if (filterDivision && r.permanentDivision !== filterDivision) return false;
       if (filterDistrict && r.permanentDistrict !== filterDistrict) return false;
       if (filterThana && r.permanentThana !== filterThana) return false;
@@ -692,23 +698,23 @@ export default function RegList() {
       if (da !== db) return db - da;
       return b.id - a.id;
     });
-  }, [registrations, transactions, search, filterStatus, filterDivision, filterDistrict, filterThana, filterOccupation, filterDepartment, filterBloodGroup, filterReceiver]);
+  }, [registrations, transactions, search, filterStatus, filterCountry, filterDivision, filterDistrict, filterThana, filterOccupation, filterDepartment, filterBloodGroup, filterReceiver]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pagedRows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   useEffect(() => {
     setPage(1);
-  }, [search, filterStatus, filterDivision, filterDistrict, filterThana, filterOccupation, filterDepartment, filterBloodGroup, filterReceiver]);
+  }, [search, filterStatus, filterCountry, filterDivision, filterDistrict, filterThana, filterOccupation, filterDepartment, filterBloodGroup, filterReceiver]);
 
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
 
-  const hasFilters = !!(search || filterStatus || filterDivision || filterDistrict || filterThana || filterOccupation || filterDepartment || filterBloodGroup || filterReceiver);
+  const hasFilters = !!(search || filterStatus || filterCountry || filterDivision || filterDistrict || filterThana || filterOccupation || filterDepartment || filterBloodGroup || filterReceiver);
 
   const clearFilters = () => {
-    setSearch(""); setFilterStatus(""); setFilterDivision(""); setFilterDistrict(""); setFilterThana(""); setFilterOccupation(""); setFilterDepartment(""); setFilterBloodGroup(""); setFilterReceiver("");
+    setSearch(""); setFilterStatus(""); setFilterCountry(""); setFilterDivision(""); setFilterDistrict(""); setFilterThana(""); setFilterOccupation(""); setFilterDepartment(""); setFilterBloodGroup(""); setFilterReceiver("");
   };
 
   const getTransaction = (regId: number) => transactions.find((t) => t.registrationId === regId && t.type !== "GUEST_ADD");
@@ -902,6 +908,10 @@ export default function RegList() {
               className="text-sm pl-8 pr-3 py-2 w-44 border border-zinc-200 rounded-lg bg-zinc-50/50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
             />
           </div>
+          <select value={filterCountry} onChange={(e) => { setFilterCountry(e.target.value); setFilterDivision(""); setFilterDistrict(""); setFilterThana(""); }} className={selectClass}>
+            <option value="">সব দেশ</option>
+            {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
           <select value={filterDivision} onChange={(e) => { setFilterDivision(e.target.value); setFilterDistrict(""); setFilterThana(""); }} className={selectClass}>
             <option value="">সব বিভাগ</option>
             {divisions.map((d) => <option key={d} value={d}>{d}</option>)}

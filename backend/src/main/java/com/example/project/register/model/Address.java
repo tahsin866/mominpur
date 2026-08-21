@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 /**
- * প্রতি রেজিস্ট্রেশনের বিপরীতে দুটি সারি — একটি PERMANENT, একটি CURRENT।
- * আগে এই তথ্যগুলো registrations টেবিলেই কলাম হিসেবে ছিল।
+ * ঠিকানা — registration_id (ছাত্রদের জন্য) অথবা teacher_id (শিক্ষকদের জন্য) দুটির একটি সেট করা থাকে।
+ * ছাত্রদের বিপরীতে দুটি সারি (PERMANENT + CURRENT); শিক্ষকদের একটি সারি (PERMANENT)।
  */
 @Entity
 @Table(name = "addresses")
@@ -16,8 +16,11 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "registration_id", nullable = false)
+    @Column(name = "registration_id")
     private Long registrationId;
+
+    @Column(name = "teacher_id")
+    private Long teacherId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "address_type", nullable = false)

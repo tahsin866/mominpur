@@ -294,7 +294,7 @@ export default function PaymentReport({ transactions, registrations }: { transac
         </div>
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-4 text-white shadow-sm">
           <p className="text-xs font-medium text-white/80 uppercase tracking-wider">Total Transactions</p>
-          <p className="text-2xl font-bold mt-1">{filtered.length.toLocaleString()}</p>
+          <p className="text-2xl font-bold mt-1">{transactions.length.toLocaleString()}</p>
           <div className="absolute -right-3 -bottom-3 w-16 h-16 rounded-full bg-white/10" />
         </div>
       </div>
