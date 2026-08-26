@@ -1,6 +1,5 @@
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
-import * as XLSX from "xlsx";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -180,35 +179,4 @@ export async function exportPDF(config: PdfReportConfig) {
     const leftover = document.getElementById(EXPORT_ROOT_ID);
     if (leftover) leftover.remove();
   }
-}
-
-/* ------------------------------------------------------------------ */
-/*  Excel Export                                                       */
-/* ------------------------------------------------------------------ */
-
-interface SheetData {
-  name: string;
-  columns: string[];
-  rows: (string | number)[][];
-}
-
-export function exportExcel(filename: string, sheets: SheetData[]) {
-  const wb = XLSX.utils.book_new();
-
-  sheets.forEach((s) => {
-    const data = [s.columns, ...s.rows];
-    const ws = XLSX.utils.aoa_to_sheet(data);
-
-    ws["!cols"] = s.columns.map((col, i) => {
-      const maxLen = Math.max(
-        col.length,
-        ...s.rows.map((r) => String(r[i] ?? "").length)
-      );
-      return { wch: Math.min(maxLen + 4, 40) };
-    });
-
-    XLSX.utils.book_append_sheet(wb, ws, s.name.substring(0, 31));
-  });
-
-  XLSX.writeFile(wb, `${filename}.xlsx`);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { exportPDF, exportExcel } from "./export-utils";
+import { exportPDF } from "./export-utils";
 
 interface Registration {
   id: number;
@@ -200,46 +200,6 @@ export default function StudentReport({ registrations }: { registrations: Regist
     }
   }
 
-  function handleExportExcel() {
-    exportExcel("Student Report", [
-      {
-        name: "Summary",
-        columns: ["Description", "Count"],
-        rows: [
-          ["Total", summary.total],
-          ["Approved", summary.approved],
-          ["Pending", summary.pending],
-          ["Rejected", summary.rejected],
-        ],
-      },
-      {
-        name: "Country Wise",
-        columns: ["Country", "Total", "Approved", "Pending", "Rejected"],
-        rows: countryWise.map((d) => [d.name, d.total, d.approved, d.pending, d.rejected]),
-      },
-      {
-        name: "Division Wise",
-        columns: ["Division", "Total", "Approved", "Pending", "Rejected"],
-        rows: divisionWise.map((d) => [d.name, d.total, d.approved, d.pending, d.rejected]),
-      },
-      {
-        name: "District Wise",
-        columns: ["District", "Division", "Total", "Approved", "Pending"],
-        rows: districtWise.map((d) => [d.name, d.division, d.total, d.approved, d.pending]),
-      },
-      {
-        name: "Year Wise",
-        columns: ["Start Year", "Total", "Approved", "Pending", "Rejected"],
-        rows: yearWise.map((d) => [d.year, d.total, d.approved, d.pending, d.rejected]),
-      },
-      {
-        name: "Detailed",
-        columns: ["SL", "Name", "Father's Name", "Phone", "Blood Group", "Occupation", "District", "Thana"],
-        rows: detailRows.map((d, i) => [i + 1, d.name, d.fatherName || "-", d.phone, d.bloodGroup, d.occupation, d.district, d.thana]),
-      },
-    ]);
-  }
-
   const { columns, rows } = getTableData();
 
   return (
@@ -340,15 +300,6 @@ export default function StudentReport({ registrations }: { registrations: Regist
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             PDF
-          </button>
-          <button
-            onClick={handleExportExcel}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Excel
           </button>
         </div>
       </div>
