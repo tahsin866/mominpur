@@ -44,6 +44,19 @@ public class TransactionController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTransactionId(@PathVariable Long id, @RequestBody java.util.Map<String, String> body) {
+        try {
+            String transactionId = body.get("transactionId");
+            if (transactionId == null || transactionId.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("ট্রানজেকশন আইডি আবশ্যক।");
+            }
+            return ResponseEntity.ok(transactionService.updateTransactionId(id, transactionId.trim()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestParam String status) {
         try {

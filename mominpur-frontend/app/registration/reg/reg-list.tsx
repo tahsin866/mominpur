@@ -117,12 +117,14 @@ const labelClass =
 
 function EditModal({
   reg,
+  tx,
   onClose,
   onSave,
 }: {
   reg: Registration;
+  tx: Transaction | undefined;
   onClose: () => void;
-  onSave: (updated: Registration) => void;
+  onSave: (updated: Registration, txUpdated?: boolean) => void;
 }) {
   const [form, setForm] = useState<EditForm>({
     name: reg.name || "",
@@ -146,6 +148,7 @@ function EditModal({
     permanentCountry: reg.permanentCountry || "",
     currentCountry: reg.currentCountry || "",
   });
+  const [transactionId, setTransactionId] = useState(tx?.transactionId || "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -169,17 +172,33 @@ function EditModal({
     setError("");
     try {
       const token = getToken();
-      const res = await fetch(`/api/registrations/${reg.id}`, {
+      const headers = { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+
+      const regRes = await fetch(`/api/registrations/${reg.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers,
         body: JSON.stringify(form),
       });
-      if (!res.ok) {
-        const text = await res.text();
+      if (!regRes.ok) {
+        const text = await regRes.text();
         throw new Error(text || "আপডেট হয়নি");
       }
-      const saved = (await res.json()) as Registration;
-      onSave(saved);
+      const saved = (await regRes.json()) as Registration;
+
+      if (tx && transactionId.trim() && transactionId.trim() !== tx.transactionId) {
+        const txRes = await fetch(`/api/transactions/${tx.id}`, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({ transactionId: transactionId.trim() }),
+        });
+        if (!txRes.ok) {
+          const txErr = await txRes.text();
+          throw new Error(txErr || "ট্রানজেকশন ID আপডেট হয়নি");
+        }
+        onSave(saved, true);
+      } else {
+        onSave(saved);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "সমস্যা হয়েছে");
     } finally {
@@ -348,6 +367,56 @@ function EditModal({
               <input name="occupationDetails" value={form.occupationDetails} onChange={handleChange} className={inputClass} />
             </div>
           </div>
+
+          {tx && (
+            <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4 space-y-3">
+              <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200 flex items-center gap-2">
+                <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                </svg>
+                পেমেন্ট তথ্য
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>ট্রানজেকশন ID</label>
+                  <input
+                    type="text"
+                    value={transactionId}
+                    onChange={(e) => setTransactionId(e.target.value)}
+                    className={inputClass}
+                    placeholder="bKash ট্রানজেকশন ID"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>পেয়িং নম্বর (শেষ ৪)</label>
+                  <input
+                    type="text"
+                    value={tx.payingNumber}
+                    className={inputClass}
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>রিসিভার নম্বর</label>
+                  <input
+                    type="text"
+                    value={tx.receiverNumber || ""}
+                    className={inputClass}
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>পরিশোধিত পরিমাণ</label>
+                  <input
+                    type="text"
+                    value={`${tx.paidAmount || 0} ৳`}
+                    className={inputClass}
+                    disabled
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-400">
@@ -769,8 +838,15 @@ export default function RegList() {
     }
   };
 
-  const handleEditSave = (updated: Registration) => {
+  const handleEditSave = (updated: Registration, txUpdated?: boolean) => {
     setRegistrations((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+    if (txUpdated) {
+      const headers = authHeaders();
+      fetch("/api/transactions/all", { headers })
+        .then((res) => res.ok ? res.json() : [])
+        .then((data) => setTransactions(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    }
     setEditing(null);
   };
 
@@ -1322,7 +1398,7 @@ export default function RegList() {
       )}
 
       {editing && (
-        <EditModal reg={editing} onClose={() => setEditing(null)} onSave={handleEditSave} />
+        <EditModal reg={editing} tx={getTransaction(editing.id)} onClose={() => setEditing(null)} onSave={handleEditSave} />
       )}
 
       {viewing && (

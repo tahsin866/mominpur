@@ -81,6 +81,14 @@ public class TransactionService {
     }
 
     @Transactional
+    public Transaction updateTransactionId(Long id, String newTransactionId) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction not found with id: " + id));
+        transaction.setTransactionId(newTransactionId);
+        return transactionRepository.save(transaction);
+    }
+
+    @Transactional
     public void deleteTransaction(Long id) {
         if (!transactionRepository.existsById(id)) {
             throw new RuntimeException("Transaction not found with id: " + id);
