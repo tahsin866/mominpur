@@ -8,6 +8,9 @@ interface EventCardProps {
   name: string;
   phone: string;
   guestCount: number;
+  studyFrom: string;
+  studyTo: string;
+  fatherName: string;
 }
 
 function bn(n: number): string {
@@ -15,7 +18,7 @@ function bn(n: number): string {
   return String(n).replace(/\d/g, (d) => digits[parseInt(d)]);
 }
 
-export default function EventCard({ name, phone, guestCount }: EventCardProps) {
+export default function EventCard({ name, phone, guestCount, studyFrom, studyTo, fatherName }: EventCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
 
@@ -226,7 +229,13 @@ export default function EventCard({ name, phone, guestCount }: EventCardProps) {
             <div style={styles.guestSection}>
               <div style={styles.guestLabel}>সম্মানিত সুধী,</div>
               <div style={styles.guestName}> {name}</div>
+              {fatherName && <div style={{fontSize: '14px', color: '#374151', marginBottom: '2px'}}>পিতা: {fatherName}</div>}
               <div style={styles.guestPhone}>মোবাইল: {phone}</div>
+              {studyFrom && studyTo && (
+                <div style={{fontSize: '14px', color: '#059669', fontWeight: 600, marginTop: '4px'}}>
+                  অধ্যয়নকাল: {studyFrom} - {studyTo}
+                </div>
+              )}
             </div>
 
             {/* Invitation Text */}

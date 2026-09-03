@@ -13,6 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/teachers")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://76.13.183.6", "http://abnayemuminpur26.org", "https://abnayemuminpur26.org"})
 public class TeacherController {
 
     @Autowired
@@ -23,8 +24,13 @@ public class TeacherController {
         try {
             Teacher teacher = new Teacher();
             teacher.setName(request.getName());
+            teacher.setFatherName(request.getFatherName());
             teacher.setPhone(request.getPhone());
             teacher.setDepartment(request.getDepartment());
+            teacher.setOccupation(request.getOccupation());
+            teacher.setOccupationDetails(request.getOccupationDetails());
+            teacher.setTeachingFrom(request.getTeachingFrom());
+            teacher.setTeachingTo(request.getTeachingTo());
             return ResponseEntity.ok(teacherService.createTeacher(teacher, request.getDivision(), request.getDistrict(), request.getThana(), request.getAddressDetails()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
@@ -50,8 +56,13 @@ public class TeacherController {
         try {
             Teacher teacher = new Teacher();
             teacher.setName(request.getName());
+            teacher.setFatherName(request.getFatherName());
             teacher.setPhone(request.getPhone());
             teacher.setDepartment(request.getDepartment());
+            teacher.setOccupation(request.getOccupation());
+            teacher.setOccupationDetails(request.getOccupationDetails());
+            teacher.setTeachingFrom(request.getTeachingFrom());
+            teacher.setTeachingTo(request.getTeachingTo());
             return ResponseEntity.ok(teacherService.updateTeacher(id, teacher, request.getDivision(), request.getDistrict(), request.getThana(), request.getAddressDetails()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

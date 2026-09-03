@@ -12,6 +12,9 @@ interface StatusResult {
   status: string;
   guestCount: number;
   submittedAt: string;
+  studyFrom: string;
+  studyTo: string;
+  fatherName: string;
 }
 
 function bn(n: number): string {
@@ -215,7 +218,7 @@ export default function StatusPage() {
                   />
                 )}
 
-                <EventCard name={result.name} phone={result.phone} guestCount={result.guestCount} />
+                <EventCard name={result.name} phone={result.phone} guestCount={result.guestCount} studyFrom={result.studyFrom} studyTo={result.studyTo} fatherName={result.fatherName} />
               </>
             )}
             {result.status === "REJECTED" && (

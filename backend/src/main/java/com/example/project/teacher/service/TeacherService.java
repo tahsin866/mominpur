@@ -36,7 +36,7 @@ public class TeacherService {
         validate(teacher);
         Teacher saved = teacherRepository.save(teacher);
         saveAddress(saved.getId(), division, district, thana, addressDetails);
-        return toDto(saved, division, district, thana, addressDetails);
+        return toDto(saved);
     }
 
     @Transactional
@@ -44,10 +44,16 @@ public class TeacherService {
         Teacher teacher = findTeacher(id);
         validate(updated);
         teacher.setName(updated.getName());
+        teacher.setFatherName(updated.getFatherName());
         teacher.setPhone(updated.getPhone());
         teacher.setDepartment(updated.getDepartment());
+        teacher.setOccupation(updated.getOccupation());
+        teacher.setOccupationDetails(updated.getOccupationDetails());
+        teacher.setTeachingFrom(updated.getTeachingFrom());
+        teacher.setTeachingTo(updated.getTeachingTo());
+        teacherRepository.save(teacher);
         saveAddress(id, division, district, thana, addressDetails);
-        return toDto(teacher, division, district, thana, addressDetails);
+        return toDto(teacher);
     }
 
     @Transactional
@@ -96,6 +102,8 @@ public class TeacherService {
     }
 
     private TeacherDTO toDto(Teacher t, String division, String district, String thana, String addressDetails) {
-        return new TeacherDTO(t.getId(), t.getName(), t.getPhone(), t.getDepartment(), division, district, thana, addressDetails, t.getCreatedAt());
+        return new TeacherDTO(t.getId(), t.getName(), t.getFatherName(), t.getPhone(), t.getDepartment(),
+                t.getOccupation(), t.getOccupationDetails(), t.getTeachingFrom(), t.getTeachingTo(),
+                division, district, thana, addressDetails, t.getCreatedAt());
     }
 }

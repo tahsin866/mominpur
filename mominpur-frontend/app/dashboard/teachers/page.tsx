@@ -6,8 +6,13 @@ import { useRouter } from "next/navigation";
 interface Teacher {
   id: number;
   name: string;
+  fatherName: string;
   phone: string;
   department: string;
+  occupation: string;
+  occupationDetails: string;
+  teachingFrom: string;
+  teachingTo: string;
   division: string;
   district: string;
   thana: string;
@@ -37,6 +42,15 @@ interface DivisionData {
 
 const DEPARTMENTS = ["নাজেরা", "হিফজ", "কিতাব"];
 
+const OCCUPATIONS = [
+  "শিক্ষক", "ব্যবসায়ী", "চিকিৎসক", "ইঞ্জিনিয়ার", "আইনজীবী",
+  "কৃষক", "সরকারি চাকুরি", "বেসরকারি চাকুরি", "অন্যান্য",
+];
+
+const startYear = 1963;
+const currentYear = 2026;
+const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => String(currentYear - i));
+
 const inputClass =
   "w-full text-sm px-3 py-2.5 border border-zinc-200 rounded-lg bg-white dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors";
 const labelClass = "block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5";
@@ -64,7 +78,7 @@ function formatDate(value: string): string {
   return d.toLocaleDateString("bn-BD", { day: "numeric", month: "short", year: "numeric" });
 }
 
-const emptyForm = { name: "", phone: "", department: "", division: "", district: "", thana: "", addressDetails: "" };
+const emptyForm = { name: "", fatherName: "", phone: "", department: "", occupation: "", occupationDetails: "", teachingFrom: "", teachingTo: "", division: "", district: "", thana: "", addressDetails: "" };
 
 export default function TeachersPage() {
   const router = useRouter();
@@ -86,6 +100,8 @@ export default function TeachersPage() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [occOpen, setOccOpen] = useState(false);
+  const [deptOpen, setDeptOpen] = useState(false);
 
   useEffect(() => {
     if (!getToken()) {
@@ -123,7 +139,7 @@ export default function TeachersPage() {
 
   function openEditModal(t: Teacher) {
     setEditingId(t.id);
-    setForm({ name: t.name || "", phone: t.phone || "", department: t.department || "", division: t.division || "", district: t.district || "", thana: t.thana || "", addressDetails: t.addressDetails || "" });
+    setForm({ name: t.name || "", fatherName: t.fatherName || "", phone: t.phone || "", department: t.department || "", occupation: t.occupation || "", occupationDetails: t.occupationDetails || "", teachingFrom: t.teachingFrom || "", teachingTo: t.teachingTo || "", division: t.division || "", district: t.district || "", thana: t.thana || "", addressDetails: t.addressDetails || "" });
     const div = divisions.find((d) => d.division === t.division);
     setDivId(div ? String(div.id) : "");
     const dist = div?.districts.find((x) => x.district === t.district);
@@ -248,7 +264,7 @@ export default function TeachersPage() {
             <table className="w-full text-sm text-left">
               <thead>
                 <tr className="bg-zinc-50 dark:bg-zinc-800/50">
-                  {["নাম", "মোবাইল", "জামাত", "ঠিকানা", "যোগ তারিখ", ""].map((col) => (
+                  {["নাম", "পিতা", "মোবাইল", "পেশা", "পেশার বিস্তারিত", "শিক্ষাদান", "জামাত", "ঠিকানা", ""].map((col) => (
                     <th key={col} className="px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
                       {col}
                     </th>
@@ -259,8 +275,14 @@ export default function TeachersPage() {
                 {filtered.map((t, i) => (
                   <tr key={t.id} className={i % 2 === 1 ? "bg-zinc-50/50 dark:bg-zinc-800/20" : ""}>
                     <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100 whitespace-nowrap">{t.name}</td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">{t.fatherName || "-"}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <a href={`tel:${t.phone}`} className="text-emerald-600 dark:text-emerald-400 hover:underline">{t.phone}</a>
+                    </td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">{t.occupation || "-"}</td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">{t.occupationDetails || "-"}</td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">
+                      {t.teachingFrom || t.teachingTo ? `${t.teachingFrom || "?"} - ${t.teachingTo || "?"}` : "-"}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {t.department ? (
@@ -274,7 +296,6 @@ export default function TeachersPage() {
                     <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">
                       {[t.addressDetails, t.thana, t.district, t.division].filter(Boolean).join(", ") || "-"}
                     </td>
-                    <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{formatDate(t.createdAt)}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex gap-1 justify-end">
                         <button
@@ -326,6 +347,16 @@ export default function TeachersPage() {
                   />
                 </div>
                 <div>
+                  <label className={labelClass}>পিতার নাম</label>
+                  <input
+                    type="text"
+                    value={form.fatherName}
+                    onChange={(e) => setForm({ ...form, fatherName: e.target.value })}
+                    className={inputClass}
+                    placeholder="পিতার নাম"
+                  />
+                </div>
+                <div>
                   <label className={labelClass}>মোবাইল নম্বর *</label>
                   <input
                     type="tel"
@@ -337,17 +368,110 @@ export default function TeachersPage() {
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>বিভাগ</label>
-                  <select
-                    value={form.department}
-                    onChange={(e) => setForm({ ...form, department: e.target.value })}
+                  <label className={labelClass}>পেশা</label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setOccOpen((o) => !o)}
+                      className={`w-full text-sm px-3 py-2.5 border rounded-lg bg-white dark:bg-zinc-800 text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors ${occOpen ? "border-emerald-500" : "border-zinc-200 dark:border-zinc-700"} ${!form.occupation ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-900 dark:text-zinc-100"}`}
+                    >
+                      <span className="truncate">{form.occupation || "নির্বাচন করুন"}</span>
+                      <svg className={`w-4 h-4 ml-2 shrink-0 transition-transform ${occOpen ? "rotate-180" : ""} text-zinc-400`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {occOpen && (
+                      <div className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {OCCUPATIONS.map((job) => (
+                          <label key={job} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors">
+                            <input
+                              type="checkbox"
+                              className="accent-emerald-600"
+                              checked={form.occupation.split(",").map((s) => s.trim()).filter(Boolean).includes(job)}
+                              onChange={() => {
+                                const current = form.occupation.split(",").map((s) => s.trim()).filter(Boolean);
+                                const updated = current.includes(job) ? current.filter((j) => j !== job) : [...current, job];
+                                setForm({ ...form, occupation: updated.join(", ") });
+                              }}
+                            />
+                            {job}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>পেশার বিস্তারিত</label>
+                  <input
+                    type="text"
+                    value={form.occupationDetails}
+                    onChange={(e) => setForm({ ...form, occupationDetails: e.target.value })}
                     className={inputClass}
-                  >
-                    <option value="">নির্বাচন করুন</option>
-                    {DEPARTMENTS.map((d) => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
+                    placeholder="প্রতিষ্ঠানের নাম, পদবী, বিবরণ"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>শিক্ষাদান শুরু</label>
+                    <select
+                      value={form.teachingFrom}
+                      onChange={(e) => setForm({ ...form, teachingFrom: e.target.value })}
+                      className={inputClass}
+                    >
+                      <option value="">শুরুর বছর</option>
+                      {years.map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>শিক্ষাদান শেষ</label>
+                    <select
+                      value={form.teachingTo}
+                      onChange={(e) => setForm({ ...form, teachingTo: e.target.value })}
+                      className={inputClass}
+                    >
+                      <option value="">শেষের বছর</option>
+                      {years.map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>বিভাগ/জামাত</label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setDeptOpen((o) => !o)}
+                      className={`w-full text-sm px-3 py-2.5 border rounded-lg bg-white dark:bg-zinc-800 text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors ${deptOpen ? "border-emerald-500" : "border-zinc-200 dark:border-zinc-700"} ${!form.department ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-900 dark:text-zinc-100"}`}
+                    >
+                      <span className="truncate">{form.department || "নির্বাচন করুন"}</span>
+                      <svg className={`w-4 h-4 ml-2 shrink-0 transition-transform ${deptOpen ? "rotate-180" : ""} text-zinc-400`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {deptOpen && (
+                      <div className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg">
+                        {DEPARTMENTS.map((dept) => (
+                          <label key={dept} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors">
+                            <input
+                              type="checkbox"
+                              className="accent-emerald-600"
+                              checked={form.department.split(",").map((s) => s.trim()).filter(Boolean).includes(dept)}
+                              onChange={() => {
+                                const current = form.department.split(",").map((s) => s.trim()).filter(Boolean);
+                                const updated = current.includes(dept) ? current.filter((d) => d !== dept) : [...current, dept];
+                                setForm({ ...form, department: updated.join(", ") });
+                              }}
+                            />
+                            {dept}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className={labelClass}>বিভাগ</label>
