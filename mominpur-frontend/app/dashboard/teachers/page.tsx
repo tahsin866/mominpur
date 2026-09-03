@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getToken, jsonHeaders } from "@/lib/auth";
+import { inputClass, labelClass, DEPARTMENTS, OCCUPATIONS, YEARS } from "@/lib/constants";
+import { fetchDivisions } from "@/lib/address";
+import type { DivisionData } from "@/lib/address";
 
 interface Teacher {
   id: number;
@@ -18,64 +22,6 @@ interface Teacher {
   thana: string;
   addressDetails: string;
   createdAt: string;
-}
-
-interface ThanaData {
-  id: number;
-  thanaName: string;
-  thana: string;
-}
-
-interface DistrictData {
-  desId: number;
-  desname: string;
-  district: string;
-  thanas: ThanaData[];
-}
-
-interface DivisionData {
-  id: number;
-  dname: string;
-  division: string;
-  districts: DistrictData[];
-}
-
-const DEPARTMENTS = ["নাজেরা", "হিফজ", "কিতাব"];
-
-const OCCUPATIONS = [
-  "শিক্ষক", "ব্যবসায়ী", "চিকিৎসক", "ইঞ্জিনিয়ার", "আইনজীবী",
-  "কৃষক", "সরকারি চাকুরি", "বেসরকারি চাকুরি", "অন্যান্য",
-];
-
-const startYear = 1963;
-const currentYear = 2026;
-const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => String(currentYear - i));
-
-const inputClass =
-  "w-full text-sm px-3 py-2.5 border border-zinc-200 rounded-lg bg-white dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors";
-const labelClass = "block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5";
-
-const getToken = (): string => {
-  try {
-    const raw = sessionStorage.getItem("user") || localStorage.getItem("user");
-    return JSON.parse(raw || "{}").token || "";
-  } catch {
-    return "";
-  }
-};
-
-const authHeaders = (): HeadersInit => {
-  const token = getToken();
-  const headers: Record<string, string> = {};
-  if (token) headers.Authorization = `Bearer ${token}`;
-  return headers;
-};
-
-function formatDate(value: string): string {
-  if (!value) return "-";
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return "-";
-  return d.toLocaleDateString("bn-BD", { day: "numeric", month: "short", year: "numeric" });
 }
 
 const emptyForm = { name: "", fatherName: "", phone: "", department: "", occupation: "", occupationDetails: "", teachingFrom: "", teachingTo: "", division: "", district: "", thana: "", addressDetails: "" };
@@ -103,21 +49,9 @@ export default function TeachersPage() {
   const [occOpen, setOccOpen] = useState(false);
   const [deptOpen, setDeptOpen] = useState(false);
 
-  useEffect(() => {
-    if (!getToken()) {
-      router.push("/login");
-      return;
-    }
-    fetchTeachers();
-    fetch("/api/location/divisions")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data) => setDivisions(Array.isArray(data) ? data : []))
-      .catch(() => {});
-  }, [router]);
-
-  async function fetchTeachers() {
+  const fetchTeachers = async () => {
     try {
-      const res = await fetch("/api/teachers/all", { headers: authHeaders() });
+      const res = await fetch("/api/teachers/all", { headers: jsonHeaders() });
       if (!res.ok) throw new Error("তথ্য লোড করা যায়নি");
       setTeachers(await res.json());
     } catch (err) {
@@ -125,7 +59,16 @@ export default function TeachersPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    if (!getToken()) {
+      router.push("/login");
+      return;
+    }
+    fetchTeachers();
+    fetchDivisions().then((data) => setDivisions(data));
+  }, [router]);
 
   function openAddModal() {
     setEditingId(null);
@@ -157,7 +100,7 @@ export default function TeachersPage() {
     try {
       const res = await fetch(editingId ? `/api/teachers/${editingId}` : "/api/teachers/add", {
         method: editingId ? "PUT" : "POST",
-        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        headers: jsonHeaders(),
         body: JSON.stringify(form),
       });
       if (!res.ok) {
@@ -181,7 +124,7 @@ export default function TeachersPage() {
   async function handleDelete(t: Teacher) {
     if (!confirm(`"${t.name}" কে মুছে ফেলতে চান?`)) return;
     try {
-      const res = await fetch(`/api/teachers/${t.id}`, { method: "DELETE", headers: authHeaders() });
+      const res = await fetch(`/api/teachers/${t.id}`, { method: "DELETE", headers: jsonHeaders() });
       if (!res.ok) throw new Error("মুছে ফেলা যায়নি");
       setTeachers((prev) => prev.filter((x) => x.id !== t.id));
     } catch (err) {
@@ -420,7 +363,7 @@ export default function TeachersPage() {
                       className={inputClass}
                     >
                       <option value="">শুরুর বছর</option>
-                      {years.map((y) => (
+                      {YEARS.map((y) => (
                         <option key={y} value={y}>{y}</option>
                       ))}
                     </select>
@@ -433,7 +376,7 @@ export default function TeachersPage() {
                       className={inputClass}
                     >
                       <option value="">শেষের বছর</option>
-                      {years.map((y) => (
+                      {YEARS.map((y) => (
                         <option key={y} value={y}>{y}</option>
                       ))}
                     </select>

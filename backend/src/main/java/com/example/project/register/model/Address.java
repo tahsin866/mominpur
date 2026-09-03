@@ -22,6 +22,9 @@ public class Address {
     @Column(name = "teacher_id")
     private Long teacherId;
 
+    @Column(name = "student_id")
+    private Long studentId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "address_type", nullable = false)
     private AddressType addressType;

@@ -18,4 +18,8 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
     List<Address> findByTeacherId(Long teacherId);
 
     void deleteByTeacherId(Long teacherId);
+
+    List<Address> findByStudentId(Long studentId);
+
+    void deleteByStudentId(Long studentId);
 }
