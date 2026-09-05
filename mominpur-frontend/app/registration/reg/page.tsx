@@ -263,7 +263,7 @@ export default function RegistrationPage() {
 
       if (res.ok && typeof data === "object" && data !== null && "id" in data) {
         // Submit transaction with registration ID
-        await fetch("/api/transactions/submit", {
+        const txRes = await fetch("/api/transactions/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -274,6 +274,18 @@ export default function RegistrationPage() {
             paidAmount: Number(paidAmount),
           }),
         });
+        const txContentType = txRes.headers.get("content-type");
+        let txData: string;
+        if (txContentType && txContentType.includes("application/json")) {
+          const json = await txRes.json();
+          txData = typeof json === "string" ? json : (json?.message || "ট্রানজেকশন সেভে সমস্যা হয়েছে।");
+        } else {
+          txData = await txRes.text();
+        }
+        if (!txRes.ok) {
+          showError(txData || "ট্রানজেকশন সেভ করা যায়নি।", "field-transactionId");
+          return;
+        }
         setMessage("আলহামদুলিল্লাহ! আপনার ফরমটি সফলভাবে ডাটাবেজে সংরক্ষিত হয়েছে।");
         setTimeout(() => {
           document.getElementById("form-message")?.scrollIntoView({ behavior: "smooth", block: "center" });

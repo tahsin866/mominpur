@@ -16,7 +16,7 @@ public class Transaction {
     @Column(name = "registration_id")
     private Long registrationId;
 
-    @Column(nullable = false, name = "transaction_id")
+    @Column(nullable = false, unique = true, name = "transaction_id")
     private String transactionId;
 
     @Column(nullable = false, name = "paying_number_last4")

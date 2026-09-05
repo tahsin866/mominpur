@@ -44,25 +44,31 @@ function countByStatus(list: Registration[]) {
 export default function StudentReport({ registrations }: { registrations: Registration[] }) {
   const [view, setView] = useState<ViewMode>("division");
   const [statusFilter, setStatusFilter] = useState("");
+  const [countryFilter, setCountryFilter] = useState("");
   const [divisionFilter, setDivisionFilter] = useState("");
   const [districtFilter, setDistrictFilter] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
 
+  const countries = useMemo(() => [...new Set(registrations.map((r) => r.permanentCountry))].filter(Boolean).sort(), [registrations]);
   const divisions = useMemo(() => [...new Set(registrations.map((r) => r.permanentDivision))].filter(Boolean).sort(), [registrations]);
-  const districts = useMemo(() => [...new Set(registrations.map((r) => r.permanentDistrict))].filter(Boolean).sort(), [registrations]);
+  const districts = useMemo(() => {
+    if (!divisionFilter) return [...new Set(registrations.map((r) => r.permanentDistrict))].filter(Boolean).sort();
+    return [...new Set(registrations.filter((r) => r.permanentDivision === divisionFilter).map((r) => r.permanentDistrict))].filter(Boolean).sort();
+  }, [registrations, divisionFilter]);
 
   const filtered = useMemo(() => {
     let list = registrations;
     if (statusFilter) list = list.filter((r) => r.status === statusFilter);
+    if (countryFilter) list = list.filter((r) => r.permanentCountry === countryFilter);
     if (divisionFilter) list = list.filter((r) => r.permanentDivision === divisionFilter);
     if (districtFilter) list = list.filter((r) => r.permanentDistrict === districtFilter);
     if (departmentFilter) list = list.filter((r) => getDepartmentsOf(r).includes(departmentFilter));
     if (yearFrom) list = list.filter((r) => r.studyFrom >= yearFrom);
     if (yearTo) list = list.filter((r) => r.studyFrom <= yearTo);
     return list;
-  }, [registrations, statusFilter, divisionFilter, districtFilter, departmentFilter, yearFrom, yearTo]);
+  }, [registrations, statusFilter, countryFilter, divisionFilter, districtFilter, departmentFilter, yearFrom, yearTo]);
 
   const summary = useMemo(() => countByStatus(filtered), [filtered]);
 
@@ -123,7 +129,7 @@ export default function StudentReport({ registrations }: { registrations: Regist
     name: string;
     fatherName: string;
     phone: string;
-    bloodGroup: string;
+    studyPeriod: string;
     occupation: string;
     district: string;
     thana: string;
@@ -135,7 +141,7 @@ export default function StudentReport({ registrations }: { registrations: Regist
         name: r.name || "-",
         fatherName: r.fatherName || "",
         phone: r.phone || "-",
-        bloodGroup: r.bloodGroup || "-",
+        studyPeriod: r.studyFrom && r.studyTo ? `${r.studyFrom} - ${r.studyTo}` : r.studyFrom || "-",
         occupation: r.occupation || "-",
         district: r.permanentDistrict || "-",
         thana: r.permanentThana || "-",
@@ -147,12 +153,12 @@ export default function StudentReport({ registrations }: { registrations: Regist
     if (view === "detail") {
       return forExport
         ? {
-            columns: ["SL", "Name", "Father's Name", "Phone", "Blood Group", "Occupation", "District", "Thana"],
-            rows: detailRows.map((d, i) => [i + 1, d.name, d.fatherName || "-", d.phone, d.bloodGroup, d.occupation, d.district, d.thana]),
+            columns: ["SL", "Name", "Father's Name", "Phone", "অধ্যয়নকাল", "Occupation", "District", "Thana"],
+            rows: detailRows.map((d, i) => [i + 1, d.name, d.fatherName || "-", d.phone, d.studyPeriod, d.occupation, d.district, d.thana]),
           }
         : {
-            columns: ["SL", "Name", "Phone", "Blood Group", "Occupation", "District", "Thana"],
-            rows: detailRows.map((d, i) => [i + 1, d.name, d.phone, d.bloodGroup, d.occupation, d.district, d.thana]),
+            columns: ["SL", "Name", "Phone", "অধ্যয়নকাল", "Occupation", "District", "Thana"],
+            rows: detailRows.map((d, i) => [i + 1, d.name, d.phone, d.studyPeriod, d.occupation, d.district, d.thana]),
           };
     }
     if (view === "country") {
@@ -206,7 +212,7 @@ export default function StudentReport({ registrations }: { registrations: Regist
     <div className="space-y-5">
       {/* Filters */}
       <div className="bg-white rounded-xl border border-zinc-100 p-4 shadow-sm dark:bg-zinc-900 dark:border-zinc-800">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
             <label className={labelClass}>Status</label>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={inputClass}>
@@ -217,8 +223,15 @@ export default function StudentReport({ registrations }: { registrations: Regist
             </select>
           </div>
           <div>
+            <label className={labelClass}>Country</label>
+            <select value={countryFilter} onChange={(e) => { setCountryFilter(e.target.value); setDivisionFilter(""); setDistrictFilter(""); }} className={inputClass}>
+              <option value="">All Countries</option>
+              {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
             <label className={labelClass}>Division</label>
-            <select value={divisionFilter} onChange={(e) => setDivisionFilter(e.target.value)} className={inputClass}>
+            <select value={divisionFilter} onChange={(e) => { setDivisionFilter(e.target.value); setDistrictFilter(""); }} className={inputClass}>
               <option value="">All Divisions</option>
               {divisions.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
@@ -249,7 +262,7 @@ export default function StudentReport({ registrations }: { registrations: Regist
           </div>
           <div className="flex items-end">
             <button
-              onClick={() => { setStatusFilter(""); setDivisionFilter(""); setDistrictFilter(""); setDepartmentFilter(""); setYearFrom(""); setYearTo(""); }}
+              onClick={() => { setStatusFilter(""); setCountryFilter(""); setDivisionFilter(""); setDistrictFilter(""); setDepartmentFilter(""); setYearFrom(""); setYearTo(""); }}
               className="w-full px-3 py-2 text-sm font-medium text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition-colors dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
             >
               Reset

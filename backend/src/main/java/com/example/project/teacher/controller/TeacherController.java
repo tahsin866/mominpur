@@ -2,7 +2,6 @@ package com.example.project.teacher.controller;
 
 import com.example.project.teacher.dto.TeacherDTO;
 import com.example.project.teacher.dto.TeacherRequest;
-import com.example.project.teacher.model.Teacher;
 import com.example.project.teacher.service.TeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,16 +21,7 @@ public class TeacherController {
     @PostMapping("/add")
     public ResponseEntity<?> create(@RequestBody TeacherRequest request) {
         try {
-            Teacher teacher = new Teacher();
-            teacher.setName(request.getName());
-            teacher.setFatherName(request.getFatherName());
-            teacher.setPhone(request.getPhone());
-            teacher.setDepartment(request.getDepartment());
-            teacher.setOccupation(request.getOccupation());
-            teacher.setOccupationDetails(request.getOccupationDetails());
-            teacher.setTeachingFrom(request.getTeachingFrom());
-            teacher.setTeachingTo(request.getTeachingTo());
-            return ResponseEntity.ok(teacherService.createTeacher(teacher, request.getDivision(), request.getDistrict(), request.getThana(), request.getAddressDetails()));
+            return ResponseEntity.ok(teacherService.createTeacher(request));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
@@ -54,16 +44,7 @@ public class TeacherController {
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody TeacherRequest request) {
         try {
-            Teacher teacher = new Teacher();
-            teacher.setName(request.getName());
-            teacher.setFatherName(request.getFatherName());
-            teacher.setPhone(request.getPhone());
-            teacher.setDepartment(request.getDepartment());
-            teacher.setOccupation(request.getOccupation());
-            teacher.setOccupationDetails(request.getOccupationDetails());
-            teacher.setTeachingFrom(request.getTeachingFrom());
-            teacher.setTeachingTo(request.getTeachingTo());
-            return ResponseEntity.ok(teacherService.updateTeacher(id, teacher, request.getDivision(), request.getDistrict(), request.getThana(), request.getAddressDetails()));
+            return ResponseEntity.ok(teacherService.updateTeacher(id, request));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }

@@ -10,4 +10,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     /** রেজিস্ট্রেশন মুছলে তার সব লেনদেনও মুছে ফেলার জন্য। */
     void deleteByRegistrationId(Long registrationId);
+
+    boolean existsByTransactionId(String transactionId);
 }

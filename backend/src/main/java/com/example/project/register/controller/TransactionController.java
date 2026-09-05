@@ -27,6 +27,8 @@ public class TransactionController {
             }
             Transaction saved = transactionService.createTransaction(transaction);
             return ResponseEntity.ok(saved);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("দুঃখিত, সার্ভারে সমস্যা হয়েছে: " + e.getMessage());
         }
@@ -53,7 +55,7 @@ public class TransactionController {
             }
             return ResponseEntity.ok(transactionService.updateTransactionId(id, transactionId.trim()));
         } catch (RuntimeException e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

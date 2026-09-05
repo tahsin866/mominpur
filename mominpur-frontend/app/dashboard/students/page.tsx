@@ -64,6 +64,7 @@ export default function StudentsPage() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [sameAddress, setSameAddress] = useState(false);
 
   const fetchStudents = async () => {
     try {
@@ -95,6 +96,7 @@ export default function StudentsPage() {
     setCurrDivId("");
     setCurrDistId("");
     setCurrThanaId("");
+    setSameAddress(false);
     setFormError("");
     setModalOpen(true);
   }
@@ -127,6 +129,13 @@ export default function StudentsPage() {
     setCurrDistId(cdist ? String(cdist.desId) : "");
     const cth = cdist?.thanas.find((x) => x.thana === s.currentThana);
     setCurrThanaId(cth ? String(cth.id) : "");
+    setSameAddress(
+      (!!s.permanentDivision || !!s.permanentAddressDetails) &&
+        s.permanentDivision === s.currentDivision &&
+        s.permanentDistrict === s.currentDistrict &&
+        s.permanentThana === s.currentThana &&
+        s.permanentAddressDetails === s.currentAddressDetails
+    );
     setFormError("");
     setModalOpen(true);
   }
@@ -435,11 +444,48 @@ export default function StudentsPage() {
 
                 {/* Current Address */}
                 <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                  <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-3 uppercase tracking-wider">বর্তমান ঠিকানা</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">বর্তমান ঠিকানা</p>
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={sameAddress}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setSameAddress(checked);
+                          if (checked) {
+                            setCurrDivId(permDivId);
+                            setCurrDistId(permDistId);
+                            setCurrThanaId(permThanaId);
+                            setForm((prev) => ({
+                              ...prev,
+                              currentDivision: prev.permanentDivision,
+                              currentDistrict: prev.permanentDistrict,
+                              currentThana: prev.permanentThana,
+                              currentAddressDetails: prev.permanentAddressDetails,
+                            }));
+                          } else {
+                            setCurrDivId("");
+                            setCurrDistId("");
+                            setCurrThanaId("");
+                            setForm((prev) => ({
+                              ...prev,
+                              currentDivision: "",
+                              currentDistrict: "",
+                              currentThana: "",
+                              currentAddressDetails: "",
+                            }));
+                          }
+                        }}
+                        className="w-4 h-4 accent-emerald-600 rounded"
+                      />
+                      <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">স্থায়ী ঠিকানার সাথে একই</span>
+                    </label>
+                  </div>
                   <div>
                     <label className={labelClass}>বিভাগ</label>
                     <select
-                      value={currDivId}
+                      value={sameAddress ? permDivId : currDivId}
                       onChange={(e) => {
                         setCurrDivId(e.target.value);
                         setCurrDistId("");
@@ -448,6 +494,7 @@ export default function StudentsPage() {
                         setForm({ ...form, currentDivision: div?.division || "", currentDistrict: "", currentThana: "" });
                       }}
                       className={inputClass}
+                      disabled={sameAddress}
                     >
                       <option value="">বিভাগ নির্বাচন করুন</option>
                       {divisions.map((d) => (
@@ -459,7 +506,7 @@ export default function StudentsPage() {
                     <div>
                       <label className={labelClass}>জেলা</label>
                       <select
-                        value={currDistId}
+                        value={sameAddress ? permDistId : currDistId}
                         onChange={(e) => {
                           setCurrDistId(e.target.value);
                           setCurrThanaId("");
@@ -467,10 +514,10 @@ export default function StudentsPage() {
                           setForm({ ...form, currentDistrict: dist?.district || "", currentThana: "" });
                         }}
                         className={inputClass}
-                        disabled={!currDivId}
+                        disabled={sameAddress || !(sameAddress ? permDivId : currDivId)}
                       >
                         <option value="">জেলা নির্বাচন করুন</option>
-                        {currDistricts.map((d) => (
+                        {(sameAddress ? permDistricts : currDistricts).map((d) => (
                           <option key={d.desId} value={d.desId}>{d.district}</option>
                         ))}
                       </select>
@@ -478,17 +525,17 @@ export default function StudentsPage() {
                     <div>
                       <label className={labelClass}>থানা</label>
                       <select
-                        value={currThanaId}
+                        value={sameAddress ? permThanaId : currThanaId}
                         onChange={(e) => {
                           setCurrThanaId(e.target.value);
                           const th = currThanas.find((t) => String(t.id) === e.target.value);
                           setForm({ ...form, currentThana: th?.thana || "" });
                         }}
                         className={inputClass}
-                        disabled={!currDistId}
+                        disabled={sameAddress || !(sameAddress ? permDistId : currDistId)}
                       >
                         <option value="">থানা নির্বাচন করুন</option>
-                        {currThanas.map((t) => (
+                        {(sameAddress ? permThanas : currThanas).map((t) => (
                           <option key={t.id} value={t.id}>{t.thana}</option>
                         ))}
                       </select>
@@ -498,9 +545,10 @@ export default function StudentsPage() {
                     <label className={labelClass}>ঠিকানার বিস্তারিত</label>
                     <textarea
                       rows={2}
-                      value={form.currentAddressDetails}
+                      value={sameAddress ? form.permanentAddressDetails : form.currentAddressDetails}
                       onChange={(e) => setForm({ ...form, currentAddressDetails: e.target.value })}
                       className={inputClass}
+                      disabled={sameAddress}
                       placeholder="গ্রাম / রাস্তা / বাসা নম্বর ইত্যাদি"
                     />
                   </div>

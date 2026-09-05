@@ -17,14 +17,35 @@ interface Teacher {
   occupationDetails: string;
   teachingFrom: string;
   teachingTo: string;
-  division: string;
-  district: string;
-  thana: string;
-  addressDetails: string;
+  permanentDivision: string;
+  permanentDistrict: string;
+  permanentThana: string;
+  permanentAddressDetails: string;
+  currentDivision: string;
+  currentDistrict: string;
+  currentThana: string;
+  currentAddressDetails: string;
   createdAt: string;
 }
 
-const emptyForm = { name: "", fatherName: "", phone: "", department: "", occupation: "", occupationDetails: "", teachingFrom: "", teachingTo: "", division: "", district: "", thana: "", addressDetails: "" };
+const emptyForm = {
+  name: "",
+  fatherName: "",
+  phone: "",
+  department: "",
+  occupation: "",
+  occupationDetails: "",
+  teachingFrom: "",
+  teachingTo: "",
+  permanentDivision: "",
+  permanentDistrict: "",
+  permanentThana: "",
+  permanentAddressDetails: "",
+  currentDivision: "",
+  currentDistrict: "",
+  currentThana: "",
+  currentAddressDetails: "",
+};
 
 export default function TeachersPage() {
   const router = useRouter();
@@ -34,18 +55,24 @@ export default function TeachersPage() {
   const [search, setSearch] = useState("");
 
   const [divisions, setDivisions] = useState<DivisionData[]>([]);
-  const [divId, setDivId] = useState("");
-  const [distId, setDistId] = useState("");
-  const [thanaId, setThanaId] = useState("");
+  const [permDivId, setPermDivId] = useState("");
+  const [permDistId, setPermDistId] = useState("");
+  const [permThanaId, setPermThanaId] = useState("");
+  const [currDivId, setCurrDivId] = useState("");
+  const [currDistId, setCurrDistId] = useState("");
+  const [currThanaId, setCurrThanaId] = useState("");
 
-  const districts = divisions.find((d) => String(d.id) === divId)?.districts || [];
-  const thanas = districts.find((d) => String(d.desId) === distId)?.thanas || [];
+  const permDistricts = divisions.find((d) => String(d.id) === permDivId)?.districts || [];
+  const permThanas = permDistricts.find((d) => String(d.desId) === permDistId)?.thanas || [];
+  const currDistricts = divisions.find((d) => String(d.id) === currDivId)?.districts || [];
+  const currThanas = currDistricts.find((d) => String(d.desId) === currDistId)?.thanas || [];
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [sameAddress, setSameAddress] = useState(false);
   const [occOpen, setOccOpen] = useState(false);
   const [deptOpen, setDeptOpen] = useState(false);
 
@@ -73,22 +100,56 @@ export default function TeachersPage() {
   function openAddModal() {
     setEditingId(null);
     setForm(emptyForm);
-    setDivId("");
-    setDistId("");
-    setThanaId("");
+    setPermDivId("");
+    setPermDistId("");
+    setPermThanaId("");
+    setCurrDivId("");
+    setCurrDistId("");
+    setCurrThanaId("");
+    setSameAddress(false);
     setFormError("");
     setModalOpen(true);
   }
 
   function openEditModal(t: Teacher) {
     setEditingId(t.id);
-    setForm({ name: t.name || "", fatherName: t.fatherName || "", phone: t.phone || "", department: t.department || "", occupation: t.occupation || "", occupationDetails: t.occupationDetails || "", teachingFrom: t.teachingFrom || "", teachingTo: t.teachingTo || "", division: t.division || "", district: t.district || "", thana: t.thana || "", addressDetails: t.addressDetails || "" });
-    const div = divisions.find((d) => d.division === t.division);
-    setDivId(div ? String(div.id) : "");
-    const dist = div?.districts.find((x) => x.district === t.district);
-    setDistId(dist ? String(dist.desId) : "");
-    const th = dist?.thanas.find((x) => x.thana === t.thana);
-    setThanaId(th ? String(th.id) : "");
+    setForm({
+      name: t.name || "",
+      fatherName: t.fatherName || "",
+      phone: t.phone || "",
+      department: t.department || "",
+      occupation: t.occupation || "",
+      occupationDetails: t.occupationDetails || "",
+      teachingFrom: t.teachingFrom || "",
+      teachingTo: t.teachingTo || "",
+      permanentDivision: t.permanentDivision || "",
+      permanentDistrict: t.permanentDistrict || "",
+      permanentThana: t.permanentThana || "",
+      permanentAddressDetails: t.permanentAddressDetails || "",
+      currentDivision: t.currentDivision || "",
+      currentDistrict: t.currentDistrict || "",
+      currentThana: t.currentThana || "",
+      currentAddressDetails: t.currentAddressDetails || "",
+    });
+    const pdiv = divisions.find((d) => d.division === t.permanentDivision);
+    setPermDivId(pdiv ? String(pdiv.id) : "");
+    const pdist = pdiv?.districts.find((x) => x.district === t.permanentDistrict);
+    setPermDistId(pdist ? String(pdist.desId) : "");
+    const pth = pdist?.thanas.find((x) => x.thana === t.permanentThana);
+    setPermThanaId(pth ? String(pth.id) : "");
+    const cdiv = divisions.find((d) => d.division === t.currentDivision);
+    setCurrDivId(cdiv ? String(cdiv.id) : "");
+    const cdist = cdiv?.districts.find((x) => x.district === t.currentDistrict);
+    setCurrDistId(cdist ? String(cdist.desId) : "");
+    const cth = cdist?.thanas.find((x) => x.thana === t.currentThana);
+    setCurrThanaId(cth ? String(cth.id) : "");
+    setSameAddress(
+      (!!t.permanentDivision || !!t.permanentAddressDetails) &&
+        t.permanentDivision === t.currentDivision &&
+        t.permanentDistrict === t.currentDistrict &&
+        t.permanentThana === t.currentThana &&
+        t.permanentAddressDetails === t.currentAddressDetails
+    );
     setFormError("");
     setModalOpen(true);
   }
@@ -207,7 +268,7 @@ export default function TeachersPage() {
             <table className="w-full text-sm text-left">
               <thead>
                 <tr className="bg-zinc-50 dark:bg-zinc-800/50">
-                  {["নাম", "পিতা", "মোবাইল", "পেশা", "পেশার বিস্তারিত", "শিক্ষাদান", "জামাত", "ঠিকানা", ""].map((col) => (
+                  {["নাম", "পিতা", "মোবাইল", "বর্তমান পেশা", "পেশার বিস্তারিত", "শিক্ষাদান", "জামাত", "স্থায়ী ঠিকানা", "বর্তমান ঠিকানা", ""].map((col) => (
                     <th key={col} className="px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
                       {col}
                     </th>
@@ -237,7 +298,10 @@ export default function TeachersPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">
-                      {[t.addressDetails, t.thana, t.district, t.division].filter(Boolean).join(", ") || "-"}
+                      {[t.permanentAddressDetails, t.permanentThana, t.permanentDistrict, t.permanentDivision].filter(Boolean).join(", ") || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">
+                      {[t.currentAddressDetails, t.currentThana, t.currentDistrict, t.currentDivision].filter(Boolean).join(", ") || "-"}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex gap-1 justify-end">
@@ -311,7 +375,7 @@ export default function TeachersPage() {
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>পেশা</label>
+                  <label className={labelClass}>বর্তমান পেশা</label>
                   <div className="relative">
                     <button
                       type="button"
@@ -416,73 +480,189 @@ export default function TeachersPage() {
                     )}
                   </div>
                 </div>
+                {/* Permanent Address */}
                 <div>
-                  <label className={labelClass}>বিভাগ</label>
-                  <select
-                    value={divId}
-                    onChange={(e) => {
-                      setDivId(e.target.value);
-                      setDistId("");
-                      setThanaId("");
-                      const div = divisions.find((d) => String(d.id) === e.target.value);
-                      setForm({ ...form, division: div?.division || "", district: "", thana: "" });
-                    }}
-                    className={inputClass}
-                  >
-                    <option value="">বিভাগ নির্বাচন করুন</option>
-                    {divisions.map((d) => (
-                      <option key={d.id} value={d.id}>{d.division}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
+                  <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-3 uppercase tracking-wider">স্থায়ী ঠিকানা</p>
                   <div>
-                    <label className={labelClass}>জেলা</label>
+                    <label className={labelClass}>বিভাগ</label>
                     <select
-                      value={distId}
+                      value={permDivId}
                       onChange={(e) => {
-                        setDistId(e.target.value);
-                        setThanaId("");
-                        const dist = districts.find((d) => String(d.desId) === e.target.value);
-                        setForm({ ...form, district: dist?.district || "", thana: "" });
+                        setPermDivId(e.target.value);
+                        setPermDistId("");
+                        setPermThanaId("");
+                        const div = divisions.find((d) => String(d.id) === e.target.value);
+                        setForm({ ...form, permanentDivision: div?.division || "", permanentDistrict: "", permanentThana: "" });
                       }}
                       className={inputClass}
-                      disabled={!divId}
                     >
-                      <option value="">জেলা নির্বাচন করুন</option>
-                      {districts.map((d) => (
-                        <option key={d.desId} value={d.desId}>{d.district}</option>
+                      <option value="">বিভাগ নির্বাচন করুন</option>
+                      {divisions.map((d) => (
+                        <option key={d.id} value={d.id}>{d.division}</option>
                       ))}
                     </select>
                   </div>
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <label className={labelClass}>জেলা</label>
+                      <select
+                        value={permDistId}
+                        onChange={(e) => {
+                          setPermDistId(e.target.value);
+                          setPermThanaId("");
+                          const dist = permDistricts.find((d) => String(d.desId) === e.target.value);
+                          setForm({ ...form, permanentDistrict: dist?.district || "", permanentThana: "" });
+                        }}
+                        className={inputClass}
+                        disabled={!permDivId}
+                      >
+                        <option value="">জেলা নির্বাচন করুন</option>
+                        {permDistricts.map((d) => (
+                          <option key={d.desId} value={d.desId}>{d.district}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>থানা</label>
+                      <select
+                        value={permThanaId}
+                        onChange={(e) => {
+                          setPermThanaId(e.target.value);
+                          const th = permThanas.find((t) => String(t.id) === e.target.value);
+                          setForm({ ...form, permanentThana: th?.thana || "" });
+                        }}
+                        className={inputClass}
+                        disabled={!permDistId}
+                      >
+                        <option value="">থানা নির্বাচন করুন</option>
+                        {permThanas.map((t) => (
+                          <option key={t.id} value={t.id}>{t.thana}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className={labelClass}>ঠিকানার বিস্তারিত</label>
+                    <textarea
+                      rows={2}
+                      value={form.permanentAddressDetails}
+                      onChange={(e) => setForm({ ...form, permanentAddressDetails: e.target.value })}
+                      className={inputClass}
+                      placeholder="গ্রাম / রাস্তা / বাসা নম্বর ইত্যাদি"
+                    />
+                  </div>
+                </div>
+
+                {/* Current Address */}
+                <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">বর্তমান ঠিকানা</p>
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={sameAddress}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setSameAddress(checked);
+                          if (checked) {
+                            setCurrDivId(permDivId);
+                            setCurrDistId(permDistId);
+                            setCurrThanaId(permThanaId);
+                            setForm((prev) => ({
+                              ...prev,
+                              currentDivision: prev.permanentDivision,
+                              currentDistrict: prev.permanentDistrict,
+                              currentThana: prev.permanentThana,
+                              currentAddressDetails: prev.permanentAddressDetails,
+                            }));
+                          } else {
+                            setCurrDivId("");
+                            setCurrDistId("");
+                            setCurrThanaId("");
+                            setForm((prev) => ({
+                              ...prev,
+                              currentDivision: "",
+                              currentDistrict: "",
+                              currentThana: "",
+                              currentAddressDetails: "",
+                            }));
+                          }
+                        }}
+                        className="w-4 h-4 accent-emerald-600 rounded"
+                      />
+                      <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">স্থায়ী ঠিকানার সাথে একই</span>
+                    </label>
+                  </div>
                   <div>
-                    <label className={labelClass}>থানা</label>
+                    <label className={labelClass}>বিভাগ</label>
                     <select
-                      value={thanaId}
+                      value={sameAddress ? permDivId : currDivId}
                       onChange={(e) => {
-                        setThanaId(e.target.value);
-                        const th = thanas.find((t) => String(t.id) === e.target.value);
-                        setForm({ ...form, thana: th?.thana || "" });
+                        setCurrDivId(e.target.value);
+                        setCurrDistId("");
+                        setCurrThanaId("");
+                        const div = divisions.find((d) => String(d.id) === e.target.value);
+                        setForm({ ...form, currentDivision: div?.division || "", currentDistrict: "", currentThana: "" });
                       }}
                       className={inputClass}
-                      disabled={!distId}
+                      disabled={sameAddress}
                     >
-                      <option value="">থানা নির্বাচন করুন</option>
-                      {thanas.map((t) => (
-                        <option key={t.id} value={t.id}>{t.thana}</option>
+                      <option value="">বিভাগ নির্বাচন করুন</option>
+                      {divisions.map((d) => (
+                        <option key={d.id} value={d.id}>{d.division}</option>
                       ))}
                     </select>
                   </div>
-                </div>
-                <div>
-                  <label className={labelClass}>ঠিকানার বিস্তারিত</label>
-                  <textarea
-                    rows={2}
-                    value={form.addressDetails}
-                    onChange={(e) => setForm({ ...form, addressDetails: e.target.value })}
-                    className={inputClass}
-                    placeholder="গ্রাম / রাস্তা / বাসা নম্বর ইত্যাদি"
-                  />
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <label className={labelClass}>জেলা</label>
+                      <select
+                        value={sameAddress ? permDistId : currDistId}
+                        onChange={(e) => {
+                          setCurrDistId(e.target.value);
+                          setCurrThanaId("");
+                          const dist = currDistricts.find((d) => String(d.desId) === e.target.value);
+                          setForm({ ...form, currentDistrict: dist?.district || "", currentThana: "" });
+                        }}
+                        className={inputClass}
+                        disabled={sameAddress || !(sameAddress ? permDivId : currDivId)}
+                      >
+                        <option value="">জেলা নির্বাচন করুন</option>
+                        {(sameAddress ? permDistricts : currDistricts).map((d) => (
+                          <option key={d.desId} value={d.desId}>{d.district}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>থানা</label>
+                      <select
+                        value={sameAddress ? permThanaId : currThanaId}
+                        onChange={(e) => {
+                          setCurrThanaId(e.target.value);
+                          const th = currThanas.find((t) => String(t.id) === e.target.value);
+                          setForm({ ...form, currentThana: th?.thana || "" });
+                        }}
+                        className={inputClass}
+                        disabled={sameAddress || !(sameAddress ? permDistId : currDistId)}
+                      >
+                        <option value="">থানা নির্বাচন করুন</option>
+                        {(sameAddress ? permThanas : currThanas).map((t) => (
+                          <option key={t.id} value={t.id}>{t.thana}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className={labelClass}>ঠিকানার বিস্তারিত</label>
+                    <textarea
+                      rows={2}
+                      value={sameAddress ? form.permanentAddressDetails : form.currentAddressDetails}
+                      onChange={(e) => setForm({ ...form, currentAddressDetails: e.target.value })}
+                      className={inputClass}
+                      disabled={sameAddress}
+                      placeholder="গ্রাম / রাস্তা / বাসা নম্বর ইত্যাদি"
+                    />
+                  </div>
                 </div>
                 {formError && (
                   <p className="text-sm text-red-600 dark:text-red-400">{formError}</p>

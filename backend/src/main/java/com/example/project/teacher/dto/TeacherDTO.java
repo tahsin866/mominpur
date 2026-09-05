@@ -17,9 +17,13 @@ public class TeacherDTO {
     private String occupationDetails;
     private String teachingFrom;
     private String teachingTo;
-    private String division;
-    private String district;
-    private String thana;
-    private String addressDetails;
+    private String permanentDivision;
+    private String permanentDistrict;
+    private String permanentThana;
+    private String permanentAddressDetails;
+    private String currentDivision;
+    private String currentDistrict;
+    private String currentThana;
+    private String currentAddressDetails;
     private LocalDateTime createdAt;
 }

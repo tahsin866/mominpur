@@ -22,10 +22,12 @@ public class TransactionService {
 
     @Transactional
     public Transaction createTransaction(Transaction transaction) {
+        if (transaction.getTransactionId() != null && transactionRepository.existsByTransactionId(transaction.getTransactionId().trim())) {
+            throw new RuntimeException("এই ট্রানজেকশন আইডি ইতিমধ্যে ব্যবহৃত হয়েছে।");
+        }
         if (transaction.getStatus() == null) {
             transaction.setStatus("PENDING");
         }
-        // টাকার অঙ্ক ক্লায়েন্ট যা-ই পাঠাক, সবসময় রেজিস্ট্রেশনের অতিথি সংখ্যা থেকেই হিসাব হয়।
         transaction.setTotalAmount(resolveTotalAmount(transaction.getRegistrationId()));
         return transactionRepository.save(transaction);
     }
@@ -43,6 +45,9 @@ public class TransactionService {
     /** অতিথি যোগের ট্রানজেকশন — totalAmount ইতিমধ্যে সেট করা, recalculate করা হবে না। */
     @Transactional
     public Transaction createGuestTransaction(Transaction transaction) {
+        if (transaction.getTransactionId() != null && transactionRepository.existsByTransactionId(transaction.getTransactionId().trim())) {
+            throw new RuntimeException("এই ট্রানজেকশন আইডি ইতিমধ্যে ব্যবহৃত হয়েছে।");
+        }
         if (transaction.getStatus() == null) {
             transaction.setStatus("PENDING");
         }
@@ -84,6 +89,10 @@ public class TransactionService {
     public Transaction updateTransactionId(Long id, String newTransactionId) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found with id: " + id));
+        if (newTransactionId != null && transactionRepository.existsByTransactionId(newTransactionId.trim())
+                && !newTransactionId.trim().equals(transaction.getTransactionId())) {
+            throw new RuntimeException("এই ট্রানজেকশন আইডি ইতিমধ্যে ব্যবহৃত হয়েছে।");
+        }
         transaction.setTransactionId(newTransactionId);
         return transactionRepository.save(transaction);
     }
