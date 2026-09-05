@@ -1,0 +1,693 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getToken, jsonHeaders } from "@/lib/auth";
+import { inputClass, labelClass, DEPARTMENTS, OCCUPATIONS, YEARS } from "@/lib/constants";
+import { fetchDivisions } from "@/lib/address";
+import type { DivisionData } from "@/lib/address";
+
+interface Teacher {
+  id: number;
+  name: string;
+  fatherName: string;
+  phone: string;
+  department: string;
+  occupation: string;
+  occupationDetails: string;
+  teachingFrom: string;
+  teachingTo: string;
+  permanentDivision: string;
+  permanentDistrict: string;
+  permanentThana: string;
+  permanentAddressDetails: string;
+  currentDivision: string;
+  currentDistrict: string;
+  currentThana: string;
+  currentAddressDetails: string;
+  createdAt: string;
+}
+
+const emptyForm = {
+  name: "",
+  fatherName: "",
+  phone: "",
+  department: "",
+  occupation: "",
+  occupationDetails: "",
+  teachingFrom: "",
+  teachingTo: "",
+  permanentDivision: "",
+  permanentDistrict: "",
+  permanentThana: "",
+  permanentAddressDetails: "",
+  currentDivision: "",
+  currentDistrict: "",
+  currentThana: "",
+  currentAddressDetails: "",
+};
+
+export default function TeachersPage() {
+  const router = useRouter();
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+
+  const [divisions, setDivisions] = useState<DivisionData[]>([]);
+  const [permDivId, setPermDivId] = useState("");
+  const [permDistId, setPermDistId] = useState("");
+  const [permThanaId, setPermThanaId] = useState("");
+  const [currDivId, setCurrDivId] = useState("");
+  const [currDistId, setCurrDistId] = useState("");
+  const [currThanaId, setCurrThanaId] = useState("");
+
+  const permDistricts = divisions.find((d) => String(d.id) === permDivId)?.districts || [];
+  const permThanas = permDistricts.find((d) => String(d.desId) === permDistId)?.thanas || [];
+  const currDistricts = divisions.find((d) => String(d.id) === currDivId)?.districts || [];
+  const currThanas = currDistricts.find((d) => String(d.desId) === currDistId)?.thanas || [];
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [sameAddress, setSameAddress] = useState(false);
+  const [occOpen, setOccOpen] = useState(false);
+  const [deptOpen, setDeptOpen] = useState(false);
+
+  const fetchTeachers = async () => {
+    try {
+      const res = await fetch("/api/teachers/all", { headers: jsonHeaders() });
+      if (!res.ok) throw new Error("তথ্য লোড করা যায়নি");
+      setTeachers(await res.json());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "কিছু একটা সমস্যা হয়েছে");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!getToken()) {
+      router.push("/login");
+      return;
+    }
+    fetchTeachers();
+    fetchDivisions().then((data) => setDivisions(data));
+  }, [router]);
+
+  function openAddModal() {
+    setEditingId(null);
+    setForm(emptyForm);
+    setPermDivId("");
+    setPermDistId("");
+    setPermThanaId("");
+    setCurrDivId("");
+    setCurrDistId("");
+    setCurrThanaId("");
+    setSameAddress(false);
+    setFormError("");
+    setModalOpen(true);
+  }
+
+  function openEditModal(t: Teacher) {
+    setEditingId(t.id);
+    setForm({
+      name: t.name || "",
+      fatherName: t.fatherName || "",
+      phone: t.phone || "",
+      department: t.department || "",
+      occupation: t.occupation || "",
+      occupationDetails: t.occupationDetails || "",
+      teachingFrom: t.teachingFrom || "",
+      teachingTo: t.teachingTo || "",
+      permanentDivision: t.permanentDivision || "",
+      permanentDistrict: t.permanentDistrict || "",
+      permanentThana: t.permanentThana || "",
+      permanentAddressDetails: t.permanentAddressDetails || "",
+      currentDivision: t.currentDivision || "",
+      currentDistrict: t.currentDistrict || "",
+      currentThana: t.currentThana || "",
+      currentAddressDetails: t.currentAddressDetails || "",
+    });
+    const pdiv = divisions.find((d) => d.division === t.permanentDivision);
+    setPermDivId(pdiv ? String(pdiv.id) : "");
+    const pdist = pdiv?.districts.find((x) => x.district === t.permanentDistrict);
+    setPermDistId(pdist ? String(pdist.desId) : "");
+    const pth = pdist?.thanas.find((x) => x.thana === t.permanentThana);
+    setPermThanaId(pth ? String(pth.id) : "");
+    const cdiv = divisions.find((d) => d.division === t.currentDivision);
+    setCurrDivId(cdiv ? String(cdiv.id) : "");
+    const cdist = cdiv?.districts.find((x) => x.district === t.currentDistrict);
+    setCurrDistId(cdist ? String(cdist.desId) : "");
+    const cth = cdist?.thanas.find((x) => x.thana === t.currentThana);
+    setCurrThanaId(cth ? String(cth.id) : "");
+    setSameAddress(
+      (!!t.permanentDivision || !!t.permanentAddressDetails) &&
+        t.permanentDivision === t.currentDivision &&
+        t.permanentDistrict === t.currentDistrict &&
+        t.permanentThana === t.currentThana &&
+        t.permanentAddressDetails === t.currentAddressDetails
+    );
+    setFormError("");
+    setModalOpen(true);
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setFormError("");
+    try {
+      const res = await fetch(editingId ? `/api/teachers/${editingId}` : "/api/teachers/add", {
+        method: editingId ? "PUT" : "POST",
+        headers: jsonHeaders(),
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || "সংরক্ষণ করা যায়নি");
+      }
+      const saved: Teacher = await res.json();
+      setTeachers((prev) =>
+        editingId
+          ? prev.map((t) => (t.id === saved.id ? saved : t))
+          : [...prev, saved].sort((a, b) => a.name.localeCompare(b.name))
+      );
+      setModalOpen(false);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "সংরক্ষণ করা যায়নি");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(t: Teacher) {
+    if (!confirm(`"${t.name}" কে মুছে ফেলতে চান?`)) return;
+    try {
+      const res = await fetch(`/api/teachers/${t.id}`, { method: "DELETE", headers: jsonHeaders() });
+      if (!res.ok) throw new Error("মুছে ফেলা যায়নি");
+      setTeachers((prev) => prev.filter((x) => x.id !== t.id));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "মুছে ফেলা যায়নি");
+    }
+  }
+
+  const filtered = teachers.filter(
+    (t) =>
+      !search ||
+      t.name?.toLowerCase().includes(search.toLowerCase()) ||
+      t.phone?.includes(search)
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+          <p className="text-sm text-zinc-400 dark:text-zinc-500">লোড হচ্ছে...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">শিক্ষক</h1>
+          <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-0.5">
+            {teachers.length} জন শিক্ষক
+          </p>
+        </div>
+        <button
+          onClick={openAddModal}
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-sm"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          নতুন শিক্ষক যোগ করুন
+        </button>
+      </div>
+
+      {error && (
+        <div className="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-400">
+          {error}
+        </div>
+      )}
+
+      {/* Search */}
+      {teachers.length > 0 && (
+        <div className="bg-white rounded-xl border border-zinc-100 p-3 dark:bg-zinc-900 dark:border-zinc-800 shadow-sm">
+          <input
+            type="text"
+            placeholder="নাম / ফোন খুঁজুন"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-64 text-sm px-3 py-2 border border-zinc-200 rounded-lg bg-zinc-50/50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+          />
+        </div>
+      )}
+
+      {/* Teacher list */}
+      {teachers.length === 0 ? (
+        <div className="bg-white rounded-xl border border-zinc-100 p-12 text-center dark:bg-zinc-900 dark:border-zinc-800 shadow-sm">
+          <svg className="w-10 h-10 mx-auto text-zinc-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+          </svg>
+          <p className="mt-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">কোনো শিক্ষক যোগ করা হয়নি</p>
+          <button onClick={openAddModal} className="mt-4 px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors">
+            প্রথম শিক্ষক যোগ করুন
+          </button>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border border-zinc-100 overflow-hidden shadow-sm dark:bg-zinc-900 dark:border-zinc-800">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead>
+                <tr className="bg-zinc-50 dark:bg-zinc-800/50">
+                  {["নাম", "পিতা", "মোবাইল", "বর্তমান পেশা", "পেশার বিস্তারিত", "শিক্ষাদান", "জামাত", "স্থায়ী ঠিকানা", "বর্তমান ঠিকানা", ""].map((col) => (
+                    <th key={col} className="px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {filtered.map((t, i) => (
+                  <tr key={t.id} className={i % 2 === 1 ? "bg-zinc-50/50 dark:bg-zinc-800/20" : ""}>
+                    <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100 whitespace-nowrap">{t.name}</td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">{t.fatherName || "-"}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <a href={`tel:${t.phone}`} className="text-emerald-600 dark:text-emerald-400 hover:underline">{t.phone}</a>
+                    </td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">{t.occupation || "-"}</td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">{t.occupationDetails || "-"}</td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">
+                      {t.teachingFrom || t.teachingTo ? `${t.teachingFrom || "?"} - ${t.teachingTo || "?"}` : "-"}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {t.department ? (
+                        <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50">
+                          {t.department}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">
+                      {[t.permanentAddressDetails, t.permanentThana, t.permanentDistrict, t.permanentDivision].filter(Boolean).join(", ") || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">
+                      {[t.currentAddressDetails, t.currentThana, t.currentDistrict, t.currentDivision].filter(Boolean).join(", ") || "-"}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex gap-1 justify-end">
+                        <button
+                          onClick={() => openEditModal(t)}
+                          className="px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors dark:text-blue-400 dark:hover:bg-blue-950/40"
+                        >
+                          এডিট
+                        </button>
+                        <button
+                          onClick={() => handleDelete(t)}
+                          className="px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors dark:text-red-400 dark:hover:bg-red-950/40"
+                        >
+                          ডিলিট
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {filtered.length === 0 && teachers.length > 0 && (
+        <p className="text-center text-sm text-zinc-400 dark:text-zinc-500">কিছু পাওয়া যায়নি</p>
+      )}
+
+      {/* Add/Edit Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl dark:bg-zinc-900 max-h-[90vh] overflow-y-auto">
+            <div className="p-5 border-b border-zinc-100 dark:border-zinc-800">
+              <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+                {editingId ? "শিক্ষক এডিট করুন" : "নতুন শিক্ষক যোগ করুন"}
+              </h2>
+            </div>
+            <form onSubmit={handleSave}>
+              <div className="p-5 space-y-4">
+                <div>
+                  <label className={labelClass}>নাম *</label>
+                  <input
+                    type="text"
+                    required
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className={inputClass}
+                    placeholder="শিক্ষকের পূর্ণ নাম"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>পিতার নাম</label>
+                  <input
+                    type="text"
+                    value={form.fatherName}
+                    onChange={(e) => setForm({ ...form, fatherName: e.target.value })}
+                    className={inputClass}
+                    placeholder="পিতার নাম"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>মোবাইল নম্বর *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className={inputClass}
+                    placeholder="01XXXXXXXXX"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>বর্তমান পেশা</label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setOccOpen((o) => !o)}
+                      className={`w-full text-sm px-3 py-2.5 border rounded-lg bg-white dark:bg-zinc-800 text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors ${occOpen ? "border-emerald-500" : "border-zinc-200 dark:border-zinc-700"} ${!form.occupation ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-900 dark:text-zinc-100"}`}
+                    >
+                      <span className="truncate">{form.occupation || "নির্বাচন করুন"}</span>
+                      <svg className={`w-4 h-4 ml-2 shrink-0 transition-transform ${occOpen ? "rotate-180" : ""} text-zinc-400`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {occOpen && (
+                      <div className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {OCCUPATIONS.map((job) => (
+                          <label key={job} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors">
+                            <input
+                              type="checkbox"
+                              className="accent-emerald-600"
+                              checked={form.occupation.split(",").map((s) => s.trim()).filter(Boolean).includes(job)}
+                              onChange={() => {
+                                const current = form.occupation.split(",").map((s) => s.trim()).filter(Boolean);
+                                const updated = current.includes(job) ? current.filter((j) => j !== job) : [...current, job];
+                                setForm({ ...form, occupation: updated.join(", ") });
+                              }}
+                            />
+                            {job}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>পেশার বিস্তারিত</label>
+                  <input
+                    type="text"
+                    value={form.occupationDetails}
+                    onChange={(e) => setForm({ ...form, occupationDetails: e.target.value })}
+                    className={inputClass}
+                    placeholder="প্রতিষ্ঠানের নাম, পদবী, বিবরণ"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>শিক্ষাদান শুরু</label>
+                    <select
+                      value={form.teachingFrom}
+                      onChange={(e) => setForm({ ...form, teachingFrom: e.target.value })}
+                      className={inputClass}
+                    >
+                      <option value="">শুরুর বছর</option>
+                      {YEARS.map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>শিক্ষাদান শেষ</label>
+                    <select
+                      value={form.teachingTo}
+                      onChange={(e) => setForm({ ...form, teachingTo: e.target.value })}
+                      className={inputClass}
+                    >
+                      <option value="">শেষের বছর</option>
+                      {YEARS.map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>বিভাগ/জামাত</label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setDeptOpen((o) => !o)}
+                      className={`w-full text-sm px-3 py-2.5 border rounded-lg bg-white dark:bg-zinc-800 text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors ${deptOpen ? "border-emerald-500" : "border-zinc-200 dark:border-zinc-700"} ${!form.department ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-900 dark:text-zinc-100"}`}
+                    >
+                      <span className="truncate">{form.department || "নির্বাচন করুন"}</span>
+                      <svg className={`w-4 h-4 ml-2 shrink-0 transition-transform ${deptOpen ? "rotate-180" : ""} text-zinc-400`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {deptOpen && (
+                      <div className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg">
+                        {DEPARTMENTS.map((dept) => (
+                          <label key={dept} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors">
+                            <input
+                              type="checkbox"
+                              className="accent-emerald-600"
+                              checked={form.department.split(",").map((s) => s.trim()).filter(Boolean).includes(dept)}
+                              onChange={() => {
+                                const current = form.department.split(",").map((s) => s.trim()).filter(Boolean);
+                                const updated = current.includes(dept) ? current.filter((d) => d !== dept) : [...current, dept];
+                                setForm({ ...form, department: updated.join(", ") });
+                              }}
+                            />
+                            {dept}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {/* Permanent Address */}
+                <div>
+                  <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-3 uppercase tracking-wider">স্থায়ী ঠিকানা</p>
+                  <div>
+                    <label className={labelClass}>বিভাগ</label>
+                    <select
+                      value={permDivId}
+                      onChange={(e) => {
+                        setPermDivId(e.target.value);
+                        setPermDistId("");
+                        setPermThanaId("");
+                        const div = divisions.find((d) => String(d.id) === e.target.value);
+                        setForm({ ...form, permanentDivision: div?.division || "", permanentDistrict: "", permanentThana: "" });
+                      }}
+                      className={inputClass}
+                    >
+                      <option value="">বিভাগ নির্বাচন করুন</option>
+                      {divisions.map((d) => (
+                        <option key={d.id} value={d.id}>{d.division}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <label className={labelClass}>জেলা</label>
+                      <select
+                        value={permDistId}
+                        onChange={(e) => {
+                          setPermDistId(e.target.value);
+                          setPermThanaId("");
+                          const dist = permDistricts.find((d) => String(d.desId) === e.target.value);
+                          setForm({ ...form, permanentDistrict: dist?.district || "", permanentThana: "" });
+                        }}
+                        className={inputClass}
+                        disabled={!permDivId}
+                      >
+                        <option value="">জেলা নির্বাচন করুন</option>
+                        {permDistricts.map((d) => (
+                          <option key={d.desId} value={d.desId}>{d.district}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>থানা</label>
+                      <select
+                        value={permThanaId}
+                        onChange={(e) => {
+                          setPermThanaId(e.target.value);
+                          const th = permThanas.find((t) => String(t.id) === e.target.value);
+                          setForm({ ...form, permanentThana: th?.thana || "" });
+                        }}
+                        className={inputClass}
+                        disabled={!permDistId}
+                      >
+                        <option value="">থানা নির্বাচন করুন</option>
+                        {permThanas.map((t) => (
+                          <option key={t.id} value={t.id}>{t.thana}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className={labelClass}>ঠিকানার বিস্তারিত</label>
+                    <textarea
+                      rows={2}
+                      value={form.permanentAddressDetails}
+                      onChange={(e) => setForm({ ...form, permanentAddressDetails: e.target.value })}
+                      className={inputClass}
+                      placeholder="গ্রাম / রাস্তা / বাসা নম্বর ইত্যাদি"
+                    />
+                  </div>
+                </div>
+
+                {/* Current Address */}
+                <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">বর্তমান ঠিকানা</p>
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={sameAddress}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setSameAddress(checked);
+                          if (checked) {
+                            setCurrDivId(permDivId);
+                            setCurrDistId(permDistId);
+                            setCurrThanaId(permThanaId);
+                            setForm((prev) => ({
+                              ...prev,
+                              currentDivision: prev.permanentDivision,
+                              currentDistrict: prev.permanentDistrict,
+                              currentThana: prev.permanentThana,
+                              currentAddressDetails: prev.permanentAddressDetails,
+                            }));
+                          } else {
+                            setCurrDivId("");
+                            setCurrDistId("");
+                            setCurrThanaId("");
+                            setForm((prev) => ({
+                              ...prev,
+                              currentDivision: "",
+                              currentDistrict: "",
+                              currentThana: "",
+                              currentAddressDetails: "",
+                            }));
+                          }
+                        }}
+                        className="w-4 h-4 accent-emerald-600 rounded"
+                      />
+                      <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">স্থায়ী ঠিকানার সাথে একই</span>
+                    </label>
+                  </div>
+                  <div>
+                    <label className={labelClass}>বিভাগ</label>
+                    <select
+                      value={sameAddress ? permDivId : currDivId}
+                      onChange={(e) => {
+                        setCurrDivId(e.target.value);
+                        setCurrDistId("");
+                        setCurrThanaId("");
+                        const div = divisions.find((d) => String(d.id) === e.target.value);
+                        setForm({ ...form, currentDivision: div?.division || "", currentDistrict: "", currentThana: "" });
+                      }}
+                      className={inputClass}
+                      disabled={sameAddress}
+                    >
+                      <option value="">বিভাগ নির্বাচন করুন</option>
+                      {divisions.map((d) => (
+                        <option key={d.id} value={d.id}>{d.division}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <label className={labelClass}>জেলা</label>
+                      <select
+                        value={sameAddress ? permDistId : currDistId}
+                        onChange={(e) => {
+                          setCurrDistId(e.target.value);
+                          setCurrThanaId("");
+                          const dist = currDistricts.find((d) => String(d.desId) === e.target.value);
+                          setForm({ ...form, currentDistrict: dist?.district || "", currentThana: "" });
+                        }}
+                        className={inputClass}
+                        disabled={sameAddress || !(sameAddress ? permDivId : currDivId)}
+                      >
+                        <option value="">জেলা নির্বাচন করুন</option>
+                        {(sameAddress ? permDistricts : currDistricts).map((d) => (
+                          <option key={d.desId} value={d.desId}>{d.district}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>থানা</label>
+                      <select
+                        value={sameAddress ? permThanaId : currThanaId}
+                        onChange={(e) => {
+                          setCurrThanaId(e.target.value);
+                          const th = currThanas.find((t) => String(t.id) === e.target.value);
+                          setForm({ ...form, currentThana: th?.thana || "" });
+                        }}
+                        className={inputClass}
+                        disabled={sameAddress || !(sameAddress ? permDistId : currDistId)}
+                      >
+                        <option value="">থানা নির্বাচন করুন</option>
+                        {(sameAddress ? permThanas : currThanas).map((t) => (
+                          <option key={t.id} value={t.id}>{t.thana}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className={labelClass}>ঠিকানার বিস্তারিত</label>
+                    <textarea
+                      rows={2}
+                      value={sameAddress ? form.permanentAddressDetails : form.currentAddressDetails}
+                      onChange={(e) => setForm({ ...form, currentAddressDetails: e.target.value })}
+                      className={inputClass}
+                      disabled={sameAddress}
+                      placeholder="গ্রাম / রাস্তা / বাসা নম্বর ইত্যাদি"
+                    />
+                  </div>
+                </div>
+                {formError && (
+                  <p className="text-sm text-red-600 dark:text-red-400">{formError}</p>
+                )}
+              </div>
+              <div className="p-5 pt-0 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                >
+                  বাতিল
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors disabled:opacity-60"
+                >
+                  {saving ? "সংরক্ষণ হচ্ছে..." : "সংরক্ষণ করুন"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -27,6 +27,8 @@ public class TransactionController {
             }
             Transaction saved = transactionService.createTransaction(transaction);
             return ResponseEntity.ok(saved);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("দুঃখিত, সার্ভারে সমস্যা হয়েছে: " + e.getMessage());
         }
@@ -42,6 +44,19 @@ public class TransactionController {
         return transactionService.getTransactionById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTransactionId(@PathVariable Long id, @RequestBody java.util.Map<String, String> body) {
+        try {
+            String transactionId = body.get("transactionId");
+            if (transactionId == null || transactionId.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("ট্রানজেকশন আইডি আবশ্যক।");
+            }
+            return ResponseEntity.ok(transactionService.updateTransactionId(id, transactionId.trim()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PatchMapping("/{id}/status")

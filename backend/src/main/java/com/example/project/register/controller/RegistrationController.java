@@ -59,7 +59,10 @@ public class RegistrationController {
                     "phone", r.getPhone(),
                     "status", r.getStatus(),
                     "guestCount", r.getGuestCount() != null ? r.getGuestCount() : 0,
-                    "submittedAt", r.getSubmittedAt() != null ? r.getSubmittedAt().toString() : ""
+                    "submittedAt", r.getSubmittedAt() != null ? r.getSubmittedAt().toString() : "",
+                    "studyFrom", r.getStudyFrom() != null ? r.getStudyFrom() : "",
+                    "studyTo", r.getStudyTo() != null ? r.getStudyTo() : "",
+                    "fatherName", r.getFatherName() != null ? r.getFatherName() : ""
                 )))
                 .orElse(ResponseEntity.notFound().build());
     }

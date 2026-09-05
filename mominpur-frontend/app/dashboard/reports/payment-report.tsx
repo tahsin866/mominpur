@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatDate, formatMonth, exportPDF, exportExcel } from "./export-utils";
+import { formatDate, formatMonth, exportPDF } from "./export-utils";
 
 interface Transaction {
   id: number;
@@ -206,40 +206,6 @@ export default function PaymentReport({ transactions, registrations }: { transac
     }
   }
 
-  function handleExportExcel() {
-    exportExcel("Payment Report", [
-      {
-        name: "Summary",
-        columns: ["Description", "Value"],
-        rows: [
-          ["Total Approved Income", summary.totalIncome],
-          ["Approved Transactions", summary.approvedCount],
-          ...Object.entries(summary.perReceiver).map(([num, amt]) => [`${num} Income`, amt]),
-        ],
-      },
-      {
-        name: "Date Wise",
-        columns: ["Date", "Transactions", "Total Amount"],
-        rows: dateWise.map((d) => [d.date, d.count, d.total]),
-      },
-      {
-        name: "Month Wise",
-        columns: ["Month", "Transactions", "Total Amount"],
-        rows: monthWise.map((d) => [d.month, d.count, d.total]),
-      },
-      {
-        name: "Receiver Wise",
-        columns: ["Number", "Total Transactions", "Total Amount"],
-        rows: receiverWise.map((d) => [d.number, d.count, d.total]),
-      },
-      {
-        name: "Detailed",
-        columns: ["SL", "Date", "Name", "Phone", "Last 4", "Transaction ID", "Receiver", "Amount"],
-        rows: detailRows.map((d, i) => [i + 1, d.date, d.name, d.phone, d.payingNumber, d.transactionId, d.receiverNumber, d.amount]),
-      },
-    ]);
-  }
-
   const { columns, rows } = getTableData();
 
   return (
@@ -294,7 +260,7 @@ export default function PaymentReport({ transactions, registrations }: { transac
         </div>
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-4 text-white shadow-sm">
           <p className="text-xs font-medium text-white/80 uppercase tracking-wider">Total Transactions</p>
-          <p className="text-2xl font-bold mt-1">{filtered.length.toLocaleString()}</p>
+          <p className="text-2xl font-bold mt-1">{transactions.length.toLocaleString()}</p>
           <div className="absolute -right-3 -bottom-3 w-16 h-16 rounded-full bg-white/10" />
         </div>
       </div>
@@ -340,15 +306,6 @@ export default function PaymentReport({ transactions, registrations }: { transac
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             PDF
-          </button>
-          <button
-            onClick={handleExportExcel}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Excel
           </button>
         </div>
       </div>
