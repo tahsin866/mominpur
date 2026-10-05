@@ -3,8 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { apiHeaders } from "@/lib/i18n/api";
 
 export default function Login() {
+  const { href, locale } = useLang();
   const router = useRouter();
   
   const [email, setEmail] = useState("");
@@ -22,6 +25,7 @@ export default function Login() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
+          ...apiHeaders(locale),
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -41,7 +45,7 @@ export default function Login() {
       
       alert("লগইন সফল হয়েছে!");
       
-      router.push("/auth");
+      router.push(href("/auth"));
       
     } catch (err: any) {
       setError(err.message || "সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না");
@@ -139,7 +143,7 @@ export default function Login() {
         <div className="mt-6 pt-4 border-t border-zinc-100 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
           এখনো রেজিস্ট্রেশন করেননি?{" "}
           <Link 
-            href="/registration/reg" 
+            href={href("/registration/reg")} 
             className="font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
           >
             এখানে রেজিস্ট্রেশন করুন
@@ -151,7 +155,7 @@ export default function Login() {
       {/* ব্যাক টু হোম লিংক */}
       <div className="mt-4 text-center">
         <Link 
-          href="/" 
+          href={href("/")} 
           className="text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
         >
           ← মূল পাতায় ফিরে যান

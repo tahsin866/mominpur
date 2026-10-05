@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { apiHeaders } from "@/lib/i18n/api";
+import { LocalizedText } from "@/lib/i18n/LocalizedText";
 
 interface ThanaData {
   id: number;
@@ -24,6 +27,7 @@ interface DivisionData {
 }
 
 export default function RegistrationPage() {
+  const { t, num, fmt, href, locale } = useLang();
   const [divisions, setDivisions] = useState<DivisionData[]>([]);
   const [divisionsLoading, setDivisionsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -74,9 +78,6 @@ export default function RegistrationPage() {
   const guestTotal = guestCount * GUEST_FEE;
   const grandTotal = REGISTRATION_FEE + guestTotal;
 
-  // "2,040" → "২,০৪০"। লোকেল স্পষ্ট করে দেওয়া, নইলে সার্ভার-ক্লায়েন্টে আলাদা হতে পারে।
-  const bn = (n: number) =>
-    n.toLocaleString("en-US").replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]);
 
   const startYear = 1963;
   const currentYear = 2026;
@@ -86,7 +87,7 @@ export default function RegistrationPage() {
   );
 
   useEffect(() => {
-    fetch(`/api/location/divisions`)
+    fetch(`/api/location/divisions`, { headers: apiHeaders(locale) })
       .then((r) => {
         if (!r.ok) throw new Error("Failed to load divisions");
         const contentType = r.headers.get("content-type");
@@ -140,6 +141,15 @@ export default function RegistrationPage() {
   const curThanas =
     curDistricts.find((d) => String(d.desId) === curDistId)?.thanas || [];
 
+  // State holds the Bangla values (those go to the backend untouched).
+  // Display uses the translated labels so the button is never Bangla on /en.
+  const deptLabels = t.registration.departments
+    .filter((d) => selectedDepartments.includes(d.value))
+    .map((d) => d.label);
+  const occLabels = t.registration.occupations
+    .filter((o) => selectedOccupations.includes(o.value))
+    .map((o) => o.label);
+
   const [errorField, setErrorField] = useState("");
   const [sameAddress, setSameAddress] = useState(false);
   const [isForeign, setIsForeign] = useState(false);
@@ -162,32 +172,32 @@ export default function RegistrationPage() {
     setErrorField("");
 
     if (form.studyFrom && form.studyTo && Number(form.studyTo) < Number(form.studyFrom)) {
-      showError("অধ্যয়ন শেষের বছর অবশ্যই অধ্যয়ন শুরুর বছরের সমান বা পরে হতে হবে। আপনি শুরু দিয়েছেন " + form.studyFrom + " আর শেষ দিয়েছেন " + form.studyTo + " — দয়া করে সঠিক তথ্য দিন।", "field-studyTo");
+      showError(fmt(t.registration.errStudyRange, { from: form.studyFrom, to: form.studyTo }), "field-studyTo");
       return;
     }
 
     if (!form.phone.trim()) {
-      showError("মোবাইল নম্বর আবশ্যক।", "field-phone");
+      showError(t.registration.errPhoneRequired, "field-phone");
       return;
     }
     if (!form.whatsapp.trim()) {
-      showError("হোয়াটসঅ্যাপ নম্বর আবশ্যক।", "field-whatsapp");
+      showError(t.registration.errWhatsappRequired, "field-whatsapp");
       return;
     }
     if (!receiverNumber) {
-      showError("যে নম্বরে সেন্ডমানি করেছেন তা নির্বাচন করুন।", "field-receiverNumber");
+      showError(t.registration.errReceiverRequired, "field-receiverNumber");
       return;
     }
     if (!paidAmount || Number(paidAmount) <= 0) {
-      showError("কত টাকা পাঠিয়েছেন তা লিখুন।", "field-paidAmount");
+      showError(t.registration.errPaidAmountRequired, "field-paidAmount");
       return;
     }
     if (!transactionId.trim()) {
-      showError("ট্রানজেকশন আইডি আবশ্যক।", "field-transactionId");
+      showError(t.registration.errTransactionRequired, "field-transactionId");
       return;
     }
     if (!lastFourDigits.trim() || lastFourDigits.length !== 4) {
-      showError("পেয়িং নম্বরের শেষ ৪ ডিজিট আবশ্যক।", "field-lastFourDigits");
+      showError(t.registration.errLastFourRequired, "field-lastFourDigits");
       return;
     }
 
@@ -232,7 +242,7 @@ export default function RegistrationPage() {
         `/api/registrations/submit`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { ...apiHeaders(locale), "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         }
       );
@@ -254,7 +264,7 @@ export default function RegistrationPage() {
           showError(data.replace("DUPLICATE_WHATSAPP: ", ""), "field-whatsapp");
           return;
         }
-        showError(data || "সমস্যা হয়েছে", "form-message");
+        showError(data || t.registration.errGeneric, "form-message");
         setTimeout(() => {
           document.getElementById("form-message")?.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 100);
@@ -265,7 +275,7 @@ export default function RegistrationPage() {
         // Submit transaction with registration ID
         const txRes = await fetch("/api/transactions/submit", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { ...apiHeaders(locale), "Content-Type": "application/json" },
           body: JSON.stringify({
             registrationId: data.id,
             transactionId: transactionId.trim(),
@@ -278,15 +288,15 @@ export default function RegistrationPage() {
         let txData: string;
         if (txContentType && txContentType.includes("application/json")) {
           const json = await txRes.json();
-          txData = typeof json === "string" ? json : (json?.message || "ট্রানজেকশন সেভে সমস্যা হয়েছে।");
+          txData = typeof json === "string" ? json : (json?.message || t.registration.errTxSave);
         } else {
           txData = await txRes.text();
         }
         if (!txRes.ok) {
-          showError(txData || "ট্রানজেকশন সেভ করা যায়নি।", "field-transactionId");
+          showError(txData || t.registration.errTxSaveFailed, "field-transactionId");
           return;
         }
-        setMessage("আলহামদুলিল্লাহ! আপনার ফরমটি সফলভাবে ডাটাবেজে সংরক্ষিত হয়েছে।");
+        setMessage(t.registration.success);
         setTimeout(() => {
           document.getElementById("form-message")?.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 100);
@@ -320,14 +330,14 @@ export default function RegistrationPage() {
         setCurDistId("");
         setCurThanaId("");
       } else {
-        const errMsg = typeof data === "string" ? data : ((data as Record<string, unknown>)?.message as string || "সমস্যা হয়েছে");
+        const errMsg = typeof data === "string" ? data : ((data as Record<string, unknown>)?.message as string || t.registration.errGeneric);
         setMessage("Error: " + errMsg);
         setTimeout(() => {
           document.getElementById("form-message")?.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 100);
       }
     } catch (err) {
-      const msg = err instanceof Error && err.message ? err.message : "সার্ভারে সংযোগ করা যায়নি। ইন্টারনেট সংযোগ চেক করুন এবং আবার চেষ্টা করুন।";
+      const msg = err instanceof Error && err.message ? err.message : t.registration.errNetwork;
       setMessage("Error: " + msg);
       setTimeout(() => {
         document.getElementById("form-message")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -361,10 +371,10 @@ export default function RegistrationPage() {
         <div className="p-4 sm:p-6 md:p-10" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
           <div className="mb-8">
             <h2 className="text-xl font-bold" style={{ color: "#064E3B" }}>
-              মিলনমেলা রেজিস্ট্রেশন ফর্ম
+              {t.registration.title}
             </h2>
             <p className="text-lg mt-1" style={{ color: "#6B7280" }}>
-              সঠিক তথ্য দিয়ে নিচের ফর্মটি পূরণ করুন।
+              <LocalizedText text={t.registration.subtitle} />
             </p>
           </div>
 
@@ -384,33 +394,33 @@ export default function RegistrationPage() {
             {/* 1. Basic Info */}
             <div className="space-y-3">
               <h3 className="text-lg font-bold border-b pb-1" style={{ color: "#0A3D2A", borderColor: "rgba(10,61,42,0.15)" }}>
-                মৌলিক তথ্য
+                <LocalizedText text={t.registration.sectionBasic} />
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    নাম *
+                    <LocalizedText text={t.registration.labelName} /> *
                   </label>
                   <input
                     type="text"
                     name="name"
                     value={form.name}
                     onChange={handleChange}
-                    placeholder="আপনার নাম"
+                    placeholder={t.registration.placeholderName}
                     className={inputClass()}
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    পিতার নাম *
+                    <LocalizedText text={t.registration.labelFatherName} /> *
                   </label>
                   <input
                     type="text"
                     name="fatherName"
                     value={form.fatherName}
                     onChange={handleChange}
-                    placeholder="পিতার নাম"
+                    placeholder={t.registration.placeholderFatherName}
                     className={inputClass()}
                     required
                   />
@@ -419,7 +429,7 @@ export default function RegistrationPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    মোবাইল নম্বর *
+                    <LocalizedText text={t.registration.labelPhone} /> *
                   </label>
                   <input
                     id="field-phone"
@@ -434,7 +444,7 @@ export default function RegistrationPage() {
                 </div>
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    হোয়াটসঅ্যাপ নম্বর *
+                    <LocalizedText text={t.registration.labelWhatsapp} /> *
                   </label>
                   <input
                     id="field-whatsapp"
@@ -451,7 +461,7 @@ export default function RegistrationPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    ব্লাড গ্রুপ
+                    <LocalizedText text={t.registration.labelBloodGroup} />
                   </label>
                   <select
                     id="field-bloodGroup"
@@ -460,7 +470,7 @@ export default function RegistrationPage() {
                     onChange={handleChange}
                     className={inputClass("field-bloodGroup")}
                   >
-                    <option value="">ব্লাড গ্রুপ নির্বাচন করুন</option>
+                    <option value="">{t.registration.selectBloodGroup}</option>
                     {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
                       <option key={bg} value={bg}>{bg}</option>
                     ))}
@@ -472,12 +482,12 @@ export default function RegistrationPage() {
             {/* 2. Study Info */}
             <div className="space-y-3">
               <h3 className="text-lg font-bold border-b pb-1" style={{ color: "#0A3D2A", borderColor: "rgba(10,61,42,0.15)" }}>
-                মাদরাসায় অধ্যয়নের বিবরণ
+                <LocalizedText text={t.registration.sectionStudy} />
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    অধ্যয়ন শুরু *
+                    <LocalizedText text={t.registration.labelStudyFrom} /> *
                   </label>
                   <select
                     name="studyFrom"
@@ -486,7 +496,7 @@ export default function RegistrationPage() {
                     className={inputClass()}
                     required
                   >
-                    <option value="">শুরুর বছর</option>
+                    <option value="">{t.registration.placeholderStudyFrom}</option>
                     {years.map((y) => (
                       <option key={y} value={y}>
                         {y}
@@ -496,7 +506,7 @@ export default function RegistrationPage() {
                 </div>
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    অধ্যয়ন শেষ *
+                    <LocalizedText text={t.registration.labelStudyTo} /> *
                   </label>
                   <select
                     id="field-studyTo"
@@ -506,7 +516,7 @@ export default function RegistrationPage() {
                     className={inputClass("field-studyTo")}
                     required
                   >
-                    <option value="">শেষের বছর</option>
+                    <option value="">{t.registration.placeholderStudyTo}</option>
                     {years.map((y) => (
                       <option key={y} value={y}>
                         {y}
@@ -516,7 +526,7 @@ export default function RegistrationPage() {
                 </div>
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    বিভাগ/জামাত *
+                    <LocalizedText text={t.registration.labelDepartment} /> *
                   </label>
                   <div ref={deptRef} className="relative">
                     <button
@@ -528,9 +538,9 @@ export default function RegistrationPage() {
                         }`}
                     >
                       <span className="truncate">
-                        {selectedDepartments.length > 0
-                          ? selectedDepartments.join(", ")
-                          : "নির্বাচন করুন"}
+                        {deptLabels.length > 0
+                          ? deptLabels.join(", ")
+                          : t.registration.selectHere}
                       </span>
                       <svg
                         className={`w-4 h-4 ml-2 shrink-0 transition-transform ${deptOpen ? "rotate-180" : ""
@@ -550,7 +560,7 @@ export default function RegistrationPage() {
                     </button>
                     {deptOpen && (
                       <div className="absolute z-50 mt-1 w-full bg-white border rounded-sm shadow-lg" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
-                        {["নাজেরা", "হিফজ", "কিতাব"].map((dept) => (
+                        {t.registration.departments.map(({ value: dept, label }) => (
                           <label
                             key={dept}
                             className="flex items-center gap-2 px-3 py-2 text-base cursor-pointer transition"
@@ -567,7 +577,7 @@ export default function RegistrationPage() {
                                 )
                               }
                             />
-                            {dept}
+                            {label}
                           </label>
                         ))}
                       </div>
@@ -581,7 +591,7 @@ export default function RegistrationPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b pb-1" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
                 <h3 className="text-lg font-bold" style={{ color: "#0A3D2A" }}>
-                  স্থায়ী ঠিকানা
+                  <LocalizedText text={t.registration.sectionPermanentAddress} />
                 </h3>
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
@@ -607,7 +617,7 @@ export default function RegistrationPage() {
                     className="w-4 h-4 accent-emerald-700 rounded"
                   />
                   <span className="text-sm font-medium" style={{ color: "#064E3B" }}>
-                    প্রবাসী/বিদেশি
+                    <LocalizedText text={t.registration.labelIsForeign} />
                   </span>
                 </label>
               </div>
@@ -615,12 +625,12 @@ export default function RegistrationPage() {
               {isForeign ? (
                 <div className="space-y-4 p-4 rounded-sm" style={{ backgroundColor: "#F0FDF4", border: "1px solid rgba(10,61,42,0.15)" }}>
                   <p className="text-sm font-semibold" style={{ color: "#064E3B" }}>
-                    বিদেশি ঠিকানা
+                    <LocalizedText text={t.registration.labelForeignAddress} />
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                        দেশ *
+                        <LocalizedText text={t.registration.labelCountry} /> *
                       </label>
                       <select
                         value={foreignCountry}
@@ -628,7 +638,7 @@ export default function RegistrationPage() {
                         className={inputClass()}
                         required
                       >
-                        <option value="">দেশ নির্বাচন করুন</option>
+                        <option value="">{t.registration.selectCountry}</option>
                         {COUNTRIES.map((c) => (
                           <option key={c} value={c}>{c}</option>
                         ))}
@@ -637,13 +647,13 @@ export default function RegistrationPage() {
                   </div>
                   <div>
                     <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      বিস্তারিত ঠিকানা *
+                      <LocalizedText text={t.registration.labelForeignAddressDetails} /> *
                     </label>
                     <textarea
                       value={foreignAddressDetails}
                       onChange={(e) => setForeignAddressDetails(e.target.value)}
                       rows={3}
-                      placeholder="শহর, এলাকা, পোস্টাল কোড, ফোন নম্বর ইত্যাদি..."
+                      placeholder={t.registration.placeholderForeignAddress}
                       className={inputClass()}
                       required
                     ></textarea>
@@ -654,7 +664,7 @@ export default function RegistrationPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                        বিভাগ *
+                        <LocalizedText text={t.registration.labelDivision} /> *
                       </label>
                       <select
                         value={permDivId}
@@ -666,7 +676,7 @@ export default function RegistrationPage() {
                         className={inputClass()}
                         required
                       >
-                        <option value="">{divisionsLoading ? "লোড হচ্ছে..." : "বিভাগ নির্বাচন করুন"}</option>
+                        <option value="">{divisionsLoading ? t.registration.loading : t.registration.selectDivision}</option>
                         {permDivisions.map((d) => (
                           <option key={d.id} value={d.id}>
                             {d.division}
@@ -676,7 +686,7 @@ export default function RegistrationPage() {
                     </div>
                     <div>
                       <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                        জেলা *
+                        <LocalizedText text={t.registration.labelDistrict} /> *
                       </label>
                       <select
                         value={permDistId}
@@ -688,7 +698,7 @@ export default function RegistrationPage() {
                         disabled={!permDivId}
                         required
                       >
-                        <option value="">জেলা নির্বাচন করুন</option>
+                        <option value="">{t.registration.selectDistrict}</option>
                         {permDistricts.map((d) => (
                           <option key={d.desId} value={d.desId}>
                             {d.district}
@@ -698,7 +708,7 @@ export default function RegistrationPage() {
                     </div>
                     <div>
                       <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                        থানা *
+                        <LocalizedText text={t.registration.labelThana} /> *
                       </label>
                       <select
                         value={permThanaId}
@@ -707,7 +717,7 @@ export default function RegistrationPage() {
                         disabled={!permDistId}
                         required
                       >
-                        <option value="">থানা নির্বাচন করুন</option>
+                        <option value="">{t.registration.selectThana}</option>
                         {permThanas.map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.thana}
@@ -718,14 +728,14 @@ export default function RegistrationPage() {
                   </div>
                   <div>
                     <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      গ্রাম/ঠিকানার বিস্তারিত *
+                      <LocalizedText text={t.registration.labelVillageDetails} /> *
                     </label>
                     <textarea
                       name="permanentAddressDetails"
                       value={form.permanentAddressDetails}
                       onChange={handleChange}
                       rows={2}
-                      placeholder="গ্রাম, ডাকঘর ইত্যাদি..."
+                      placeholder={t.registration.placeholderVillage}
                       className={inputClass()}
                       required
                     ></textarea>
@@ -739,7 +749,7 @@ export default function RegistrationPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between border-b pb-1" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
                   <h3 className="text-lg font-bold" style={{ color: "#0A3D2A" }}>
-                    বর্তমান ঠিকানা
+                    <LocalizedText text={t.registration.sectionCurrentAddress} />
                   </h3>
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
@@ -769,14 +779,14 @@ export default function RegistrationPage() {
                       className="w-4 h-4 accent-emerald-700 rounded"
                     />
                     <span className="text-sm font-medium" style={{ color: "#064E3B" }}>
-                      স্থায়ী ঠিকানার সাথে একই
+                      <LocalizedText text={t.registration.labelSameAsPermanent} />
                     </span>
                   </label>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      বিভাগ *
+                      <LocalizedText text={t.registration.labelDivision} /> *
                     </label>
                     <select
                       value={sameAddress ? permDivId : curDivId}
@@ -789,7 +799,7 @@ export default function RegistrationPage() {
                       disabled={sameAddress}
                       required
                     >
-                      <option value="">{divisionsLoading ? "লোড হচ্ছে..." : "বিভাগ নির্বাচন করুন"}</option>
+                      <option value="">{divisionsLoading ? t.registration.loading : t.registration.selectDivision}</option>
                       {curDivisions.map((d) => (
                         <option key={d.id} value={d.id}>
                           {d.division}
@@ -799,7 +809,7 @@ export default function RegistrationPage() {
                   </div>
                   <div>
                     <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      জেলা *
+                      <LocalizedText text={t.registration.labelDistrict} /> *
                     </label>
                     <select
                       value={sameAddress ? permDistId : curDistId}
@@ -811,7 +821,7 @@ export default function RegistrationPage() {
                       disabled={sameAddress || !(sameAddress ? permDivId : curDivId)}
                       required
                     >
-                      <option value="">জেলা নির্বাচন করুন</option>
+                      <option value="">{t.registration.selectDistrict}</option>
                       {(sameAddress ? permDistricts : curDistricts).map((d) => (
                         <option key={d.desId} value={d.desId}>
                           {d.district}
@@ -821,7 +831,7 @@ export default function RegistrationPage() {
                   </div>
                   <div>
                     <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      থানা *
+                      <LocalizedText text={t.registration.labelThana} /> *
                     </label>
                     <select
                       value={sameAddress ? permThanaId : curThanaId}
@@ -830,7 +840,7 @@ export default function RegistrationPage() {
                       disabled={sameAddress || !(sameAddress ? permDistId : curDistId)}
                       required
                     >
-                      <option value="">থানা নির্বাচন করুন</option>
+                      <option value="">{t.registration.selectThana}</option>
                       {(sameAddress ? permThanas : curThanas).map((t) => (
                         <option key={t.id} value={t.id}>
                           {t.thana}
@@ -841,14 +851,14 @@ export default function RegistrationPage() {
                 </div>
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    বর্তমান ঠিকানার বিস্তারিত *
+                    <LocalizedText text={t.registration.labelCurrentAddressDetails} /> *
                   </label>
                   <textarea
                     name="currentAddressDetails"
                     value={sameAddress ? form.permanentAddressDetails : form.currentAddressDetails}
                     onChange={handleChange}
                     rows={2}
-                    placeholder="বাসা নম্বর, রোড, এলাকা ইত্যাদি..."
+                    placeholder={t.registration.placeholderCurrentAddress}
                     className={inputClass()}
                     disabled={sameAddress}
                     required
@@ -860,12 +870,12 @@ export default function RegistrationPage() {
             {/* 5. Occupation & Security */}
             <div className="space-y-3">
               <h3 className="text-lg font-bold border-b pb-1" style={{ color: "#0A3D2A", borderColor: "rgba(10,61,42,0.15)" }}>
-                পেশার বিবরণ
+                <LocalizedText text={t.registration.sectionOccupation} />
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    পেশা *
+                    <LocalizedText text={t.registration.labelOccupation} /> *
                   </label>
                   <div ref={occRef} className="relative">
                     <button
@@ -877,9 +887,9 @@ export default function RegistrationPage() {
                         }`}
                     >
                       <span className="truncate">
-                        {selectedOccupations.length > 0
-                          ? selectedOccupations.join(", ")
-                          : "নির্বাচন করুন"}
+                        {occLabels.length > 0
+                          ? occLabels.join(", ")
+                          : t.registration.selectHere}
                       </span>
                       <svg
                         className={`w-4 h-4 ml-2 shrink-0 transition-transform ${occOpen ? "rotate-180" : ""
@@ -899,17 +909,7 @@ export default function RegistrationPage() {
                     </button>
                     {occOpen && (
                       <div className="absolute z-50 mt-1 w-full bg-white border rounded-sm shadow-lg max-h-60 overflow-y-auto" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
-                        {[
-                          "শিক্ষক",
-                          "ব্যবসায়ী",
-                          "চিকিৎসক",
-                          "ইঞ্জিনিয়ার",
-                          "আইনজীবী",
-                          "কৃষক",
-                          "সরকারি চাকুরি",
-                          "বেসরকারি চাকুরি",
-                          "অন্যান্য",
-                        ].map((job) => (
+                        {t.registration.occupations.map(({ value: job, label }) => (
                           <label
                             key={job}
                             className="flex items-center gap-2 px-3 py-2 text-base cursor-pointer transition"
@@ -926,7 +926,7 @@ export default function RegistrationPage() {
                                 )
                               }
                             />
-                            {job}
+                            {label}
                           </label>
                         ))}
                       </div>
@@ -935,14 +935,14 @@ export default function RegistrationPage() {
                 </div>
                 <div>
                   <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                    পেশার বিস্তারিত বিবরণ
+                    <LocalizedText text={t.registration.labelOccupationDetails} />
                   </label>
                   <input
                     type="text"
                     name="occupationDetails"
                     value={form.occupationDetails}
                     onChange={handleChange}
-                    placeholder="প্রতিষ্ঠানের নাম, পদবী, বিবরণ"
+                    placeholder={t.registration.placeholderOccupation}
                     className={inputClass()}
                   />
                 </div>
@@ -952,16 +952,16 @@ export default function RegistrationPage() {
             {/* 6. Payment */}
             <div className="space-y-3">
               <h3 className="text-lg font-bold border-b pb-1" style={{ color: "#0A3D2A", borderColor: "rgba(10,61,42,0.15)" }}>
-                সেন্ডমানি করুন
+                <LocalizedText text={t.registration.sectionSendMoney} />
               </h3>
               <div className="p-4 rounded-sm" style={{ backgroundColor: "#F0FDF4", border: "1px solid rgba(10,61,42,0.15)" }}>
                 {/* অতিথি নির্বাচন */}
                 <div className="mb-4 p-3 rounded-sm" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
                   <p className="text-lg font-semibold mb-1" style={{ color: "#064E3B" }}>
-                    আপনার সাথে কতজন অতিথি আসবেন?
+                    <LocalizedText text={t.registration.guestQuestion} />
                   </p>
                   <p className="text-sm mb-3" style={{ color: "#6B7280" }}>
-                    সর্বোচ্চ {bn(MAX_GUESTS)} জন। প্রতি অতিথির ফি {bn(GUEST_FEE)} টাকা।
+                    {fmt(t.registration.guestNote, { max: MAX_GUESTS, fee: num(GUEST_FEE) })}
                   </p>
 
                   <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
@@ -983,13 +983,13 @@ export default function RegistrationPage() {
                           }}
                         >
                           <span className="block text-lg font-semibold">
-                            {count === 0 ? "অতিথি নেই" : `${bn(count)} জন`}
+                            {count === 0 ? t.registration.noGuests : fmt(t.registration.personCount, { n: count })}
                           </span>
                           <span
                             className="block text-sm"
                             style={{ color: selected ? "#C9BFA6" : "#6B7280" }}
                           >
-                            {count === 0 ? "০ টাকা" : `${bn(count * GUEST_FEE)} টাকা`}
+                            {count === 0 ? t.registration.zeroTaka : fmt(t.registration.amountTaka, { n: count * GUEST_FEE })}
                           </span>
                         </button>
                       );
@@ -1000,19 +1000,19 @@ export default function RegistrationPage() {
                 {/* টাকার হিসাব */}
                 <div className="mb-4 p-3 rounded-sm" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
                   <div className="flex items-center justify-between py-1">
-                    <span className="text-lg" style={{ color: "#6B7280" }}>রেজিস্ট্রেশন ফি</span>
+                    <span className="text-lg" style={{ color: "#6B7280" }}><LocalizedText text={t.registration.labelRegistrationFee} /></span>
                     <span className="text-lg font-semibold" style={{ color: "#064E3B" }}>
-                      {bn(REGISTRATION_FEE)} টাকা
+                      {fmt(t.registration.amountTaka, { n: num(REGISTRATION_FEE) })}
                     </span>
                   </div>
 
                   {guestCount > 0 && (
                     <div className="flex items-center justify-between py-1">
                       <span className="text-lg" style={{ color: "#6B7280" }}>
-                        অতিথি ({bn(guestCount)} × {bn(GUEST_FEE)})
+                        {fmt(t.registration.labelGuestFee, { count: num(guestCount), fee: num(GUEST_FEE) })}
                       </span>
                       <span className="text-lg font-semibold" style={{ color: "#064E3B" }}>
-                        {bn(guestTotal)} টাকা
+                        {fmt(t.registration.amountTaka, { n: num(guestTotal) })}
                       </span>
                     </div>
                   )}
@@ -1021,24 +1021,24 @@ export default function RegistrationPage() {
                     className="flex items-center justify-between mt-2 pt-3"
                     style={{ borderTop: "1px solid rgba(10,61,42,0.15)" }}
                   >
-                    <span className="text-lg font-semibold" style={{ color: "#064E3B" }}>সর্বমোট</span>
+                    <span className="text-lg font-semibold" style={{ color: "#064E3B" }}><LocalizedText text={t.registration.labelGrandTotal} /></span>
                     <span className="text-2xl font-bold" style={{ color: "#0A3D2A" }}>
-                      {bn(grandTotal)} টাকা
+                      {fmt(t.registration.amountTaka, { n: num(grandTotal) })}
                     </span>
                   </div>
                 </div>
 
                 <p className="text-lg font-semibold mb-3" style={{ color: "#064E3B" }}>
-                  বিকাশে সর্বমোট <span style={{ color: "#0A3D2A" }}>{bn(grandTotal)} টাকা</span> সেন্ডমানি করুন
+                  {fmt(t.registration.bkashInstruction, { total: num(grandTotal) })}
                 </p>
 
                 <div className="space-y-2 mb-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm sm:text-base" style={{ color: "#6B7280" }}>নম্বর ১:</span>
+                    <span className="text-sm sm:text-base" style={{ color: "#6B7280" }}><LocalizedText text={t.registration.number1} /></span>
                     <span className="text-base sm:text-lg font-bold" style={{ color: "#0A3D2A" }}>01775900779</span>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm sm:text-base" style={{ color: "#6B7280" }}>নম্বর ২:</span>
+                    <span className="text-sm sm:text-base" style={{ color: "#6B7280" }}><LocalizedText text={t.registration.number2} /></span>
                     <span className="text-base sm:text-lg font-bold" style={{ color: "#0A3D2A" }}>01727728792</span>
                   </div>
                 </div>
@@ -1046,7 +1046,7 @@ export default function RegistrationPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      যে নম্বরে সেন্ডমানি করেছেন *
+                      <LocalizedText text={t.registration.labelReceiverNumber} /> *
                     </label>
                     <select
                       id="field-receiverNumber"
@@ -1055,21 +1055,21 @@ export default function RegistrationPage() {
                       className={inputClass("field-receiverNumber")}
                       required
                     >
-                      <option value="">নম্বর নির্বাচন করুন</option>
+                      <option value="">{t.registration.selectNumber}</option>
                       <option value="01775900779">01775900779</option>
                       <option value="01727728792">01727728792</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      কত টাকা পাঠিয়েছেন *
+                      <LocalizedText text={t.registration.labelPaidAmount} /> *
                     </label>
                     <input
                       id="field-paidAmount"
                       type="number"
                       value={paidAmount}
                       onChange={(e) => setPaidAmount(e.target.value)}
-                      placeholder="টাকার পরিমাণ"
+                      placeholder={t.registration.placeholderPaidAmount}
                       className={inputClass("field-paidAmount")}
                       min="1"
                       required
@@ -1080,21 +1080,21 @@ export default function RegistrationPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      যে নাম্বার থেকে সেন্ডমানি করেছেন তার ট্রানজেকশন আইডি *
+                      <LocalizedText text={t.registration.labelTransactionId} /> *
                     </label>
                     <input
                       id="field-transactionId"
                       type="text"
                       value={transactionId}
                       onChange={(e) => setTransactionId(e.target.value)}
-                      placeholder="ট্রানজেকশন আইডি লিখুন"
+                      placeholder={t.registration.placeholderTransactionId}
                       className={inputClass("field-transactionId")}
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-sm sm:text-base font-semibold uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>
-                      যে  নম্বরের থেকে সেন্ডমানি করেছেন তার শেষ ৪ ডিজিট *
+                      <LocalizedText text={t.registration.labelLastFourDigits} /> *
                     </label>
                     <input
                       id="field-lastFourDigits"
@@ -1107,7 +1107,7 @@ export default function RegistrationPage() {
                           setLastFourDigits(val);
                         }
                       }}
-                      placeholder="৪ ডিজিট"
+                      placeholder={t.registration.placeholderLastFour}
                       maxLength={4}
                       required
                     />
@@ -1118,13 +1118,13 @@ export default function RegistrationPage() {
 
             <div className="pt-4 flex flex-col-reverse sm:flex-row justify-end gap-3">
               <Link
-                href="/"
+                href={href("/")}
                 className="text-base font-semibold py-2.5 px-5 rounded-sm transition text-center"
                 style={{ color: "#064E3B", backgroundColor: "#F3F4F6" }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#E5E7EB")}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#F3F4F6")}
               >
-                বাতিল করুন
+                {t.registration.cancel}
               </Link>
               <button
                 type="submit"
@@ -1132,7 +1132,7 @@ export default function RegistrationPage() {
                 className="text-white text-base font-semibold py-2.5 px-6 rounded-sm hover:opacity-90 transition disabled:opacity-50"
                 style={{ backgroundColor: "#0A3D2A" }}
               >
-                {loading ? "সাবমিট হচ্ছে..." : "সাবমিট করুন"}
+                {loading ? t.registration.submitting : t.registration.submit}
               </button>
             </div>
           </form>
@@ -1140,7 +1140,7 @@ export default function RegistrationPage() {
       </main>
 
       <footer className="py-6 text-center text-sm sm:text-base" style={{ borderTop: "1px solid rgba(10,61,42,0.15)", backgroundColor: "#FFFFFF", color: "#6B7280" }}>
-        <p>© ২০২৬ ইত্তেহাদে আবনায়ে মুমিনপুর। সর্বস্বত্ব সংরক্ষিত।</p>
+        <p><LocalizedText text={t.registration.footer} /></p>
       </footer>
     </div>
   );

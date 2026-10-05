@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import html2canvas from "html2canvas-pro";
+import { useLang } from "@/lib/i18n/LanguageProvider";
 
 interface EventCardProps {
   name: string;
@@ -13,12 +14,8 @@ interface EventCardProps {
   fatherName: string;
 }
 
-function bn(n: number): string {
-  const digits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-  return String(n).replace(/\d/g, (d) => digits[parseInt(d)]);
-}
-
 export default function EventCard({ name, phone, guestCount, studyFrom, studyTo, fatherName }: EventCardProps) {
+  const { t, num, fmt, fonts, href } = useLang();
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
 
@@ -38,7 +35,7 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
       link.click();
     } catch (error) {
       console.error("Download error:", error);
-      alert("দুঃখিত, কার্ডটি ডাউনলোড করা যায়নি। আবার চেষ্টা করুন।");
+      alert(t.eventCard.downloadError);
     } finally {
       setDownloading(false);
     }
@@ -46,7 +43,7 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
 
   const qrUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/verify?phone=${phone}`
+      ? `${window.location.origin}${href("/verify")}?phone=${phone}`
       : "";
 
   const totalPersons = 1 + (guestCount || 0);
@@ -59,7 +56,7 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
       borderRadius: "16px",
       overflow: "hidden",
       boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
-      fontFamily: "'SolaimanLipi', sans-serif",
+      fontFamily: fonts.body,
       position: "relative" as const,
       border: "1px solid #E5E7EB",
     },
@@ -192,7 +189,7 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
 
   return (
     <div className="mt-6 flex flex-col items-center">
-      <div style={{ fontFamily: "'SolaimanLipi', sans-serif" }}>
+      <div style={{ fontFamily: fonts.body }}>
         {/* Download Button */}
         <button
           onClick={handleDownload}
@@ -207,7 +204,7 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
           )}
-          {downloading ? "প্রসেস হচ্ছে..." : "ডিজিটাল আমন্ত্রণ পত্রটি ডাউনলোড করুন"}
+          {downloading ? t.eventCard.downloading : t.eventCard.downloadButton}
         </button>
 
         {/* Printable Card Area */}
@@ -217,9 +214,9 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
             <div style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.05, backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'0 0 20 20\'%3%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3%3Cpath d=\'M0 0h20L10 10z\'/%3%3C/g%3%3C/svg%3%3E")'}}></div>
 
             <div style={{position: 'relative', zIndex: 1}}>
-              <div style={styles.headerBadge}>আমন্ত্রণ পত্র</div>
-              <div style={styles.organizationName}>ইত্তেহাদে আবনায়ে মুমিনপুর</div>
-              <div style={styles.eventName}>গ্রান্ড পুনর্মিলনী ২০২৬</div>
+              <div style={styles.headerBadge}>{t.eventCard.badge}</div>
+              <div style={styles.organizationName}>{t.eventCard.organization}</div>
+              <div style={styles.eventName}>{t.eventCard.eventName}</div>
             </div>
           </div>
 
@@ -227,39 +224,39 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
           <div style={styles.body}>
             {/* Greeting */}
             <div style={styles.guestSection}>
-              <div style={styles.guestLabel}>সম্মানিত সুধী,</div>
+              <div style={styles.guestLabel}>{t.eventCard.greeting}</div>
               <div style={styles.guestName}> {name}</div>
-              {fatherName && <div style={{fontSize: '14px', color: '#374151', marginBottom: '2px'}}>পিতা: {fatherName}</div>}
-              <div style={styles.guestPhone}>মোবাইল: {phone}</div>
+              {fatherName && <div style={{fontSize: '14px', color: '#374151', marginBottom: '2px'}}>{t.eventCard.fatherLabel} {fatherName}</div>}
+              <div style={styles.guestPhone}>{t.eventCard.mobileLabel} {phone}</div>
               {studyFrom && studyTo && (
                 <div style={{fontSize: '14px', color: '#059669', fontWeight: 600, marginTop: '4px'}}>
-                  অধ্যয়নকাল: {studyFrom} - {studyTo}
+                  {t.eventCard.studyLabel} {studyFrom} - {studyTo}
                 </div>
               )}
             </div>
 
             {/* Invitation Text */}
             <div style={styles.invitationText}>
-              আসসালামু আলাইকুম। আল্লাহর অশেষ রহমতে আসন্ন <strong>ইত্তেহাদে আবনায়ে মুমিনপুর পুনর্মিলনী</strong> অনুষ্ঠানে আপনাকে আন্তরিকভাবে আমন্ত্রণ জানাচ্ছি। আপনার উপস্থিতি অনুষ্ঠানটিকে সফল ও সার্থক করে তুলবে।
+              {t.eventCard.invitationBefore} <strong>{t.eventCard.invitationEvent}</strong>{t.eventCard.invitationAfter}
             </div>
 
             {/* Event Details Grid */}
             <div style={styles.detailsGrid}>
               <div style={styles.detailBox}>
-                <div style={styles.detailLabel}>তারিখ</div>
-                <div style={styles.detailValue}>১৬ ডিসেম্বর, ২০২৬</div>
-                <div style={{fontSize: '12px', color: '#6B7280'}}>রোজ: বুধবার</div>
+                <div style={styles.detailLabel}>{t.eventCard.labelDate}</div>
+                <div style={styles.detailValue}>{t.eventCard.date}</div>
+                <div style={{fontSize: '12px', color: '#6B7280'}}>{t.eventCard.dayLabel}</div>
               </div>
               <div style={styles.detailBox}>
-                <div style={styles.detailLabel}>স্থান</div>
-                <div style={styles.detailValue}>মাদরাসা প্রাঙ্গণ</div>
-                <div style={{fontSize: '12px', color: '#6B7280'}}>মুমিনপুর, চাঁদপুর</div>
+                <div style={styles.detailLabel}>{t.eventCard.labelVenue}</div>
+                <div style={styles.detailValue}>{t.eventCard.venue}</div>
+                <div style={{fontSize: '12px', color: '#6B7280'}}>{t.eventCard.venueArea}</div>
               </div>
               {guestCount > 0 && (
                 <div style={{...styles.detailBox, backgroundColor: '#FFFBEB', border: '1px solid #FEF3C7'}}>
-                  <div style={{...styles.detailLabel, color: '#D97706'}}>অতিথি</div>
-                  <div style={styles.detailValue}>{bn(guestCount)} জন</div>
-                  <div style={{fontSize: '12px', color: '#92400E'}}>সর্বমোট {bn(totalPersons)} জন</div>
+                  <div style={{...styles.detailLabel, color: '#D97706'}}>{t.eventCard.labelGuests}</div>
+                  <div style={styles.detailValue}>{num(guestCount)} {t.eventCard.unitPersons}</div>
+                  <div style={{fontSize: '12px', color: '#92400E'}}>{fmt(t.eventCard.totalPersons, { n: totalPersons })}</div>
                 </div>
               )}
             </div>
@@ -292,10 +289,10 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
                 </div>
                 <div style={{flex: 1}}>
                   <div style={{fontSize: '14px', fontWeight: 700, color: '#92400E', marginBottom: '2px'}}>
-                    সাথে {bn(guestCount)} জন অতিথি
+                    {fmt(t.eventCard.withGuests, { n: guestCount })}
                   </div>
                   <div style={{fontSize: '12px', color: '#B45309', lineHeight: 1.5}}>
-                    এই এন্ট্রি পাসে আপনার সাথে {bn(guestCount)} জন অতিথির প্রবেশাধিকার অন্তর্ভুক্ত রয়েছে। মোট প্রবেশ: {bn(totalPersons)} জন।
+                    {fmt(t.eventCard.passNote, { n: guestCount, total: totalPersons })}
                   </div>
                 </div>
               </div>
@@ -314,9 +311,9 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <div style={styles.qrInfoTitle}>ডিজিটাল এন্ট্রি পাস</div>
+                <div style={styles.qrInfoTitle}>{t.eventCard.passTitle}</div>
                 <div style={styles.qrInfoText}>
-                  অনুগ্রহ করে প্রবেশের সময় এই QR কোডটি স্ক্যান করুন। স্ক্যান করলে সরাসরি ভেরিফিকেশন হয়ে যাবে।
+                  {t.eventCard.passInfo}
                 </div>
                 {guestCount > 0 && (
                   <div style={{
@@ -329,7 +326,7 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
                     padding: '3px 10px',
                     borderRadius: '100px',
                   }}>
-                    প্রবেশ: {bn(totalPersons)} জন
+                    {fmt(t.eventCard.entryCount, { n: totalPersons })}
                   </div>
                 )}
               </div>
@@ -338,7 +335,7 @@ export default function EventCard({ name, phone, guestCount, studyFrom, studyTo,
 
           {/* Footer */}
           <div style={styles.footer}>
-            ঠিকানা: পোঃ শাহ্তলী, উপজেলাঃ চাঁদপুর সদর, জেলাঃ চাঁদপুর, বাংলাদেশ।
+            {t.eventCard.footer}
           </div>
         </div>
       </div>

@@ -1,4 +1,3 @@
-import Navbar from "../landing-pages/navbar";
 import CountdownBanner from "./countdown-banner";
 
 export default function RegistrationLayout({
@@ -8,7 +7,6 @@ export default function RegistrationLayout({
 }) {
   return (
     <>
-      <Navbar />
       <CountdownBanner />
       {children}
     </>

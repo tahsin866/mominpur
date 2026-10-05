@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
 import { useSearchParams } from "next/navigation";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { apiHeaders } from "@/lib/i18n/api";
 
 interface VerifyResult {
   name: string;
@@ -13,6 +15,7 @@ interface VerifyResult {
 }
 
 function VerifyContent() {
+  const { href, locale } = useLang();
   const searchParams = useSearchParams();
   const phoneParam = searchParams.get("phone");
   const autoPhone =
@@ -30,7 +33,9 @@ function VerifyContent() {
       return { error: "অনুগ্রহ করে ১১ ডিজিটের মোবাইল নম্বর দিন।" };
     }
     try {
-      const res = await fetch(`/api/registrations/check-status?phone=${number}`);
+      const res = await fetch(`/api/registrations/check-status?phone=${number}`, {
+        headers: apiHeaders(locale),
+      });
       if (res.status === 404) {
         return { error: "এই নম্বরে কোনো রেজিস্ট্রেশন পাওয়া যায়নি।" };
       }
@@ -112,7 +117,7 @@ function VerifyContent() {
             </div>
             <h1 className="text-lg font-bold text-white">ভেরিফিকেশন প্যানেল</h1>
           </div>
-          <Link href="/" className="text-sm hover:text-white transition" style={{ color: "#C9BFA6" }}>
+          <Link href={href("/")} className="text-sm hover:text-white transition" style={{ color: "#C9BFA6" }}>
             ← হোম
           </Link>
         </div>

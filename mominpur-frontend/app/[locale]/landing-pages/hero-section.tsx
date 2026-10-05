@@ -4,12 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { StarMark } from "./components";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { LocalizedText } from "@/lib/i18n/LocalizedText";
 
 const API = "";
-
-const fallbackSlides: { id?: number; filename: string; alt: string; caption?: string }[] = [
-  { filename: "", alt: "ইত্তেহাদে আবনায়ে মুমিনপুর" },
-];
 
 // বাংলা লেখার জন্য প্রিমিয়াম ফন্ট ফ্যামিলি
 const FONT_FAMILY = "'SolaimanLipi', sans-serif";
@@ -17,12 +15,13 @@ const FONT_FAMILY = "'SolaimanLipi', sans-serif";
 const NUMBER_FONT_FAMILY = "Inter, system-ui, -apple-system, sans-serif";
 
 const EVENT_DATE = new Date("2026-12-16T00:00:00+06:00").getTime();
-const bnDigit = (n: number) =>
-  String(n).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]);
 
 export default function HeroSection() {
+  const { t, href, num } = useLang();
   const [current, setCurrent] = useState(0);
-  const [slides, setSlides] = useState(fallbackSlides);
+  const [slides, setSlides] = useState<{ id?: number; filename: string; alt: string; caption?: string }[]>([
+    { filename: "", alt: t.hero.title },
+  ]);
   const [countdown, setCountdown] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
 
   useEffect(() => {
@@ -151,7 +150,7 @@ export default function HeroSection() {
             className="text-sm md:text-base font-semibold tracking-[0.25em] uppercase"
             style={{ fontFamily: FONT_FAMILY, color: "#0A3D2A" }}
           >
-            ঐতিহাসিক পুনর্মিলনী ও স্মৃতিচারণ <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>২০২৬</span>
+            <LocalizedText text={t.hero.eyebrow} />
           </span>
           <span className="h-[1px] w-12 bg-emerald-800/30" />
         </div>
@@ -161,7 +160,7 @@ export default function HeroSection() {
           className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-black tracking-tight mb-6 drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)] leading-[1.2]"
           style={{ fontFamily: FONT_FAMILY, color: "#0A3D2A" }}
         >
-          ইত্তেহাদে আবনায়ে মুমিনপুর
+          <LocalizedText text={t.hero.title} />
         </h1>
 
         {/* ডেসক্রিপশন টেক্সট - সংখ্যাগুলোকে আলাদা স্প্যানে নিয়ে ফন্ট ফিক্স করা হয়েছে */}
@@ -169,17 +168,17 @@ export default function HeroSection() {
           className="max-w-2xl mx-auto text-base md:text-xl mb-10 font-medium leading-relaxed"
           style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}
         >
-          স্মৃতির টানে, চেনা প্রাঙ্গণে... <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>১৯৬৪</span> সাল থেকে <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>২০২৫</span> সকল প্রাক্তনের স্মৃতিচারণ ও পুনর্মিলনী।
+          <LocalizedText text={t.hero.tagline} />
         </p>
 
         {/* রেজিস্ট্রেশন কল-টু-অ্যাকশন বাটন */}
         <div className="mb-12">
           <Link
-            href="/registration/reg"
+            href={href("/registration/reg")}
             className="inline-block font-bold text-base md:text-lg px-10 py-4 rounded-sm shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-[#0A3D2A]"
             style={{ fontFamily: FONT_FAMILY, backgroundColor: "#0A3D2A", color: "#FFFFFF" }}
           >
-            রেজিস্ট্রেশন করুন
+            <LocalizedText text={t.hero.cta} />
           </Link>
         </div>
 
@@ -193,7 +192,7 @@ export default function HeroSection() {
         >
           <span className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
             <StarMark className="w-3 h-3.5 sm:w-3.5 sm:h-4 text-emerald-800 shrink-0" />
-            <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>১৬</span> ডিসেম্বর, <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>২০২৬</span>
+            <LocalizedText text={t.hero.eventDate} />
           </span>
           <span className="hidden sm:inline text-emerald-800/30">|</span>
           <span className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-base md:text-lg font-bold" style={{ fontFamily: FONT_FAMILY, color: "#064E3B" }}>
@@ -201,7 +200,7 @@ export default function HeroSection() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
             </svg>
-            মাদরাসা প্রাঙ্গন
+            <LocalizedText text={t.hero.venue} />
           </span>
           {countdown && (
             <>
@@ -210,7 +209,10 @@ export default function HeroSection() {
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-emerald-800">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
-                <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.days)}</span> দিন <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.hours)}</span> ঘণ্টা <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.minutes)}</span> মি. <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{bnDigit(countdown.seconds)}</span> সে.
+                <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{num(countdown.days)}</span> {t.hero.countdownDays}{" "}
+                <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{num(countdown.hours)}</span> {t.hero.countdownHours}{" "}
+                <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{num(countdown.minutes)}</span> {t.hero.countdownMinutes}{" "}
+                <span style={{ fontFamily: NUMBER_FONT_FAMILY }}>{num(countdown.seconds)}</span> {t.hero.countdownSeconds}
               </span>
             </>
           )}
@@ -226,7 +228,7 @@ export default function HeroSection() {
                 onClick={prev}
                 className="w-9 h-9 rounded-full border flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:bg-[#0A3D2A] hover:text-white"
                 style={{ borderColor: "rgba(10,61,42,0.25)", color: "#0A3D2A" }}
-                aria-label="আগের ছবি"
+                aria-label={t.hero.prevPhoto}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -237,7 +239,7 @@ export default function HeroSection() {
                 onClick={next}
                 className="w-9 h-9 rounded-full border flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:bg-[#0A3D2A] hover:text-white"
                 style={{ borderColor: "rgba(10,61,42,0.25)", color: "#0A3D2A" }}
-                aria-label="পরের ছবি"
+                aria-label={t.hero.nextPhoto}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -256,7 +258,7 @@ export default function HeroSection() {
                     backgroundColor: i === current ? "#0A3D2A" : "rgba(10,61,42,0.2)",
                     transform: i === current ? "scale(1.4)" : "scale(1)",
                   }}
-                  aria-label={`ছবি ${i + 1}`}
+                  aria-label={t.hero.photoNumber.replace("{n}", String(i + 1))}
                 />
               ))}
             </div>

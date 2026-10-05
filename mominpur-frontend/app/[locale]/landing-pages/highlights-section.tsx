@@ -1,25 +1,18 @@
+"use client";
+
 import { StarMark } from "./components";
-
-const highlights = [
-  { title: "কুরআন তিলাওয়াত", desc: "প্রাক্তন হাফেজদের দ্বারা কুরআন তিলাওয়াত ও মুখস্থকারীদের অংশগ্রহণ" },
-  { title: "সহপাঠী সমাবেশ", desc: "প্রাক্তন সহপাঠীদের সাথে স্মৃতি তুলে ধরার সুযোগ" },
-  { title: "নসীহত ও বক্তৃতা", desc: "দেশ বরেণ্য উলামা-মাশায়েখদের নসীহত ও বক্তৃতা" },
-  { title: "স্মৃতি সংরক্ষণ", desc: "পুরোনো ছবি ও স্মৃতির ধারণা, সহপাঠী সমাবেশ" },
-  { title: "সম্মাননা", desc: "প্রাক্তন শিক্ষক ও শিক্ষার্থীদের সম্মাননা প্রদান" },
-];
-
-// গ্লোবাল ফন্ট কনফিগারেশন
-const BANGLA_FONT = "'SolaimanLipi', sans-serif";
-const NUMBER_FONT = "Inter, system-ui, -apple-system, sans-serif";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { LocalizedText } from "@/lib/i18n/LocalizedText";
 
 export default function HighlightsSection() {
+  const { t, fonts } = useLang();
   return (
     <section 
       className="border-y select-none" 
       style={{ 
         backgroundColor: "#FFFFFF", 
         borderColor: "rgba(10,61,42,0.12)",
-        fontFamily: BANGLA_FONT 
+        fontFamily: fonts.body 
       }}
     >
       <div className="max-w-5xl mx-auto px-4 py-24">
@@ -27,10 +20,10 @@ export default function HighlightsSection() {
         {/* হেড সেকশন */}
         <div className="text-center mb-16">
           <p className="text-xs md:text-sm tracking-[0.3em] uppercase mb-3 font-semibold" style={{ color: "#0A3D2A" }}>
-            অনুষ্ঠানসূচি
+            <LocalizedText text={t.highlights.eyebrow} />
           </p>
           <h2 className="text-3xl md:text-4xl font-black mb-6 tracking-tight" style={{ color: "#064E3B" }}>
-            অনুষ্ঠানের বৈশিষ্ট্য
+            <LocalizedText text={t.highlights.title} />
           </h2>
           
           {/* মার্জিত সময় ও স্থান নির্দেশক বার (Rounded-sm ও প্রিমিয়াম শ্যাডো) */}
@@ -46,21 +39,21 @@ export default function HighlightsSection() {
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-[#0A3D2A] shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3v18.75h18V5.25H3v15.75Z" />
               </svg>
-              <span style={{ fontFamily: NUMBER_FONT }}>১৬ ই ডিসেম্বর, ২০২৬</span>
+              <LocalizedText text={t.highlights.eventDate} />
             </span>
             <span className="hidden sm:inline opacity-30" style={{ color: "#0A3D2A" }}>|</span>
             <span className="flex items-center gap-2.5" style={{ color: "#064E3B" }}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-[#0A3D2A] shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
               </svg>
-              <span style={{ fontFamily: NUMBER_FONT }}>সকাল ৯:০০ টা - দুপুর ২:০০ টা</span>
+              <LocalizedText text={t.highlights.eventTime} />
             </span>
           </div>
         </div>
 
         {/* বৈশিষ্ট্য গ্রিড - নিট ও ক্লিন বর্ডার লেআউট */}
         <div className="grid md:grid-cols-2 gap-x-12 gap-y-2 items-start">
-          {highlights.map((h, index) => (
+          {t.highlights.items.map((h, index) => (
             <div
               key={h.title}
               className="flex gap-4 py-6 border-b transition-colors duration-300 hover:bg-emerald-50/10 group"
@@ -74,7 +67,7 @@ export default function HighlightsSection() {
                   {h.title}
                 </h3>
                 <p className="text-sm md:text-base leading-relaxed" style={{ color: "#6B7280" }}>
-                  {h.desc}
+                  <LocalizedText text={h.desc} />
                 </p>
               </div>
             </div>

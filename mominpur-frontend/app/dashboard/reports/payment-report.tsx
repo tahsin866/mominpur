@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatDate, formatMonth, exportPDF } from "./export-utils";
+import { formatDate, formatMonth, toDateKey, exportPDF } from "./export-utils";
+import { exportExcel } from "./excel-utils";
 
 interface Transaction {
   id: number;
@@ -40,24 +41,37 @@ export default function PaymentReport({ transactions, registrations }: { transac
     [registrations]
   );
 
-  const filtered = useMemo(() => {
-    let list = transactions.filter(
-      (t) => t.status === "APPROVED" && approvedRegIds.has(t.registrationId)
-    );
+  /**
+   * Shudhu date + receiver filter — status/approval filter chara.
+   *
+   * Date filter o `toDateKey` diye string compare kore, table er moto. Eta
+   * joruri karon `new Date("2026-09-15")` ECMAScript normoye UTC midnight
+   * hisebe parse hoy, kinti `new Date("2026-09-15T03:00:00")` parse hoy LOCAL.
+   * Tai Date parse korle 6 ghonta farak pore — subah 6:00 er modhdhe payment
+   * table e thakleo filter e chole jay. String compare e kono farak nai.
+   */
+  const dateReceiverFiltered = useMemo(() => {
+    let list = transactions;
     if (dateFrom) {
-      const from = new Date(dateFrom);
-      list = list.filter((t) => new Date(t.createdAt) >= from);
+      list = list.filter((t) => toDateKey(t.createdAt) >= dateFrom);
     }
     if (dateTo) {
-      const to = new Date(dateTo);
-      to.setHours(23, 59, 59, 999);
-      list = list.filter((t) => new Date(t.createdAt) <= to);
+      list = list.filter((t) => toDateKey(t.createdAt) <= dateTo);
     }
     if (receiverFilter) {
       list = list.filter((t) => t.receiverNumber === receiverFilter);
     }
     return list;
-  }, [transactions, approvedRegIds, dateFrom, dateTo, receiverFilter]);
+  }, [transactions, dateFrom, dateTo, receiverFilter]);
+
+  /** Approval filter o apply kora — income, table ar PDF shob eitar upor. */
+  const filtered = useMemo(
+    () =>
+      dateReceiverFiltered.filter(
+        (t) => t.status === "APPROVED" && approvedRegIds.has(t.registrationId)
+      ),
+    [dateReceiverFiltered, approvedRegIds]
+  );
 
   const receiverNumbers = useMemo(
     () => [...new Set(transactions.map((t) => t.receiverNumber))].filter(Boolean),
@@ -82,17 +96,18 @@ export default function PaymentReport({ transactions, registrations }: { transac
 
   const dateRangeLabel = useMemo(() => {
     if (filtered.length === 0) return "-";
-    const times = filtered.map((t) => new Date(t.createdAt).getTime()).filter((n) => !isNaN(n));
-    if (times.length === 0) return "-";
-    const from = dateFrom ? formatDate(dateFrom) : formatDate(new Date(Math.min(...times)).toISOString());
-    const to = dateTo ? formatDate(dateTo) : formatDate(new Date(Math.max(...times)).toISOString());
+    const keys = filtered.map((t) => toDateKey(t.createdAt)).filter(Boolean).sort();
+    if (keys.length === 0) return "-";
+    const from = dateFrom ? formatDate(dateFrom) : formatDate(keys[0]);
+    const to = dateTo ? formatDate(dateTo) : formatDate(keys[keys.length - 1]);
     return `${from} থেকে ${to} পর্যন্ত`;
   }, [filtered, dateFrom, dateTo]);
 
   const dateWise = useMemo(() => {
     const map: Record<string, { count: number; total: number }> = {};
     filtered.forEach((t) => {
-      const key = new Date(t.createdAt).toISOString().split("T")[0];
+      const key = toDateKey(t.createdAt);
+      if (!key) return;
       if (!map[key]) map[key] = { count: 0, total: 0 };
       map[key].count++;
       map[key].total += t.paidAmount;
@@ -105,8 +120,8 @@ export default function PaymentReport({ transactions, registrations }: { transac
   const monthWise = useMemo(() => {
     const map: Record<string, { count: number; total: number }> = {};
     filtered.forEach((t) => {
-      const d = new Date(t.createdAt);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const key = toDateKey(t.createdAt).slice(0, 7);
+      if (!key) return;
       if (!map[key]) map[key] = { count: 0, total: 0 };
       map[key].count++;
       map[key].total += t.paidAmount;
@@ -155,24 +170,36 @@ export default function PaymentReport({ transactions, registrations }: { transac
             amount: t.paidAmount,
           };
         })
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+        .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)),
     [filtered, regMap]
   );
 
-  function getTableData(): { columns: string[]; rows: (string | number)[][] } {
-    if (view === "date") {
+  const REPORT_TITLE = "আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর";
+
+  function summaryDetails() {
+    return [
+      { label: "তারিখ", value: dateRangeLabel },
+      { label: "রিসিভার নম্বর", value: receiverFilter || "সকল" },
+      { label: "সিস্টেম টোটাল", value: `${systemTotal.toLocaleString("en-US")} BDT` },
+      { label: "প্রদত্ত টোটাল", value: `${summary.totalIncome.toLocaleString("en-US")} BDT` },
+      { label: "মোট ট্রানজেকশন", value: `${dateReceiverFiltered.length.toLocaleString("en-US")}` },
+    ];
+  }
+
+  function getTableData(viewKey: ViewMode = view): { columns: string[]; rows: (string | number)[][] } {
+    if (viewKey === "date") {
       return {
         columns: ["Date", "Transactions", "Total Amount"],
         rows: dateWise.map((d) => [formatDate(d.date), d.count, d.total]),
       };
     }
-    if (view === "month") {
+    if (viewKey === "month") {
       return {
         columns: ["Month", "Transactions", "Total Amount"],
         rows: monthWise.map((d) => [formatMonth(d.month), d.count, d.total]),
       };
     }
-    if (view === "detail") {
+    if (viewKey === "detail") {
       return {
         columns: ["SL", "Date", "Name", "Phone", "Last 4", "Transaction ID", "Receiver", "Amount"],
         rows: detailRows.map((d, i) => [i + 1, formatDate(d.date), d.name, d.phone, d.payingNumber, d.transactionId, d.receiverNumber, d.amount]),
@@ -184,25 +211,46 @@ export default function PaymentReport({ transactions, registrations }: { transac
     };
   }
 
+  /**
+   * Excel e sob view ekshathe — PDF er moto column, shudhu ek file e.
+   * J view e user thako, shei view ta PROTHOM sheet: Excel file khulei shei ta
+   * dekhay, tai ongulo tab click na kore o report er column kholase.
+   */
+  function getExcelSheets() {
+    const ordered = [view, ...views.filter((v) => v.key !== view).map((v) => v.key)];
+    return ordered.map((key) => {
+      const { columns, rows } = getTableData(key);
+      return { name: views.find((v) => v.key === key)!.label, columns, rows };
+    });
+  }
+
   async function handleExportPDF() {
     const { columns, rows } = getTableData();
     try {
       await exportPDF({
-        title: "আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর",
+        title: REPORT_TITLE,
         subtitle: "নিবন্ধন পেমেন্ট রিপোর্ট",
-        details: [
-          { label: "তারিখ", value: dateRangeLabel },
-          { label: "রিসিভার নম্বর", value: receiverFilter || "সকল" },
-          { label: "সিস্টেম টোটাল", value: `${systemTotal.toLocaleString("en-US")} BDT` },
-          { label: "প্রদত্ত টোটাল", value: `${summary.totalIncome.toLocaleString("en-US")} BDT` },
-          { label: "মোট ট্রানজেকশন", value: `${filtered.length.toLocaleString("en-US")}` },
-        ],
+        details: summaryDetails(),
         columns,
         rows,
       });
     } catch (error) {
       console.error("PDF export error:", error);
       alert("দুঃখিত, PDF তৈরি করা যায়নি। আবার চেষ্টা করুন।");
+    }
+  }
+
+  function handleExportExcel() {
+    try {
+      exportExcel({
+        filename: "mominpur-payment-report",
+        title: REPORT_TITLE,
+        details: summaryDetails(),
+        sheets: getExcelSheets(),
+      });
+    } catch (error) {
+      console.error("Excel export error:", error);
+      alert("দুঃখিত, Excel ফাইল তৈরি করা যায়নি। আবার চেষ্টা করুন।");
     }
   }
 
@@ -259,8 +307,8 @@ export default function PaymentReport({ transactions, registrations }: { transac
           <div className="absolute -right-3 -bottom-3 w-16 h-16 rounded-full bg-white/10" />
         </div>
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-4 text-white shadow-sm">
-          <p className="text-xs font-medium text-white/80 uppercase tracking-wider">Total Transactions</p>
-          <p className="text-2xl font-bold mt-1">{transactions.length.toLocaleString()}</p>
+          <p className="text-xs font-medium text-white/80 uppercase tracking-wider">Total Transactions (All Status)</p>
+          <p className="text-2xl font-bold mt-1">{dateReceiverFiltered.length.toLocaleString()}</p>
           <div className="absolute -right-3 -bottom-3 w-16 h-16 rounded-full bg-white/10" />
         </div>
       </div>
@@ -306,6 +354,15 @@ export default function PaymentReport({ transactions, registrations }: { transac
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             PDF
+          </button>
+          <button
+            onClick={handleExportExcel}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Excel
           </button>
         </div>
       </div>

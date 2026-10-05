@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { apiHeaders } from "@/lib/i18n/api";
+import { LocalizedText } from "@/lib/i18n/LocalizedText";
 
 interface GuestAddFormProps {
   phone: string;
@@ -9,11 +12,6 @@ interface GuestAddFormProps {
   registrationId: number;
   onSuccess: () => void;
   onCancel: () => void;
-}
-
-function bn(n: number): string {
-  const digits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-  return String(n).replace(/\d/g, (d) => digits[parseInt(d)]);
 }
 
 const GUEST_FEE = 510;
@@ -27,6 +25,7 @@ export default function GuestAddForm({
   onSuccess,
   onCancel,
 }: GuestAddFormProps) {
+  const { t, num, fmt, locale } = useLang();
   const remainingSlots = MAX_GUESTS - currentGuestCount;
   const [additionalGuests, setAdditionalGuests] = useState(1);
   const [receiverNumber, setReceiverNumber] = useState("");
@@ -45,19 +44,19 @@ export default function GuestAddForm({
     setSuccess("");
 
     if (!receiverNumber) {
-      setError("যে নম্বরে সেন্ডমানি করেছেন তা নির্বাচন করুন।");
+      setError(t.guestAdd.errSenderRequired);
       return;
     }
     if (!transactionId.trim()) {
-      setError("ট্রানজেকশন আইডি দিন।");
+      setError(t.guestAdd.errTransactionRequired);
       return;
     }
     if (!/^\d{4}$/.test(lastFourDigits)) {
-      setError("সেন্ডমানি করা নম্বরের শেষ ৪ ডিজিট দিন।");
+      setError(t.guestAdd.errLastFourRequired);
       return;
     }
     if (!paidAmount || Number(paidAmount) < 1) {
-      setError("কত টাকা পাঠিয়েছেন তা লিখুন।");
+      setError(t.guestAdd.errAmountRequired);
       return;
     }
 
@@ -66,7 +65,7 @@ export default function GuestAddForm({
     try {
       const res = await fetch("/api/registrations/add-guest", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...apiHeaders(locale), "Content-Type": "application/json" },
         body: JSON.stringify({
           phone,
           additionalGuests,
@@ -78,16 +77,14 @@ export default function GuestAddForm({
       });
 
       if (res.ok) {
-        setSuccess(
-          `আলহামদুলিল্লাহ! ${bn(additionalGuests)} জন অতিথি যোগের আবেদন সফলভাবে জমা হয়েছে। অ্যাডমিন অনুমোদনের পর আপডেট হবে।`
-        );
+        setSuccess(fmt(t.guestAdd.success, { n: additionalGuests }));
         setTimeout(() => onSuccess(), 3000);
       } else {
         const text = await res.text();
-        setError(text || "সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+        setError(text || t.guestAdd.errGeneric);
       }
     } catch {
-      setError("সংযোগ করা যায়নি। পরে আবার চেষ্টা করুন।");
+      setError(t.guestAdd.errNetwork);
     } finally {
       setLoading(false);
     }
@@ -101,9 +98,9 @@ export default function GuestAddForm({
       {/* Header */}
       <div className="px-5 py-4 flex items-center justify-between" style={{ backgroundColor: "#FFFBEB", borderBottom: "1px solid #FEF3C7" }}>
         <div>
-          <h3 className="text-base font-bold" style={{ color: "#92400E" }}>অতিথি যোগ করুন</h3>
+          <h3 className="text-base font-bold" style={{ color: "#92400E" }}>{t.guestAdd.title}</h3>
           <p className="text-xs mt-0.5" style={{ color: "#B45309" }}>
-            {name} — আরো {bn(remainingSlots)} জন অতিথি যোগ করতে পারবেন
+            {fmt(t.guestAdd.subtitle, { name, n: remainingSlots })}
           </p>
         </div>
         <button
@@ -111,7 +108,7 @@ export default function GuestAddForm({
           className="text-sm font-medium px-3 py-1.5 rounded-sm hover:bg-amber-100 transition"
           style={{ color: "#92400E" }}
         >
-          বাতিল
+          {t.common.cancel}
         </button>
       </div>
 
@@ -119,7 +116,7 @@ export default function GuestAddForm({
         {/* Guest Count Selector */}
         <div>
           <p className="text-sm font-semibold mb-2" style={{ color: "#064E3B" }}>
-            কতজন অতিথি যোগ করতে চান?
+            <LocalizedText text={t.guestAdd.howMany} />
           </p>
           <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${remainingSlots}, 1fr)` }}>
             {Array.from({ length: remainingSlots }, (_, i) => i + 1).map((count) => {
@@ -136,9 +133,9 @@ export default function GuestAddForm({
                     border: selected ? "2px solid #0A3D2A" : "1px solid rgba(10,61,42,0.25)",
                   }}
                 >
-                  <span className="block text-base font-semibold">{bn(count)} জন</span>
+                  <span className="block text-base font-semibold">{num(count)} {t.guestAdd.unitPersons}</span>
                   <span className="block text-sm" style={{ color: selected ? "#C9BFA6" : "#6B7280" }}>
-                    {bn(count * GUEST_FEE)} টাকা
+                    {num(count * GUEST_FEE)} {t.guestAdd.unitTaka}
                   </span>
                 </button>
               );
@@ -150,10 +147,10 @@ export default function GuestAddForm({
         <div className="p-3 rounded-sm" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(10,61,42,0.15)" }}>
           <div className="flex items-center justify-between">
             <span className="text-sm" style={{ color: "#6B7280" }}>
-              অতিথি ফি ({bn(additionalGuests)} × {bn(GUEST_FEE)})
+              {fmt(t.guestAdd.feeLabel, { count: num(additionalGuests), fee: num(GUEST_FEE) })}
             </span>
             <span className="text-lg font-bold" style={{ color: "#0A3D2A" }}>
-              {bn(totalFee)} টাকা
+              {num(totalFee)} {t.guestAdd.unitTaka}
             </span>
           </div>
         </div>
@@ -161,15 +158,15 @@ export default function GuestAddForm({
         {/* Payment Instructions */}
         <div className="p-3 rounded-sm" style={{ backgroundColor: "#F0FDF4", border: "1px solid rgba(10,61,42,0.15)" }}>
           <p className="text-sm font-semibold mb-2" style={{ color: "#064E3B" }}>
-            বিকাশে <span style={{ color: "#0A3D2A" }}>{bn(totalFee)} টাকা</span> সেন্ডমানি করুন
+            {fmt(t.guestAdd.bkashInstruction, { total: num(totalFee) })}
           </p>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm" style={{ color: "#6B7280" }}>নম্বর ১:</span>
+              <span className="text-sm" style={{ color: "#6B7280" }}>{t.guestAdd.number1}</span>
               <span className="text-base font-bold" style={{ color: "#0A3D2A" }}>01775900779</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm" style={{ color: "#6B7280" }}>নম্বর ২:</span>
+              <span className="text-sm" style={{ color: "#6B7280" }}>{t.guestAdd.number2}</span>
               <span className="text-base font-bold" style={{ color: "#0A3D2A" }}>01727728792</span>
             </div>
           </div>
@@ -179,7 +176,7 @@ export default function GuestAddForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-semibold mb-1" style={{ color: "#6B7280" }}>
-              যে নম্বরে সেন্ডমানি করেছেন *
+              <LocalizedText text={t.guestAdd.labelSender} /> *
             </label>
             <select
               value={receiverNumber}
@@ -188,20 +185,20 @@ export default function GuestAddForm({
               style={{ borderColor: "rgba(10,61,42,0.2)" }}
               required
             >
-              <option value="">নম্বর নির্বাচন করুন</option>
+              <option value="">{t.guestAdd.selectPlaceholder}</option>
               <option value="01775900779">01775900779</option>
               <option value="01727728792">01727728792</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-semibold mb-1" style={{ color: "#6B7280" }}>
-              কত টাকা পাঠিয়েছেন *
+              <LocalizedText text={t.guestAdd.labelAmount} /> *
             </label>
             <input
               type="number"
               value={paidAmount}
               onChange={(e) => setPaidAmount(e.target.value)}
-              placeholder="টাকার পরিমাণ"
+              placeholder={t.guestAdd.amountPlaceholder}
               className={inputClass}
               style={{ borderColor: "rgba(10,61,42,0.2)" }}
               min="1"
@@ -213,13 +210,13 @@ export default function GuestAddForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-semibold mb-1" style={{ color: "#6B7280" }}>
-              ট্রানজেকশন আইডি *
+              <LocalizedText text={t.guestAdd.labelTransaction} /> *
             </label>
             <input
               type="text"
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
-              placeholder="ট্রানজেকশন আইডি লিখুন"
+              placeholder={t.guestAdd.transactionPlaceholder}
               className={inputClass}
               style={{ borderColor: "rgba(10,61,42,0.2)" }}
               required
@@ -227,7 +224,7 @@ export default function GuestAddForm({
           </div>
           <div>
             <label className="block text-sm font-semibold mb-1" style={{ color: "#6B7280" }}>
-              সেন্ডমানি করা নম্বরের শেষ ৪ ডিজিট *
+              <LocalizedText text={t.guestAdd.labelLastFour} /> *
             </label>
             <input
               type="text"
@@ -238,7 +235,7 @@ export default function GuestAddForm({
                   setLastFourDigits(val);
                 }
               }}
-              placeholder="৪ ডিজিট"
+              placeholder={t.guestAdd.lastFourPlaceholder}
               maxLength={4}
               className={inputClass}
               style={{ borderColor: "rgba(10,61,42,0.2)" }}
@@ -266,7 +263,7 @@ export default function GuestAddForm({
           className="w-full py-3 text-white font-semibold rounded-sm hover:opacity-90 transition disabled:opacity-50"
           style={{ backgroundColor: "#D97706" }}
         >
-          {loading ? "জমা হচ্ছে..." : `${bn(additionalGuests)} জন অতিথি যোগের আবেদন জমা দিন`}
+          {loading ? t.guestAdd.submitting : fmt(t.guestAdd.submit, { n: additionalGuests })}
         </button>
       </form>
     </div>
