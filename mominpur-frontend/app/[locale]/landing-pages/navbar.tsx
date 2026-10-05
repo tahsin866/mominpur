@@ -2,15 +2,18 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { LanguageToggle } from "../components/LanguageToggle";
 
-const navLinks = [
-  { label: "মুমিনপুর সম্পর্কে", href: "/#about" },
-  { label: "আবেদন স্ট্যাটাস চেক", href: "/status" },
-  { label: "যোগাযোগ", href: "/#contact" },
-];
-
-export default function Navbar() {
+export function LandingNavbar() {
   const [open, setOpen] = useState(false);
+  const { t, href } = useLang();
+
+  const navLinks = [
+    { label: t.nav.about, href: "/#about" },
+    { label: t.nav.checkStatus, href: "/status" },
+    { label: t.nav.contact, href: "/#contact" },
+  ];
 
   return (
     <header
@@ -22,64 +25,75 @@ export default function Navbar() {
       <div className="max-w-5xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link
-            href="/"
+            href={href("/")}
             className="font-bold text-sm md:text-base tracking-tight leading-tight"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            <div className="text-lg md:text-xl font-extrabold text-emerald-900 dark:text-white">আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর</div>
-            <div className="text-xs font-normal text-gray-500 dark:text-gray-400">পোঃ শাহ্তলী, উপজেলাঃ চাঁদপুর সদর, জেলাঃ চাঁদপুর, বাংলাদেশ</div>
+            <div className="text-lg md:text-xl font-extrabold text-emerald-900 dark:text-white">
+              {t.nav.brandName}
+            </div>
+            <div className="text-xs font-normal text-gray-500 dark:text-gray-400">
+              {t.nav.brandAddress}
+            </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((l) => (
-              <a
-                key={l.label}
-                href={l.href}
-                className="text-sm transition-colors hover:text-emerald-700 dark:hover:text-emerald-400 text-gray-700 dark:text-gray-200"
+          {/* Right side — toggle sobcheye rightmost e thake */}
+          <div className="flex items-center gap-3">
+            <nav className="hidden md:flex items-center gap-5">
+              {navLinks.map((l) => (
+                <a
+                  key={l.label}
+                  href={href(l.href)}
+                  className="text-sm transition-colors hover:text-emerald-700 dark:hover:text-emerald-400 text-gray-700 dark:text-gray-200"
+                >
+                  {l.label}
+                </a>
+              ))}
+              <Link
+                href={href("/registration/reg")}
+                className="text-sm font-semibold px-5 py-2 rounded-sm transition duration-200 hover:bg-[#064e3b]"
+                style={{ backgroundColor: "#065F46", color: "#FFFFFF" }}
               >
-                {l.label}
-              </a>
-            ))}
-            <Link
-              href="/registration/reg"
-              className="text-sm font-semibold px-5 py-2 rounded-sm transition duration-200 hover:bg-[#064e3b]"
-              style={{ backgroundColor: "#065F46", color: "#FFFFFF" }}
-            >
-              রেজিস্ট্রেশন
-            </Link>
-          </nav>
+                {t.nav.registration}
+              </Link>
+            </nav>
 
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-label="মেনু খুলুন"
-            aria-expanded={open}
-            className="md:hidden p-2 -mr-2 text-emerald-800 dark:text-emerald-300"
-          >
-            {open ? (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" d="M3 6h18M3 12h18M3 18h18" />
-              </svg>
-            )}
-          </button>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-label={open ? t.nav.closeMenu : t.nav.openMenu}
+              aria-expanded={open}
+              className="md:hidden p-2 -mr-2 text-emerald-800 dark:text-emerald-300"
+            >
+              {open ? (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" d="M3 6h18M3 12h18M3 18h18" />
+                </svg>
+              )}
+            </button>
+
+            <LanguageToggle />
+          </div>
         </div>
 
         {open && (
-          <nav
-            className="md:hidden flex flex-col gap-1 pb-5 border-t pt-3 dark:border-gray-700"
-          >
+          <nav className="md:hidden flex flex-col gap-1 pb-5 border-t pt-3 dark:border-gray-700">
             <div className="mb-2 pb-2 border-b dark:border-gray-700">
-              <div className="text-lg font-extrabold text-emerald-900 dark:text-white">আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">পোঃ শাহ্তলী, উপজেলাঃ চাঁদপুর সদর, জেলাঃ চাঁদপুর, বাংলাদেশ</div>
+              <div className="text-lg font-extrabold text-emerald-900 dark:text-white">
+                {t.nav.brandName}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {t.nav.brandAddress}
+              </div>
             </div>
             {navLinks.map((l) => (
               <a
                 key={l.label}
-                href={l.href}
+                href={href(l.href)}
                 onClick={() => setOpen(false)}
                 className="text-sm py-2.5 text-gray-700 dark:text-gray-200"
               >
@@ -87,12 +101,12 @@ export default function Navbar() {
               </a>
             ))}
             <Link
-              href="/registration/reg"
+              href={href("/registration/reg")}
               onClick={() => setOpen(false)}
               className="text-sm font-semibold text-center px-5 py-2.5 rounded-sm mt-2"
               style={{ backgroundColor: "#065F46", color: "#FFFFFF" }}
             >
-              রেজিস্ট্রেশন
+              {t.nav.registration}
             </Link>
           </nav>
         )}

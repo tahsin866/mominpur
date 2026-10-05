@@ -1,23 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { apiHeaders } from "@/lib/i18n/api";
+import { LocalizedText } from "@/lib/i18n/LocalizedText";
 
 // নতুন কন্টাক্ট ইনফোসহ আপডেট করা অ্যারে
-const contacts = [
-
-  { name: "মোঃ মিফতাহ উদ্দিন", phone: "+880 1775-900779" },
-    { name: "খোরশেদ আলম", phone: "+880 1727-728792" },
-  { name: "মোঃ শাহেদ আহম্মেদ (সিলেট)", phone: "+880 1717-870310" },
-  { name: "মোঃ হুমায়ন খান (সিলেট)", phone: "+880 1713-811740" },
-  { name: "মোঃ হুজাইফা (মিরপুর)", phone: "+880 1817-574268" },
-  { name: "মোঃ আসাদুল্লাহ (মোহাম্মাদিয়া লাইব্রেরী)", phone: "+880 1817-575158" },
-];
-
-// গ্লোবাল ফন্ট কনফিগারেশন
-const BANGLA_FONT = "'SolaimanLipi', sans-serif";
-const NUMBER_FONT = "Inter, system-ui, -apple-system, sans-serif";
-
 export default function ContactSection() {
+  const { t, fonts, locale } = useLang();
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
@@ -29,7 +19,7 @@ export default function ContactSection() {
     try {
       const res = await fetch("/api/messages/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...apiHeaders(locale), "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       const text = await res.text();
@@ -37,10 +27,10 @@ export default function ContactSection() {
         setResult(text);
         setForm({ name: "", email: "", phone: "", message: "" });
       } else {
-        setResult("Error: " + text);
+        setResult(`${t.common.error}: ${text}`);
       }
     } catch {
-      setResult("Error: সার্ভারে সংযোগ করা যায়নি।");
+      setResult(`${t.common.error}: ${t.contact.serverError}`);
     } finally {
       loading && setLoading(false);
     }
@@ -53,13 +43,13 @@ export default function ContactSection() {
     <section 
       id="contact" 
       className="max-w-6xl mx-auto px-4 py-24 select-none"
-      style={{ fontFamily: BANGLA_FONT }}
+      style={{ fontFamily: fonts.body }}
     >
       {/* হেড সেকশন */}
       <div className="text-center mb-20 relative">
        
         <h2 className="text-3xl md:text-5xl font-black tracking-tight" style={{ color: "#0B4230" }}>
-          যেকোনো প্রয়োজনে যোগাযোগ করুন
+          <LocalizedText text={t.contact.title} />
         </h2>
         <div className="w-24 h-1 mx-auto mt-5 rounded-full" style={{ backgroundColor: "#0A3D2A" }} />
       </div>
@@ -67,10 +57,10 @@ export default function ContactSection() {
       <div className="grid lg:grid-cols-12 gap-12 items-start">
         
         {/* বাম কলাম: যোগাযোগের তথ্য ও ঠিকানা */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="lg:col-span-5 space-y-6 min-w-0">
         
           <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
-            {contacts.map((c) => (
+            {t.contact.people.map((c) => (
               <div
                 key={c.name}
                 className="flex items-center gap-4 p-4 rounded-sm border transition-all duration-300 hover:shadow-sm"
@@ -85,17 +75,17 @@ export default function ContactSection() {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm md:text-base truncate" style={{ color: "#064E3B" }}>{c.name}</p>
+                  <p className="font-bold text-sm md:text-base truncate" style={{ color: "#064E3B" }}><LocalizedText text={c.name} /></p>
                   {c.phone ? (
                     <a 
                       href={`tel:${c.phone.replace(/\s/g, "")}`} 
                       className="text-sm md:text-base hover:underline block font-semibold mt-0.5" 
-                      style={{ color: "#0A3D2A", fontFamily: NUMBER_FONT }}
+                      style={{ color: "#0A3D2A", fontFamily: fonts.number }}
                     >
                       {c.phone}
                     </a>
                   ) : (
-                    <span className="text-xs text-gray-400 font-medium block mt-0.5">নম্বর উপলব্ধ নেই</span>
+                    <span className="text-xs text-gray-400 font-medium block mt-0.5">{t.contact.noNumber}</span>
                   )}
                 </div>
               </div>
@@ -104,19 +94,19 @@ export default function ContactSection() {
 
           {/* স্থায়ী ঠিকানা পার্ট */}
           <div className="p-5 rounded-sm border" style={{ backgroundColor: "#FFFFFF", borderColor: "rgba(10,61,42,0.12)" }}>
-            <h4 className="font-bold mb-2 text-sm md:text-base" style={{ color: "#064E3B" }}>ঠিকানা</h4>
+            <h4 className="font-bold mb-2 text-sm md:text-base" style={{ color: "#064E3B" }}>{t.contact.addressTitle}</h4>
             <p className="text-sm md:text-base leading-relaxed text-gray-500">
-              <span className="font-semibold" style={{ color: "#0A3D2A" }}>আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর</span>
+              <span className="font-semibold" style={{ color: "#0A3D2A" }}>{t.contact.addressName}</span>
               <br />
-              পোঃ শাহ্তলী, উপজেলাঃ চাঁদপুর সদর, জেলাঃ চাঁদপুর, বাংলাদেশ।
+              <LocalizedText text={t.contact.addressBody} />
             </p>
           </div>
         </div>
 
         {/* ডান কলাম: বার্তা পাঠানোর ফর্ম */}
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-7 min-w-0">
           <h3 className="text-xl font-bold tracking-tight mb-6" style={{ color: "#064E3B" }}>
-            বার্তা পাঠান
+            <LocalizedText text={t.contact.formTitle} />
           </h3>
 
           
@@ -128,12 +118,12 @@ export default function ContactSection() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-400">নাম *</label>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-400">{t.contact.nameLabel} *</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="আপনার নাম প্রবেশ করুন"
+                placeholder={t.contact.namePlaceholder}
                 className={inputClass}
                 style={{ borderColor: "rgba(10,61,42,0.15)" }}
                 required
@@ -142,36 +132,36 @@ export default function ContactSection() {
             
             <div className="grid sm:grid-cols-2 gap-5">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-400">ইমেইল</label>
+                <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-400">{t.contact.emailLabel}</label>
                 <input
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="example@email.com"
                   className={inputClass}
-                  style={{ borderColor: "rgba(10,61,42,0.15)", fontFamily: NUMBER_FONT }}
+                  style={{ borderColor: "rgba(10,61,42,0.15)", fontFamily: fonts.number }}
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-400">ফোন নম্বর *</label>
+                <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-400">{t.contact.phoneLabel} *</label>
                 <input
                   type="tel"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="01XXXXXXXXX"
+                  placeholder={t.contact.phonePlaceholder}
                   className={inputClass}
-                  style={{ borderColor: "rgba(10,61,42,0.15)", fontFamily: NUMBER_FONT }}
+                  style={{ borderColor: "rgba(10,61,42,0.15)", fontFamily: fonts.number }}
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-400">বার্তা *</label>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-400">{t.contact.messageLabel} *</label>
               <textarea
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
-                placeholder="আপনার মতামত বা বার্তা এখানে লিখুন..."
+                placeholder={t.contact.messagePlaceholder}
                 rows={5}
                 className={inputClass}
                 style={{ borderColor: "rgba(10,61,42,0.15)" }}
@@ -185,7 +175,7 @@ export default function ContactSection() {
               className="w-full text-white font-bold text-sm md:text-base py-3 rounded-sm hover:opacity-95 shadow-sm active:scale-[0.99] transition-all disabled:opacity-50 disabled:pointer-events-none"
               style={{ backgroundColor: "#0A3D2A" }}
             >
-              {loading ? "বার্তা পাঠানো হচ্ছে..." : "বার্তা পাঠান"}
+              {loading ? t.contact.submitting : t.contact.submit}
             </button>
           </form>
         </div>

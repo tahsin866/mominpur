@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { LocalizedText } from "@/lib/i18n/LocalizedText";
 
 export default function DawatnamaModal() {
+  const { t } = useLang();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -32,7 +35,7 @@ export default function DawatnamaModal() {
         onClick={close}
         className="absolute top-4 right-4 z-[110] w-10 h-10 rounded-full flex items-center justify-center transition hover:bg-white/20"
         style={{ color: "#F4ECD8" }}
-        aria-label="বন্ধ করুন"
+        aria-label={t.common.close}
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
@@ -46,7 +49,7 @@ export default function DawatnamaModal() {
       >
         <Image
           src="/dawatnama.jpeg"
-          alt="দাওয়াতনামা - ইত্তেহাদে আবনায়ে মুমিনপুর"
+          alt={t.dawatnama.alt}
           fill
           sizes="90vw"
           className="object-contain"
@@ -59,7 +62,7 @@ export default function DawatnamaModal() {
         className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs"
         style={{ color: "rgba(201,191,166,0.6)" }}
       >
-        যেকোনো জায়গায় ক্লিক করে বন্ধ করুন
+        <LocalizedText text={t.dawatnama.closeHint} />
       </p>
     </div>
   );

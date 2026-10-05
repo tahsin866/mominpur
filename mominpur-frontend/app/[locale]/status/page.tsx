@@ -4,6 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import EventCard from "./event-card";
 import GuestAddForm from "./guest-add-form";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { apiHeaders } from "@/lib/i18n/api";
+import { LocalizedText } from "@/lib/i18n/LocalizedText";
 
 interface StatusResult {
   id: number;
@@ -17,14 +20,10 @@ interface StatusResult {
   fatherName: string;
 }
 
-function bn(n: number): string {
-  const digits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-  return String(n).replace(/\d/g, (d) => digits[parseInt(d)]);
-}
-
 const MAX_GUESTS = 2;
 
 export default function StatusPage() {
+  const { t, num, fmt, locale } = useLang();
   const [phone, setPhone] = useState("");
   const [result, setResult] = useState<StatusResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -32,7 +31,9 @@ export default function StatusPage() {
   const [showGuestForm, setShowGuestForm] = useState(false);
 
   const fetchStatus = async (phoneNum: string) => {
-    const res = await fetch(`/api/registrations/check-status?phone=${phoneNum}`);
+    const res = await fetch(`/api/registrations/check-status?phone=${phoneNum}`, {
+        headers: apiHeaders(locale),
+      });
     if (res.ok) {
       const data = await res.json();
       setResult(data);
@@ -49,23 +50,25 @@ export default function StatusPage() {
     setShowGuestForm(false);
 
     if (!phone.trim()) {
-      setError("মোবাইল নম্বর দিন।");
+      setError(t.status.errPhoneRequired);
       setLoading(false);
       return;
     }
 
     try {
-      const res = await fetch(`/api/registrations/check-status?phone=${phone}`);
+      const res = await fetch(`/api/registrations/check-status?phone=${phone}`, {
+        headers: apiHeaders(locale),
+      });
       if (res.status === 404) {
-        setError("এই নম্বরে কোনো রেজিস্ট্রেশন পাওয়া যায়নি।");
+        setError(t.status.errNotFound);
       } else if (res.ok) {
         const data = await res.json();
         setResult(data);
       } else {
-        setError("সার্ভারে সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।");
+        setError(t.status.errServer);
       }
     } catch {
-      setError("সংযোগ করা যায়নি। পরে আবার চেষ্টা করুন।");
+      setError(t.status.errNetwork);
     } finally {
       setLoading(false);
     }
@@ -74,11 +77,11 @@ export default function StatusPage() {
   const statusInfo = (s: string) => {
     switch (s) {
       case "APPROVED":
-        return { label: "অনুমোদিত", color: "text-emerald-700 bg-emerald-50 border-emerald-200", icon: "✓" };
+        return { label: t.status.approved, color: "text-emerald-700 bg-emerald-50 border-emerald-200", icon: "✓" };
       case "REJECTED":
-        return { label: "বাতিলকৃত", color: "text-red-700 bg-red-50 border-red-200", icon: "✕" };
+        return { label: t.status.rejected, color: "text-red-700 bg-red-50 border-red-200", icon: "✕" };
       default:
-        return { label: "পেন্ডিং", color: "text-yellow-700 bg-yellow-50 border-yellow-200", icon: "⏳" };
+        return { label: t.status.pending, color: "text-yellow-700 bg-yellow-50 border-yellow-200", icon: "⏳" };
     }
   };
 
@@ -98,10 +101,10 @@ export default function StatusPage() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-display)", color: "#064E3B" }}>
-            আপনার আবেদনের স্ট্যাটাস দেখুন
+            <LocalizedText text={t.status.title} />
           </h2>
           <p className="text-sm" style={{ color: "#6B7280" }}>
-            রেজিস্ট্রেশনের সময় ব্যবহৃত মোবাইল নম্বর দিন
+            <LocalizedText text={t.status.subtitle} />
           </p>
         </div>
 
@@ -111,7 +114,7 @@ export default function StatusPage() {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="মোবাইল নম্বর লিখুন"
+              placeholder={t.status.phonePlaceholder}
               className="flex-1 text-base sm:text-lg px-4 py-3 border rounded-sm bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
               style={{ borderColor: "rgba(10,61,42,0.2)" }}
               required
@@ -122,7 +125,7 @@ export default function StatusPage() {
               className="px-6 py-3 text-white font-semibold rounded-sm hover:opacity-90 transition disabled:opacity-50"
               style={{ backgroundColor: "#0A3D2A" }}
             >
-              {loading ? "যাচাই হচ্ছে..." : "স্ট্যাটাস দেখুন"}
+              {loading ? t.status.checking : t.status.checkButton}
             </button>
           </div>
         </form>
@@ -137,7 +140,7 @@ export default function StatusPage() {
           <div className="p-4 sm:p-6 rounded-sm border" style={{ borderColor: "rgba(10,61,42,0.15)" }}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 pb-4" style={{ borderBottom: "1px solid rgba(10,61,42,0.1)" }}>
               <div>
-                <p className="text-sm" style={{ color: "#6B7280" }}>রেজিস্ট্রেশন ফলাফল</p>
+                <p className="text-sm" style={{ color: "#6B7280" }}>{t.status.resultTitle}</p>
                 <p className="text-lg font-bold" style={{ color: "#064E3B" }}>{result.name}</p>
               </div>
               {(() => {
@@ -152,21 +155,21 @@ export default function StatusPage() {
 
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span style={{ color: "#6B7280" }}>মোবাইল নম্বর</span>
+                <span style={{ color: "#6B7280" }}>{t.status.labelPhone}</span>
                 <span className="font-medium" style={{ color: "#064E3B" }}>{result.phone}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span style={{ color: "#6B7280" }}>আবেদনের তারিখ</span>
+                <span style={{ color: "#6B7280" }}>{t.status.labelDate}</span>
                 <span className="font-medium" style={{ color: "#064E3B" }}>
-                  {result.submittedAt ? new Date(result.submittedAt).toLocaleDateString("bn-BD") : "-"}
+                  {result.submittedAt ? new Date(result.submittedAt).toLocaleDateString(locale) : "-"}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span style={{ color: "#6B7280" }}>অতিথি সংখ্যা</span>
-                <span className="font-medium" style={{ color: "#064E3B" }}>{bn(result.guestCount)} জন</span>
+                <span style={{ color: "#6B7280" }}>{t.status.labelGuests}</span>
+                <span className="font-medium" style={{ color: "#064E3B" }}>{num(result.guestCount)} {t.status.unitPersons}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span style={{ color: "#6B7280" }}>স্ট্যাটাস</span>
+                <span style={{ color: "#6B7280" }}>{t.status.labelStatus}</span>
                 <span className="font-medium" style={{ color: "#064E3B" }}>{statusInfo(result.status).label}</span>
               </div>
             </div>
@@ -174,7 +177,7 @@ export default function StatusPage() {
             {result.status === "APPROVED" && (
               <>
                 <div className="mt-4 p-3 rounded-sm text-sm" style={{ backgroundColor: "#ECFDF5", color: "#064E3B" }}>
-                  আলহামদুলিল্লাহ! আপনার আবেদন অনুমোদিত হয়েছে। মিলনমেলায় আপনার অংশগ্রহণের জন্য অগ্রিম শুভেচ্ছা।
+                  <LocalizedText text={t.status.msgApproved} />
                 </div>
 
                 {/* Guest Add Button */}
@@ -183,10 +186,10 @@ export default function StatusPage() {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold" style={{ color: "#92400E" }}>
-                          আপনার সাথে অতিথি নিয়ে আসতে চান?
+                          <LocalizedText text={t.status.guestInviteTitle} />
                         </p>
                         <p className="text-xs mt-0.5" style={{ color: "#B45309" }}>
-                          আরো {bn(MAX_GUESTS - result.guestCount)} জন অতিথি যোগ করতে পারবেন। প্রতি অতিথি ৫১০ টাকা।
+                          <LocalizedText text={fmt(t.status.guestInviteBody, { n: MAX_GUESTS - result.guestCount })} />
                         </p>
                       </div>
                       <button
@@ -200,7 +203,7 @@ export default function StatusPage() {
                           <line x1="19" y1="8" x2="19" y2="14" />
                           <line x1="22" y1="11" x2="16" y2="11" />
                         </svg>
-                        অতিথি যোগ করুন
+                        <LocalizedText text={t.status.guestAddButton} />
                       </button>
                     </div>
                   </div>
@@ -223,12 +226,12 @@ export default function StatusPage() {
             )}
             {result.status === "REJECTED" && (
               <div className="mt-4 p-3 rounded-sm text-sm" style={{ backgroundColor: "#FEF2F2", color: "#991B1B" }}>
-                আপনার আবেদন বাতিল করা হয়েছে। বিস্তারিত জানতে যোগাযোগ করুন।
+                <LocalizedText text={t.status.msgRejected} />
               </div>
             )}
             {result.status === "PENDING" && (
               <div className="mt-4 p-3 rounded-sm text-sm" style={{ backgroundColor: "#FFFBEB", color: "#92400E" }}>
-                আপনার আবেদন বর্তমানে পর্যালোচনাধীন রয়েছে। অনুগ্রহ করে অপেক্ষা করুন।
+                <LocalizedText text={t.status.msgPending} />
               </div>
             )}
           </div>
@@ -236,7 +239,7 @@ export default function StatusPage() {
       </main>
 
       <footer className="py-6 text-center text-sm" style={{ borderTop: "1px solid rgba(10,61,42,0.15)", color: "#6B7280" }}>
-        <p>© ২০২৬ ইত্তেহাদে আবনায়ে মুমিনপুর।</p>
+        <p><LocalizedText text={t.status.footer} /></p>
       </footer>
     </div>
   );

@@ -1,4 +1,3 @@
-import Navbar from "../landing-pages/navbar";
 
 export default function StatusLayout({
   children,
@@ -7,7 +6,6 @@ export default function StatusLayout({
 }) {
   return (
     <>
-      <Navbar />
       {children}
     </>
   );

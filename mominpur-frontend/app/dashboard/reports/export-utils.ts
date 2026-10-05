@@ -5,11 +5,33 @@ import html2canvas from "html2canvas-pro";
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Backend LocalDateTime pathay (kono timezone chara), tai DB te ja store hoyeche
+ * setai report e dekhate hobe. `new Date()` diye parse korle timezone convert hoy
+ * jay — "2026-09-15T02:30:00" ke `toISOString()` korle "2026-09-14" deyay.
+ * Tai string theke YYYY-MM-DD direct nite hoy.
+ *
+ * Ektu extra khela: "2026-09-15" (kono T nai) parse korle seta UTC midnight hoy,
+ * tarpor local e render korle negative-offset timezone e ager din chole jay.
+ * Tai format korte `new Date(y, m, d)` local midnight banay — bhittro hobe na.
+ */
+const YMD = /^(\d{4})-(\d{2})-(\d{2})/;
+
+function ymdParts(value: string): [number, number, number] | null {
+  const match = YMD.exec(value);
+  if (!match) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+/** DB te store hoyeche seta exact date ("YYYY-MM-DD"). Invalid hole "" deyay. */
+export function toDateKey(value: string): string {
+  return ymdParts(value) ? value.slice(0, 10) : "";
+}
+
 export function formatDate(value: string): string {
-  if (!value) return "-";
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return "-";
-  return d.toLocaleDateString("en-US", {
+  const parts = ymdParts(value);
+  if (!parts) return "-";
+  return new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -17,10 +39,9 @@ export function formatDate(value: string): string {
 }
 
 export function formatMonth(value: string): string {
-  if (!value) return "-";
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return "-";
-  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const parts = ymdParts(value);
+  if (!parts) return "-";
+  return new Date(parts[0], parts[1] - 1, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
 /* ------------------------------------------------------------------ */

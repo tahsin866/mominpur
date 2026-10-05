@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import RegList from "../../registration/reg/reg-list";
+import RegList from "../../[locale]/registration/reg/reg-list";
 
 function isAuthenticated(): boolean {
   if (typeof window === "undefined") return false;

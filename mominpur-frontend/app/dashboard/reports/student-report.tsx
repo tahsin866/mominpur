@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { exportPDF } from "./export-utils";
+import { exportExcel } from "./excel-utils";
 
 interface Registration {
   id: number;
@@ -149,8 +150,19 @@ export default function StudentReport({ registrations }: { registrations: Regist
     [filtered]
   );
 
-  function getTableData(forExport = false): { columns: string[]; rows: (string | number)[][] } {
-    if (view === "detail") {
+  const REPORT_TITLE = "আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর";
+
+  function summaryDetails() {
+    return [
+      { label: "মোট", value: `${summary.total.toLocaleString("en-US")}` },
+      { label: "অনুমোদিত", value: `${summary.approved.toLocaleString("en-US")}` },
+      { label: "পেন্ডিং", value: `${summary.pending.toLocaleString("en-US")}` },
+      { label: "বাতিল", value: `${summary.rejected.toLocaleString("en-US")}` },
+    ];
+  }
+
+  function getTableData(viewKey: ViewMode = view, forExport = false): { columns: string[]; rows: (string | number)[][] } {
+    if (viewKey === "detail") {
       return forExport
         ? {
             columns: ["SL", "Name", "Father's Name", "Phone", "অধ্যয়নকাল", "Occupation", "District", "Thana"],
@@ -161,19 +173,19 @@ export default function StudentReport({ registrations }: { registrations: Regist
             rows: detailRows.map((d, i) => [i + 1, d.name, d.phone, d.studyPeriod, d.occupation, d.district, d.thana]),
           };
     }
-    if (view === "country") {
+    if (viewKey === "country") {
       return {
         columns: ["Country", "Total", "Approved", "Pending", "Rejected"],
         rows: countryWise.map((d) => [d.name, d.total, d.approved, d.pending, d.rejected]),
       };
     }
-    if (view === "division") {
+    if (viewKey === "division") {
       return {
         columns: ["Division", "Total", "Approved", "Pending", "Rejected"],
         rows: divisionWise.map((d) => [d.name, d.total, d.approved, d.pending, d.rejected]),
       };
     }
-    if (view === "district") {
+    if (viewKey === "district") {
       return {
         columns: ["District", "Division", "Total", "Approved", "Pending"],
         rows: districtWise.map((d) => [d.name, d.division, d.total, d.approved, d.pending]),
@@ -185,24 +197,46 @@ export default function StudentReport({ registrations }: { registrations: Regist
     };
   }
 
+  /**
+   * Excel e sob view ekshathe — PDF er moto column, shudhu ek file e.
+   * J view e user thako, shei view ta PROTHOM sheet: Excel file khulei shei ta
+   * dekhay, tai ongulo tab click na kore o report er column kholase.
+   */
+  function getExcelSheets() {
+    const ordered = [view, ...views.filter((v) => v.key !== view).map((v) => v.key)];
+    return ordered.map((key) => {
+      const { columns, rows } = getTableData(key, true);
+      return { name: views.find((v) => v.key === key)!.label, columns, rows };
+    });
+  }
+
   async function handleExportPDF() {
-    const { columns, rows } = getTableData(true);
+    const { columns, rows } = getTableData(view, true);
     try {
       await exportPDF({
-        title: "আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর",
+        title: REPORT_TITLE,
         subtitle: "স্টুডেন্ট রিপোর্ট",
-        details: [
-          { label: "মোট", value: `${summary.total.toLocaleString("en-US")}` },
-          { label: "অনুমোদিত", value: `${summary.approved.toLocaleString("en-US")}` },
-          { label: "পেন্ডিং", value: `${summary.pending.toLocaleString("en-US")}` },
-          { label: "বাতিল", value: `${summary.rejected.toLocaleString("en-US")}` },
-        ],
+        details: summaryDetails(),
         columns,
         rows,
       });
     } catch (error) {
       console.error("PDF export error:", error);
       alert("দুঃখিত, PDF তৈরি করা যায়নি। আবার চেষ্টা করুন।");
+    }
+  }
+
+  function handleExportExcel() {
+    try {
+      exportExcel({
+        filename: "mominpur-student-report",
+        title: REPORT_TITLE,
+        details: summaryDetails(),
+        sheets: getExcelSheets(),
+      });
+    } catch (error) {
+      console.error("Excel export error:", error);
+      alert("দুঃখিত, Excel ফাইল তৈরি করা যায়নি। আবার চেষ্টা করুন।");
     }
   }
 
@@ -313,6 +347,15 @@ export default function StudentReport({ registrations }: { registrations: Regist
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             PDF
+          </button>
+          <button
+            onClick={handleExportExcel}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Excel
           </button>
         </div>
       </div>
