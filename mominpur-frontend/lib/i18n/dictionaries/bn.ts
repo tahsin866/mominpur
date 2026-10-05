@@ -261,6 +261,12 @@ const bn = {
     footer: "ঠিকানা: পোঃ শাহ্তলী, উপজেলাঃ চাঁদপুর সদর, জেলাঃ চাঁদপুর, বাংলাদেশ।",
   },
   registration: {
+    countdownTitle: "রেজিস্ট্রেশন শেষ হতে বাকি",
+    countdownExpired: "রেজিস্ট্রেশন সময় শেষ",
+    countdownDays: "দিন",
+    countdownHours: "ঘণ্টা",
+    countdownMinutes: "মিনিট",
+    countdownSeconds: "সেকেন্ড",
     title: "মিলনমেলা রেজিস্ট্রেশন ফর্ম",
     subtitle: "সঠিক তথ্য দিয়ে নিচের ফর্মটি পূরণ করুন।",
     sectionBasic: "মৌলিক তথ্য",

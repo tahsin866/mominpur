@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useLang } from "@/lib/i18n/LanguageProvider";
 import { LanguageToggle } from "../components/LanguageToggle";
@@ -23,22 +24,36 @@ export function LandingNavbar() {
       }}
     >
       <div className="max-w-5xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        {/* Mobile e brand + hamburger ek line-e thake — logo/name choto o
+            truncate kora jate double line na hoy. EN/BN toggle mobile e
+            dropdown menu-r bhitore thake, top row khali rakhe. */}
+        <div className="flex items-center justify-between gap-2 py-2.5 md:py-0 md:h-16">
           <Link
             href={href("/")}
-            className="font-bold text-sm md:text-base tracking-tight leading-tight"
+            className="flex items-center gap-2 md:gap-3 min-w-0 flex-1 md:flex-initial font-bold text-sm md:text-base tracking-tight leading-tight"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            <div className="text-lg md:text-xl font-extrabold text-emerald-900 dark:text-white">
-              {t.nav.brandName}
-            </div>
-            <div className="text-xs font-normal text-gray-500 dark:text-gray-400">
-              {t.nav.brandAddress}
-            </div>
+            <Image
+              src="/muminpur-logo-v2.png"
+              alt=""
+              aria-hidden="true"
+              width={40}
+              height={40}
+              className="h-9 w-9 md:h-12 md:w-12 shrink-0 rounded-sm object-contain"
+              priority
+            />
+            <span className="min-w-0">
+              <span className="block text-sm md:text-xl font-extrabold text-emerald-900 dark:text-white truncate">
+                {t.nav.brandName}
+              </span>
+              <span className="block text-[11px] md:text-xs font-normal text-gray-500 dark:text-gray-400 truncate">
+                {t.nav.brandAddress}
+              </span>
+            </span>
           </Link>
 
           {/* Right side — toggle sobcheye rightmost e thake */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <nav className="hidden md:flex items-center gap-5">
               {navLinks.map((l) => (
                 <a
@@ -76,20 +91,14 @@ export function LandingNavbar() {
               )}
             </button>
 
-            <LanguageToggle />
+            <div className="hidden md:block">
+              <LanguageToggle />
+            </div>
           </div>
         </div>
 
         {open && (
           <nav className="md:hidden flex flex-col gap-1 pb-5 border-t pt-3 dark:border-gray-700">
-            <div className="mb-2 pb-2 border-b dark:border-gray-700">
-              <div className="text-lg font-extrabold text-emerald-900 dark:text-white">
-                {t.nav.brandName}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {t.nav.brandAddress}
-              </div>
-            </div>
             {navLinks.map((l) => (
               <a
                 key={l.label}
@@ -108,6 +117,10 @@ export function LandingNavbar() {
             >
               {t.nav.registration}
             </Link>
+
+            <div className="mt-3 pt-3 border-t flex justify-center dark:border-gray-700">
+              <LanguageToggle />
+            </div>
           </nav>
         )}
       </div>

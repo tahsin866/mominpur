@@ -1,29 +1,24 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import "./globals.css";
-import { defaultLocale, isLocale } from "@/lib/i18n/config";
 
-// NOTE: Public page er title/description locale-anusar bodlay [locale] layout er
-// generateMetadata theke ase (nesting-e nested value overriding kore). Ekhane
-// shudhu admin/dashboard er jonno fallback.
+// NOTE: Public page er title/description ar `lang` [locale] layout theke ase
+// (nesting-e nested value overriding kore). Ekhane shudhu /dashboard er jonno.
+//
+// ETTO `headers()`/`cookies()` KORTE HOBE NA. Root layout e kono dynamic API
+// call korle puro app dynamic hoye jay — /dashboard gulo `○` static theke
+// `ƒ` dynamic hoye jay. Tai `lang` hardcoded "bn" (dashboard Bangla, tai thik).
 export const metadata: Metadata = {
   title: "আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর",
-  description: "Admin Dashboard",
+  description: "আল-মাদরাসাতুল-ইসলামিয়্যাহ মুমিনপুর",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // proxy.ts ei header-ta set kore (public URL e locale prefix theke).
-  // Admin page e header thake na -> default.
-  const headerList = await headers();
-  const headerLocale = headerList.get("x-locale") ?? "";
-  const lang = isLocale(headerLocale) ? headerLocale : defaultLocale;
-
   return (
-    <html lang={lang} className="h-full antialiased">
+    <html lang="bn" className="h-full antialiased">
       <head>
         <link
           rel="stylesheet"
