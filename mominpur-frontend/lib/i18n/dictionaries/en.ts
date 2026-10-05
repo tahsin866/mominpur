@@ -259,6 +259,12 @@ const en: Dictionary = {
     footer: "Address: Post: Shahatali, Chandpur Sadar Upazila, Chandpur, Bangladesh.",
   },
   registration: {
+    countdownTitle: "Time left for registration",
+    countdownExpired: "Registration closed",
+    countdownDays: "days",
+    countdownHours: "hours",
+    countdownMinutes: "minutes",
+    countdownSeconds: "seconds",
     title: "Reunion Registration Form",
     subtitle: "Please fill in the form below with accurate information.",
     sectionBasic: "Basic Information",

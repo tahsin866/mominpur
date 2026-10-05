@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/i18n/LanguageProvider";
 import { apiHeaders } from "@/lib/i18n/api";
+import { locationEn } from "@/lib/i18n/location-en";
 import { LocalizedText } from "@/lib/i18n/LocalizedText";
 
 interface ThanaData {
@@ -28,6 +29,11 @@ interface DivisionData {
 
 export default function RegistrationPage() {
   const { t, num, fmt, href, locale } = useLang();
+
+  // API e kono English field nai, tai label frontend-e map kora.
+// Bangla page e original Bangla naam-i dekha hobe.
+  const loc = (level: "division" | "district" | "thana", bn: string) =>
+    locale === "en" ? locationEn(level, bn) : bn;
   const [divisions, setDivisions] = useState<DivisionData[]>([]);
   const [divisionsLoading, setDivisionsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -679,7 +685,7 @@ export default function RegistrationPage() {
                         <option value="">{divisionsLoading ? t.registration.loading : t.registration.selectDivision}</option>
                         {permDivisions.map((d) => (
                           <option key={d.id} value={d.id}>
-                            {d.division}
+                            {loc("division", d.division)}
                           </option>
                         ))}
                       </select>
@@ -701,7 +707,7 @@ export default function RegistrationPage() {
                         <option value="">{t.registration.selectDistrict}</option>
                         {permDistricts.map((d) => (
                           <option key={d.desId} value={d.desId}>
-                            {d.district}
+                            {loc("district", d.district)}
                           </option>
                         ))}
                       </select>
@@ -720,7 +726,7 @@ export default function RegistrationPage() {
                         <option value="">{t.registration.selectThana}</option>
                         {permThanas.map((t) => (
                           <option key={t.id} value={t.id}>
-                            {t.thana}
+                            {loc("thana", t.thana)}
                           </option>
                         ))}
                       </select>
@@ -802,7 +808,7 @@ export default function RegistrationPage() {
                       <option value="">{divisionsLoading ? t.registration.loading : t.registration.selectDivision}</option>
                       {curDivisions.map((d) => (
                         <option key={d.id} value={d.id}>
-                          {d.division}
+                          {loc("division", d.division)}
                         </option>
                       ))}
                     </select>
@@ -824,7 +830,7 @@ export default function RegistrationPage() {
                       <option value="">{t.registration.selectDistrict}</option>
                       {(sameAddress ? permDistricts : curDistricts).map((d) => (
                         <option key={d.desId} value={d.desId}>
-                          {d.district}
+                          {loc("district", d.district)}
                         </option>
                       ))}
                     </select>
@@ -843,7 +849,7 @@ export default function RegistrationPage() {
                       <option value="">{t.registration.selectThana}</option>
                       {(sameAddress ? permThanas : curThanas).map((t) => (
                         <option key={t.id} value={t.id}>
-                          {t.thana}
+                          {loc("thana", t.thana)}
                         </option>
                       ))}
                     </select>

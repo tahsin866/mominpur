@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLang } from "@/lib/i18n/LanguageProvider";
+import { LocalizedText } from "@/lib/i18n/LocalizedText";
 
 const DEADLINE = new Date("2026-10-31T00:00:00+06:00").getTime();
 
-const bn = (n: number) =>
-  String(n).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]);
-
-const pad = (n: number) => (n < 10 ? "0" + n : String(n));
-
 export default function CountdownBanner() {
+  const { t, num, locale } = useLang();
+  // Bangla page e zero ta Bangla digit dekhay, tai "0" hardcode korle "05" mix hoy.
+  const zero = locale === "bn" ? "০" : "0";
+  const pad2 = (n: number) => (num(n).length < 2 ? zero + num(n) : num(n));
+
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
     hours: number;
@@ -44,10 +46,10 @@ export default function CountdownBanner() {
   const boxes = expired
     ? []
     : [
-        { value: bn(timeLeft!.days), label: "দিন" },
-        { value: bn(Number(pad(timeLeft!.hours))), label: "ঘণ্টা" },
-        { value: bn(Number(pad(timeLeft!.minutes))), label: "মিনিট" },
-        { value: bn(Number(pad(timeLeft!.seconds))), label: "সেকেন্ড" },
+        { value: num(timeLeft!.days), label: t.registration.countdownDays },
+        { value: pad2(timeLeft!.hours), label: t.registration.countdownHours },
+        { value: pad2(timeLeft!.minutes), label: t.registration.countdownMinutes },
+        { value: pad2(timeLeft!.seconds), label: t.registration.countdownSeconds },
       ];
 
   return (
@@ -57,12 +59,12 @@ export default function CountdownBanner() {
     >
       {expired ? (
         <p className="text-xl font-bold" style={{ color: "#064E3B" }}>
-          রেজিস্ট্রেশন সময় শেষ
+          <LocalizedText text={t.registration.countdownExpired} />
         </p>
       ) : (
         <div className="max-w-md mx-auto">
           <p className="text-lg font-semibold mb-2" style={{ color: "#064E3B" }}>
-            রেজিস্ট্রেশন শেষ হতে বাকি
+            <LocalizedText text={t.registration.countdownTitle} />
           </p>
           <div className="grid grid-cols-4 gap-2">
             {boxes.map((b) => (
