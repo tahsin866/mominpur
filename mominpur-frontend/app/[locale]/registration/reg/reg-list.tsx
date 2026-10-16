@@ -81,6 +81,16 @@ const authHeaders = (): HeadersInit => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+/**
+ * মোবাইল/হোয়াটসঅ্যাপ নম্বর যাচাই।
+ * দেশি নম্বর: ১১ ডিজিট (01XXXXXXXXX)।
+ * বিদেশি নম্বর: "+" দিয়ে শুরু, পরে ৭-১৫ ডিজিট (+880..., +447979647913)।
+ */
+const isValidPhone = (value: string): boolean => {
+  const v = value.trim();
+  return /^\d{11,}$/.test(v) || /^\+\d{7,15}$/.test(v);
+};
+
 const STATUS = {
   APPROVED: {
     label: "অনুমোদিত",
@@ -160,12 +170,12 @@ function EditModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^\d{11}$/.test(form.phone)) {
-      setError("মোবাইল নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
+    if (!isValidPhone(form.phone)) {
+      setError("মোবাইল নম্বর সঠিক নয়। ১১ ডিজিট দিন, অথবা বিদেশি নম্বর +880... হিসেবে দিন।");
       return;
     }
-    if (!/^\d{11}$/.test(form.whatsapp)) {
-      setError("হোয়াটসঅ্যাপ নম্বর অবশ্যই ১১ ডিজিটের হতে হবে।");
+    if (!isValidPhone(form.whatsapp)) {
+      setError("হোয়াটসঅ্যাপ নম্বর সঠিক নয়। ১১ ডিজিট দিন, অথবা বিদেশি নম্বর +880... হিসেবে দিন।");
       return;
     }
     setSaving(true);
@@ -245,11 +255,11 @@ function EditModal({
             </div>
             <div>
               <label className={labelClass}>মোবাইল নম্বর *</label>
-              <input type="tel" name="phone" value={form.phone} onChange={handleChange} maxLength={11} className={inputClass} required />
+              <input type="tel" name="phone" value={form.phone} onChange={handleChange} className={inputClass} required />
             </div>
             <div>
               <label className={labelClass}>হোয়াটসঅ্যাপ নম্বর *</label>
-              <input type="tel" name="whatsapp" value={form.whatsapp} onChange={handleChange} maxLength={11} className={inputClass} required />
+              <input type="tel" name="whatsapp" value={form.whatsapp} onChange={handleChange} className={inputClass} required />
             </div>
             <div>
               <label className={labelClass}>ব্লাড গ্রুপ</label>

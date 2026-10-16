@@ -31,9 +31,12 @@ export default function StatusPage() {
   const [showGuestForm, setShowGuestForm] = useState(false);
 
   const fetchStatus = async (phoneNum: string) => {
-    const res = await fetch(`/api/registrations/check-status?phone=${phoneNum}`, {
-        headers: apiHeaders(locale),
-      });
+    const res = await fetch(
+        `/api/registrations/check-status?phone=${encodeURIComponent(phoneNum.trim())}`,
+        {
+          headers: apiHeaders(locale),
+        }
+      );
     if (res.ok) {
       const data = await res.json();
       setResult(data);
@@ -56,9 +59,12 @@ export default function StatusPage() {
     }
 
     try {
-      const res = await fetch(`/api/registrations/check-status?phone=${phone}`, {
-        headers: apiHeaders(locale),
-      });
+      const res = await fetch(
+        `/api/registrations/check-status?phone=${encodeURIComponent(phone.trim())}`,
+        {
+          headers: apiHeaders(locale),
+        }
+      );
       if (res.status === 404) {
         setError(t.status.errNotFound);
       } else if (res.ok) {

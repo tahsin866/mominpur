@@ -14,12 +14,18 @@ interface VerifyResult {
   submittedAt: string;
 }
 
+/** দেশি ১১ ডিজিট, অথবা "+" দিয়ে শুরু হওয়া বিদেশি নম্বর (+880..., +44...)। */
+function isValidPhone(value: string): boolean {
+  const v = value.trim();
+  return /^\d{11,}$/.test(v) || /^\+\d{7,15}$/.test(v);
+}
+
 function VerifyContent() {
   const { href, locale } = useLang();
   const searchParams = useSearchParams();
   const phoneParam = searchParams.get("phone");
   const autoPhone =
-    typeof phoneParam === "string" && /^\d{11}$/.test(phoneParam)
+    typeof phoneParam === "string" && isValidPhone(phoneParam)
       ? phoneParam
       : "";
   const [phone, setPhone] = useState(autoPhone);
@@ -29,13 +35,16 @@ function VerifyContent() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const runCheck = useCallback(async (number: string) => {
-    if (!/^\d{11}$/.test(number)) {
-      return { error: "অনুগ্রহ করে ১১ ডিজিটের মোবাইল নম্বর দিন।" };
+    if (!isValidPhone(number)) {
+      return { error: "অনুগ্রহ করে সঠিক মোবাইল নম্বর দিন (১১ ডিজিট বা +880...)।" };
     }
     try {
-      const res = await fetch(`/api/registrations/check-status?phone=${number}`, {
-        headers: apiHeaders(locale),
-      });
+      const res = await fetch(
+        `/api/registrations/check-status?phone=${encodeURIComponent(number.trim())}`,
+        {
+          headers: apiHeaders(locale),
+        }
+      );
       if (res.status === 404) {
         return { error: "এই নম্বরে কোনো রেজিস্ট্রেশন পাওয়া যায়নি।" };
       }
@@ -146,9 +155,8 @@ function VerifyContent() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="01XXXXXXXXX"
-                  maxLength={11}
-                  pattern="\d{11}"
+                  placeholder="01XXXXXXXXX বা +880..."
+                  maxLength={20}
                   className="flex-1 text-lg px-4 py-3.5 border-2 rounded-lg bg-white focus:outline-none transition text-center tracking-widest font-semibold dark:bg-gray-800 dark:text-white"
                   style={{ borderColor: "#0A3D2A" }}
                   autoFocus
