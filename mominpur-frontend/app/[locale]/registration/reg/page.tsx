@@ -130,7 +130,7 @@ export default function RegistrationPage() {
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (value === "" || /^\d*$/.test(value)) {
+    if (value === "" || /^\+?\d*$/.test(value)) {
       setForm({ ...form, [name]: value });
     }
   };
