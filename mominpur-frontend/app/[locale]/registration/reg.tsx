@@ -16,13 +16,13 @@ export default function RegPage() {
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-20"></div>
         <div className="relative max-w-3xl mx-auto space-y-5">
           <span className="inline-block px-3 py-1 text-lg font-semibold bg-emerald-500/20 text-emerald-300 rounded-full tracking-wider uppercase border border-emerald-500/30">
-            ঐতিহাসিক পুনর্মিলনী ও মিলনমেলা ২০২৬
+            ঐতিহাসিক পুনর্মিলন ২০২৬
           </span>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-white via-zinc-200 to-emerald-300 bg-clip-text text-transparent">
             ইত্তেহাদে আবনায়ে মুমিনপুর
           </h1>
           <p className="text-lg text-emerald-100/80 max-w-xl mx-auto font-medium">
-            স্মৃতির টানে, চেনা প্রাঙ্গণে... ১৯৬৩ সাল থেকে আজ পর্যন্ত সকল প্রাক্তনের মিলনমেলা
+            স্মৃতির টানে, চেনা প্রাঙ্গণে... ১৯৬৩ সাল থেকে আজ পর্যন্ত সকল প্রাক্তনের পুনর্মিলন
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-4 text-lg font-medium">
             <span className="flex items-center gap-1.5 bg-white/10 px-4 py-2 rounded-sm border border-white/10">

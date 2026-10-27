@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useLang } from "@/lib/i18n/LanguageProvider";
 import { LocalizedText } from "@/lib/i18n/LocalizedText";
 
-const DEADLINE = new Date("2026-10-31T00:00:00+06:00").getTime();
+const DEADLINE = new Date("2026-11-06T00:00:00+06:00").getTime();
 
 export default function CountdownBanner() {
   const { t, num, locale } = useLang();
