@@ -31,7 +31,7 @@ export default function RegistrationPage() {
   const { t, num, fmt, href, locale } = useLang();
 
   // API e kono English field nai, tai label frontend-e map kora.
-// Bangla page e original Bangla naam-i dekha hobe.
+  // Bangla page e original Bangla naam-i dekha hobe.
   const loc = (level: "division" | "district" | "thana", bn: string) =>
     locale === "en" ? locationEn(level, bn) : bn;
   const [divisions, setDivisions] = useState<DivisionData[]>([]);
@@ -184,6 +184,10 @@ export default function RegistrationPage() {
 
     if (!form.phone.trim()) {
       showError(t.registration.errPhoneRequired, "field-phone");
+      return;
+    }
+    if (!/^\+?\d{11,}$/.test(form.phone.trim())) {
+      showError(t.registration.errPhoneMinLength, "field-phone");
       return;
     }
     if (!form.whatsapp.trim()) {
@@ -354,7 +358,7 @@ export default function RegistrationPage() {
   };
 
   const COUNTRIES = [
-    "Afghanistan", "Algeria", "Argentina", "Australia", "Bahrain", "Bangladesh", "Belgium",
+    "Afghanistan", "Algeria", "Argentina", "Australia", "Bahrain", "Belgium",
     "Brazil", "Brunei", "Cambodia", "Canada", "China", "Cyprus", "Denmark",
     "Egypt", "Finland", "France", "Germany", "Ghana", "Greece", "Hungary",
     "India", "Indonesia", "Iran", "Iraq", "Ireland", "Italy", "Japan",
@@ -388,8 +392,8 @@ export default function RegistrationPage() {
             <div
               id="form-message"
               className={`mb-6 p-3 rounded-sm text-lg font-medium ${message.startsWith("Error")
-                  ? "bg-red-50 text-red-700 border border-red-200"
-                  : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                ? "bg-red-50 text-red-700 border border-red-200"
+                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
                 }`}
             >
               {message}
@@ -539,8 +543,8 @@ export default function RegistrationPage() {
                       type="button"
                       onClick={() => setDeptOpen((o) => !o)}
                       className={`w-full text-base px-3 py-2 border rounded-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-emerald-500 ${deptOpen
-                          ? "border-emerald-500 ring-1 ring-emerald-500"
-                          : ""
+                        ? "border-emerald-500 ring-1 ring-emerald-500"
+                        : ""
                         }`}
                     >
                       <span className="truncate">
@@ -888,8 +892,8 @@ export default function RegistrationPage() {
                       type="button"
                       onClick={() => setOccOpen((o) => !o)}
                       className={`w-full text-base px-3 py-2 border rounded-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-emerald-500 ${occOpen
-                          ? "border-emerald-500 ring-1 ring-emerald-500"
-                          : ""
+                        ? "border-emerald-500 ring-1 ring-emerald-500"
+                        : ""
                         }`}
                     >
                       <span className="truncate">

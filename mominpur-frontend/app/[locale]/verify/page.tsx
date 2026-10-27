@@ -306,7 +306,7 @@ function VerifyContent() {
                 {isApproved && (
                   <div className="mt-4 p-4 rounded-xl text-sm font-medium" style={{ backgroundColor: "#ECFDF5", color: "#064E3B", border: "1px solid #A7F3D0" }}>
                     <p className="font-bold mb-1">✓ যাচাইকৃত অংশগ্রহণকারী</p>
-                    <p>আলহামদুলিল্লাহ! এই ব্যক্তি মিলনমেলায় অংশগ্রহণের জন্য অনুমোদিত।</p>
+                    <p>আলহামদুলিল্লাহ! এই ব্যক্তি পুনর্মিলনে অংশগ্রহণের জন্য অনুমোদিত।</p>
                   </div>
                 )}
                 {isRejected && (
